@@ -1,5 +1,5 @@
 ---
-name: "[feature] [기능 이름]"
+name: feature template
 about: 기능 추가 템플릿
 title: ''
 labels: ''
