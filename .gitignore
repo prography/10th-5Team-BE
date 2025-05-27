@@ -40,5 +40,6 @@ out/
 .DS_Store
 Thumbs.db
 
-application-local.properties
-application-prod.properties
+application-local.yml
+application-prod.yml
+application.yml
