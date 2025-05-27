@@ -1,4 +1,4 @@
-package com.example.capstone.user.domain;
+package com.example.cherrydan.user.domain;
 
 public enum Role {
     ROLE_USER,
