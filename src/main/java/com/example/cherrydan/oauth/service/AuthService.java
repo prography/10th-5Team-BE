@@ -1,71 +1,60 @@
-package com.example.capstone.oauth.service;
+package com.example.cherrydan.oauth.service;
 
-import com.example.capstone.common.annotation.LogExecutionTime;
-import com.example.capstone.common.exception.BaseException;
-import com.example.capstone.common.exception.ErrorMessage;
-import com.example.capstone.oauth.dto.TokenDTO;
-import com.example.capstone.oauth.model.RefreshToken;
-import com.example.capstone.oauth.security.jwt.JwtTokenProvider;
-import com.example.capstone.user.domain.User;
-import com.example.capstone.user.repository.UserRepository;
+import com.example.cherrydan.common.exception.AuthException;
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.UserException;
+import com.example.cherrydan.oauth.dto.TokenDTO;
+import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
+import com.example.cherrydan.oauth.service.RefreshTokenService;
+import com.example.cherrydan.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
-    private final UserRepository userRepository;
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenProvider tokenProvider;
 
     @Transactional
-    @LogExecutionTime
     public TokenDTO refreshToken(String refreshToken) {
         try {
-            // 리프레시 토큰 확인
-            RefreshToken token = refreshTokenService.findByToken(refreshToken);
-            
-            // 토큰 만료 확인
-            refreshTokenService.verifyExpiration(token);
-            
-            // 사용자 정보 조회
-            User user = token.getUser();
-            if (user == null) {
-                throw new BaseException(ErrorMessage.USER_NOT_FOUND);
+            // Refresh Token 유효성 검증
+            if (refreshToken == null) {
+                throw new AuthException(ErrorMessage.AUTH_REFRESH_TOKEN_NOT_FOUND);
             }
+
+            if (!refreshTokenService.validateRefreshToken(refreshToken)) {
+                throw new AuthException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
+            }
+
+            // 사용자 정보 조회
+            Optional<User> userOpt = refreshTokenService.getUserByRefreshToken(refreshToken);
+            if (userOpt.isEmpty()) {
+                throw new UserException(ErrorMessage.USER_NOT_FOUND);
+            }
+
+            User user = userOpt.get();
             
             // 새 Access Token 생성
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
-                    user.getEmail(),
-                    null,
-                    Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()))
-            );
+            String newAccessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
             
-            String newAccessToken = tokenProvider.generateToken(authentication);
+            log.info("토큰 갱신 완료: 사용자 ID = {}", user.getId());
             
-            // 반환할 TokenDTO 생성
-            return TokenDTO.builder()
-                    .accessToken(newAccessToken)
-                    .refreshToken(refreshToken)
-                    .tokenType("Bearer")
-                    .expiresIn(3600L) // 1시간
-                    .build();
-        } catch (IllegalArgumentException e) {
-            throw new BaseException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
-        } catch (BaseException e) {
-            throw e;
+            // TokenDTO 반환
+            return new TokenDTO(newAccessToken);
+            
+        } catch (AuthException | UserException e) {
+            throw e; // 이미 적절한 커스텀 예외이므로 그대로 전파
         } catch (Exception e) {
-            log.error("토큰 갱신 중 오류 발생: {}", e.getMessage());
-            throw new BaseException(ErrorMessage.UNEXPECTED_ERROR);
+            log.error("토큰 갱신 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
+            throw new AuthException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
         }
     }
 }

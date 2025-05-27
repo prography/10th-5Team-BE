@@ -1,6 +1,5 @@
-package com.example.capstone.oauth.controller;
+package com.example.cherrydan.oauth.controller;
 
-import com.example.capstone.user.dto.LoginResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  * Swagger UI에서 OAuth 인증 과정을 프론트엔드 개발자에게 설명하는 용도로 사용됩니다.
  */
 @RestController
-@RequestMapping("/api-docs")
+@RequestMapping("/api/docs")
 @Tag(name = "인증", description = "OAuth2 인증 흐름 문서화")
 public class AuthDocumentationController {
 
@@ -20,7 +19,7 @@ public class AuthDocumentationController {
             summary = "OAuth2 인증 시작",
             description = "소셜 로그인(Google, Kakao, Naver)을 시작하기 위한 엔드포인트입니다.<br>" +
                     "프론트엔드에서는 사용자를 다음 URL로 리다이렉트해야 합니다:<br>" +
-                    "<code>GET /oauth2/authorize/{provider}</code><br>" +
+                    "<code>GET /api/oauth2/authorize/{provider}</code><br>" +
                     "여기서 {provider}는 'google', 'kakao', 'naver' 중 하나입니다.<br><br>" +
                     "이 URL은 사용자를 해당 소셜 로그인 페이지로 리다이렉트합니다."
     )
@@ -30,24 +29,9 @@ public class AuthDocumentationController {
     }
 
     @Operation(
-            summary = "OAuth2 인증 콜백",
-            description = "소셜 로그인 제공자가 인증 성공 후 사용자를 리다이렉트하는 백엔드 URL입니다.<br>" +
-                    "<code>GET /login/oauth2/code/{provider}</code><br>" +
-                    "이 URL은 프론트엔드에서 직접 호출하지 않으며, OAuth 제공자에 의해 자동으로 호출됩니다.<br><br>" +
-                    "인증이 성공하면, 백엔드는 사용자를 다음 URL로 리다이렉트합니다:<br>" +
-                    "<code>GET http://43.203.242.216/login/oauth2/success?token={accessToken}&refreshToken={refreshToken}</code><br>" +
-                    "프론트엔드는 이 URL에서 토큰을 추출하여 저장해야 합니다."
-    )
-    @GetMapping("/oauth2/callback")
-    public LoginResponseDTO oauthCallback() {
-        // 이 메서드는 실제로 호출되지 않고 문서화 목적으로만 사용됩니다.
-        return null;
-    }
-
-    @Operation(
             summary = "토큰 리프레시",
             description = "액세스 토큰이 만료되었을 때 리프레시 토큰을 사용하여 새 액세스 토큰을 발급받는 엔드포인트입니다.<br>" +
-                    "<code>POST /auth/refresh?refreshToken={refreshToken}</code>"
+                    "<code>POST api/auth/refresh?refreshToken={refreshToken}</code>"
     )
     @GetMapping("/auth/refresh")
     public void refreshToken() {
@@ -78,7 +62,7 @@ public class AuthDocumentationController {
                     "      navigate('/');\n" +
                     "    } else {\n" +
                     "      // 인증 실패 처리\n" +
-                    "      navigate('/login', { state: { error: 'Authentication failed' } });\n" +
+                    "      navigate('/api/auth/login', { state: { error: 'Authentication failed' } });\n" +
                     "    }\n" +
                     "  }, [location, navigate]);\n\n" +
                     "  return <div>로그인 처리 중...</div>;\n" +

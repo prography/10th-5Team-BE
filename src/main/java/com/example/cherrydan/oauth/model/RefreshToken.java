@@ -1,6 +1,7 @@
-package com.example.capstone.oauth.model;
+package com.example.cherrydan.oauth.model;
 
-import com.example.capstone.user.domain.User;
+import com.example.cherrydan.user.domain.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,5 +30,6 @@ public class RefreshToken {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonIgnore
     private User user;
 }

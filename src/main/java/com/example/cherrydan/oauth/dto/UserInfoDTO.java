@@ -1,7 +1,7 @@
-package com.example.capstone.oauth.dto;
+package com.example.cherrydan.oauth.dto;
 
-import com.example.capstone.oauth.model.AuthProvider;
-import com.example.capstone.user.domain.User;
+import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
