@@ -1,4 +1,4 @@
-package com.example.capstone.oauth.security.oauth2.user;
+package com.example.cherrydan.oauth.security.oauth2.user;
 
 import java.util.Map;
 

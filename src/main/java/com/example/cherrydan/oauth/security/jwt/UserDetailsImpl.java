@@ -1,7 +1,7 @@
-package com.example.capstone.oauth.security.jwt;
+package com.example.cherrydan.oauth.security.jwt;
 
-import com.example.capstone.user.domain.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,29 +12,27 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
 public class UserDetailsImpl implements UserDetails, OAuth2User {
     private Long id;
     private String email;
-    @JsonIgnore
-    private String password;
     private String name;
     private String picture;
+    private AuthProvider provider;
     private Collection<? extends GrantedAuthority> authorities;
     private Map<String, Object> attributes;
 
     public static UserDetailsImpl build(User user) {
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(user.getRole().name()));
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
 
         return new UserDetailsImpl(
                 user.getId(),
                 user.getEmail(),
-                user.getPassword(),
                 user.getName(),
                 user.getPicture(),
+                user.getProvider(),
                 authorities,
                 null
         );
@@ -58,7 +56,7 @@ public class UserDetailsImpl implements UserDetails, OAuth2User {
 
     @Override
     public String getPassword() {
-        return password;
+        return null; // OAuth 사용자는 비밀번호 없음
     }
 
     @Override

@@ -1,24 +1,35 @@
-package com.example.capstone.oauth.security.oauth2.user;
+package com.example.cherrydan.oauth.security.oauth2.user;
 
-
-import com.example.capstone.oauth.model.AuthProvider;
-import com.example.capstone.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.OAuthException;
+import com.example.cherrydan.oauth.model.AuthProvider;
 
 import java.util.Map;
 
 public class OAuth2UserInfoFactory {
 
+    public static OAuth2UserInfo getOAuth2UserInfo(AuthProvider authProvider, Map<String, Object> attributes) {
+        switch (authProvider) {
+            case GOOGLE:
+                return new GoogleOAuth2UserInfo(attributes);
+            case GITHUB:
+                return new GithubOAuth2UserInfo(attributes);
+            case KAKAO:
+                return new KakaoOAuth2UserInfo(attributes);
+            case NAVER:
+                return new NaverOAuth2UserInfo(attributes);
+            default:
+                throw new OAuthException(ErrorMessage.OAUTH_PROVIDER_NOT_SUPPORTED);
+        }
+    }
+
+    // 기존 메서드도 유지 (하위 호환성)
     public static OAuth2UserInfo getOAuth2UserInfo(String registrationId, Map<String, Object> attributes) {
-        if(registrationId.equalsIgnoreCase(AuthProvider.GOOGLE.toString())) {
-            return new GoogleOAuth2UserInfo(attributes);
-        } else if (registrationId.equalsIgnoreCase(AuthProvider.GITHUB.toString())) {
-            return new GithubOAuth2UserInfo(attributes);
-        } else if (registrationId.equalsIgnoreCase(AuthProvider.KAKAO.toString())) {
-            return new KakaoOAuth2UserInfo(attributes);
-        } else if (registrationId.equalsIgnoreCase(AuthProvider.NAVER.toString())) {
-            return new NaverOAuth2UserInfo(attributes);
-        } else {
-            throw new OAuth2AuthenticationProcessingException("Sorry! Login with " + registrationId + " is not supported yet.");
+        try {
+            AuthProvider authProvider = AuthProvider.valueOf(registrationId.toUpperCase());
+            return getOAuth2UserInfo(authProvider, attributes);
+        } catch (IllegalArgumentException e) {
+            throw new OAuthException(ErrorMessage.OAUTH_PROVIDER_NOT_SUPPORTED);
         }
     }
 }
