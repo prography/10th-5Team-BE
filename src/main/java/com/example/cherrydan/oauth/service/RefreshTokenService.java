@@ -83,7 +83,7 @@ public class RefreshTokenService {
             log.info("Refresh Token 삭제 완료: 토큰 값 = {}", tokenValue);
         } catch (Exception e) {
             log.error("Refresh Token 삭제 실패: {}", e.getMessage());
-            throw new RefreshTokenException();
+            throw new RefreshTokenException(ErrorMessage.REFRESH_TOKEN_DELETE_ERROR);
         }
     }
 
