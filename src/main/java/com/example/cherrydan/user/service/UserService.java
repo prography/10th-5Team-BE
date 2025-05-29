@@ -4,12 +4,10 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
-import com.example.cherrydan.user.domain.Role;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.SignUpRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +23,11 @@ public class UserService {
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
         return UserInfoDTO.fromEntity(user);
+    }
+    
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
     }
 
     public User getUserByEmail(String email) {

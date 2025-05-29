@@ -15,6 +15,7 @@ public class UserDto {
         this.id = user.getId();
         this.email = user.getEmail();
         this.name = user.getName();
+        this.profileImageUrl = user.getPicture();
         this.provider = user.getProvider().name();
     }
 }

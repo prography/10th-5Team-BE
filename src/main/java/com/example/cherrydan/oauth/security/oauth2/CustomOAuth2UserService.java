@@ -5,7 +5,6 @@ import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfoFactory;
-import com.example.cherrydan.user.domain.Role;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -83,27 +82,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * Find existing user or create a new one
      */
     private User findOrCreateUser(OAuth2UserInfo oAuth2UserInfo, String registrationId) {
+        AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
+        
+        // 먼저 이메일로 사용자 조회
         Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
 
+        // 이메일로 사용자를 찾았으면
         if (userOptional.isPresent()) {
             User existingUser = userOptional.get();
-            validateProvider(existingUser, registrationId);
+            
+            // 같은 제공자가 아니면 오류 발생
+            if (existingUser.getProvider() != null && !existingUser.getProvider().equals(provider)) {
+                throw new OAuth2AuthenticationProcessingException(
+                        String.format("이미 %s 계정으로 가입되어 있습니다. %s 계정으로 로그인해 주세요.", 
+                        existingUser.getProvider(), existingUser.getProvider())
+                );
+            }
+            
+            // 정보 업데이트 후 반환
             return updateExistingUser(existingUser, oAuth2UserInfo);
         } else {
-            return registerNewUser(registrationId, oAuth2UserInfo);  // 수정된 부분
-        }
-    }
-
-    /**
-     * 인증 제공자 검증
-     * Validate authentication provider
-     */
-    private void validateProvider(User user, String registrationId) {
-        if (!user.getProvider().toString().equalsIgnoreCase(registrationId)) {
-            throw new OAuth2AuthenticationProcessingException(
-                    String.format("이미 %s 계정으로 가입되어 있습니다. %s 계정으로 로그인해 주세요.", 
-                    user.getProvider(), user.getProvider())
-            );
+            // 이메일로 사용자를 찾지 못했으면 새로 등록
+            return registerNewUser(provider, oAuth2UserInfo);
         }
     }
 
@@ -111,16 +111,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * 신규 사용자 등록
      * Register a new user from OAuth2 information
      */
-    private User registerNewUser(String registrationId, OAuth2UserInfo oAuth2UserInfo) {  // 수정된 매개변수
-        AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
-
+    private User registerNewUser(AuthProvider provider, OAuth2UserInfo oAuth2UserInfo) {
         User user = User.builder()
                 .email(oAuth2UserInfo.getEmail())
                 .name(oAuth2UserInfo.getName())
                 .picture(oAuth2UserInfo.getImageUrl())
+                .socialId(oAuth2UserInfo.getId())
                 .provider(provider)
-                .providerId(oAuth2UserInfo.getId())
-                .role(Role.ROLE_USER)
                 .build();
 
         log.info("새 OAuth2 사용자 등록: {}", user.getEmail());
