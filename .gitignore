@@ -41,5 +41,3 @@ out/
 Thumbs.db
 
 application-local.yml
-application-prod.yml
-application.yml
