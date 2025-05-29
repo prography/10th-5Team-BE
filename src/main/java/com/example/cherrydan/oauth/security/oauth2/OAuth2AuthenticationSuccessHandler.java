@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 @Slf4j
 @Component
@@ -40,18 +41,32 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private String redirectFailureUrl;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
-                                      Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         try {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+            Long userId = userDetails.getId();
+            String userEmail = userDetails.getEmail();
 
-            // JWT 토큰 생성
-            String accessToken = tokenProvider.generateAccessToken(userDetails.getId(), userDetails.getEmail());
-            String refreshToken = tokenProvider.generateRefreshToken(userDetails.getId());
+            // 액세스 토큰 생성
+            String accessToken = tokenProvider.generateAccessToken(userId, userEmail);
 
-            // Refresh Token을 DB에 저장
-            refreshTokenService.saveRefreshToken(userDetails.getId(), refreshToken);
+            // 기존 리프레시 토큰이 있는지 확인
+            Optional<String> existingRefreshToken = refreshTokenService.findRefreshTokenByUserId(userId);
+            String refreshToken;
+
+            if (existingRefreshToken.isPresent() && tokenProvider.validateToken(existingRefreshToken.get())) {
+                // 유효한 리프레시 토큰이 있으면 재사용
+                refreshToken = existingRefreshToken.get();
+                log.info("기존 리프레시 토큰 재사용: 사용자 ID = {}", userId);
+            } else {
+                // 없거나 만료된 경우 새로 생성
+                refreshToken = tokenProvider.generateRefreshToken(userId);
+                // 새 리프레시 토큰을 DB에 저장
+                refreshTokenService.saveRefreshToken(userId, refreshToken);
+                log.info("새 리프레시 토큰 생성: 사용자 ID = {}", userId);
+            }
 
             // Refresh Token을 HttpOnly 쿠키로 설정
             Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
@@ -66,7 +81,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
                     URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
 
             log.info("OAuth2 로그인 성공: 사용자 ID = {}, 이메일 = {}, 제공자 = {}",
-                    userDetails.getId(), userDetails.getEmail(), userDetails.getProvider());
+                    userId, userEmail, userDetails.getProvider());
 
             getRedirectStrategy().sendRedirect(request, response, redirectUrl);
 

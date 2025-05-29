@@ -38,8 +38,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 공개 경로
                         .requestMatchers("/", "/login", "/login.html", "/error", "/favicon.ico").permitAll()
-                        .requestMatchers("/api/auth/refresh", "/api/auth/logout").permitAll()
+                        .requestMatchers("/index.html", "/oauth-test.html").permitAll()
+                        .requestMatchers("/api/auth/refresh", "/api/auth/logout", "/api/auth/me").permitAll()
                         .requestMatchers("/api/test/public").permitAll()
+                        .requestMatchers("/admin/cleanup-tokens").permitAll() // 임시 관리자 엔드포인트
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // OAuth2 관련 경로
