@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    active: prod  # 기본 프로파일을 local로 설정, 배포 시 prod로 변경
+#  config:
+#    import: optional:file:.env[.properties]
+
+# 공통 설정은 여기에 추가
+# 환경별 설정은 application-{profile}.yml 파일에서 관리
