@@ -1,10 +1,6 @@
 name: CI/CD Pipeline
 
 on:
-  # main/develop으로 가는 PR에서는 빌드 테스트만
-  pull_request:
-    branches: [main, develop]
-
   # main/develop 브랜치에 푸시되면 빌드 + 배포
   push:
     branches: [main, develop]
