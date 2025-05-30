@@ -20,10 +20,10 @@ public class AuthDocumentationController {
             description = "소셜 로그인(Google, Kakao, Naver)을 시작하기 위한 엔드포인트입니다.<br>" +
                     "프론트엔드에서는 사용자를 다음 URL로 리다이렉트해야 합니다:<br>" +
                     "<code>GET /api/oauth2/authorize/{provider}</code><br>" +
-                    "여기서 {provider}는 'google', 'kakao', 'naver' 중 하나입니다.<br><br>" +
+                    "여기서 {provider}는 'kakao', 'naver' 중 하나입니다.<br><br>" +
                     "이 URL은 사용자를 해당 소셜 로그인 페이지로 리다이렉트합니다."
     )
-    @GetMapping("/oauth2/authorize")
+    @GetMapping("/api/oauth2/authorization")
     public void oauthAuthorize() {
         // 이 메서드는 실제로 호출되지 않고 문서화 목적으로만 사용됩니다.
     }
