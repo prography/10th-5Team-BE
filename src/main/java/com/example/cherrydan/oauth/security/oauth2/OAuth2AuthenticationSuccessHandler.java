@@ -21,6 +21,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -73,22 +74,25 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             refreshCookie.setHttpOnly(true);
             refreshCookie.setSecure(false);
             refreshCookie.setPath("/");
-            refreshCookie.setMaxAge(14 * 24 * 60 * 60); // 14일
+            refreshCookie.setMaxAge(14 * 24 * 60 * 60);
             response.addCookie(refreshCookie);
 
-            // Access Token은 URL 파라미터로 전달
-            String redirectUrl = redirectSuccessUrl + "?token=" +
-                    URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
+            // 리다이렉트 URL 생성
+            String targetUrl = UriComponentsBuilder.fromUriString(redirectSuccessUrl)
+                    .queryParam("token", accessToken)
+                    .build().toUriString();
 
-            log.info("OAuth2 로그인 성공: 사용자 ID = {}, 이메일 = {}, 제공자 = {}",
-                    userId, userEmail, userDetails.getProvider());
-
-            getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+            // 리다이렉트 수행
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } catch (Exception e) {
             log.error("OAuth 인증 성공 처리 중 오류 발생: {}", e.getMessage(), e);
-            String errorUrl = redirectFailureUrl + "?message=" +
-                    URLEncoder.encode("로그인 성공 처리 중 오류가 발생했습니다.", StandardCharsets.UTF_8);
+
+            // 오류 발생 시에도 UriComponentsBuilder를 사용하여 일관된 방식으로 리다이렉트
+            String errorUrl = UriComponentsBuilder.fromUriString(redirectFailureUrl)
+                    .queryParam("message", "로그인 성공 처리 중 오류가 발생했습니다.")
+                    .build().toUriString();
+
             getRedirectStrategy().sendRedirect(request, response, errorUrl);
         }
     }
