@@ -1,5 +1,7 @@
 package com.example.cherrydan.oauth.security.oauth2;
 
+import com.example.cherrydan.common.exception.AuthException;
+import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.oauth.model.AuthProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
@@ -66,6 +68,26 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // UserDetails 객체 생성 및 반환 (Build and return UserDetails)
         return UserDetailsImpl.build(user, oAuth2User.getAttributes());
     }
+
+    /**
+     * Apple 사용자 정보 처리 (Apple용 별도 메서드)
+     * Process Apple user information manually (not through OAuth2 flow)
+     */
+    public User processAppleUser(OAuth2UserInfo appleUserInfo) {
+        try {
+            // 이메일 확인 (Validate email)
+            validateEmail(appleUserInfo);
+
+            // 사용자 조회 또는 생성 (Find or create user)
+            return findOrCreateUser(appleUserInfo, "apple");
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Apple 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     /**
      * 이메일 유효성 검증

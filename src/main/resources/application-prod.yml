@@ -70,3 +70,8 @@ oauth2:
   redirect:
     success-url: ${OAUTH2_REDIRECT_SUCCESS_URL}
     failure-url: ${OAUTH2_REDIRECT_FAILURE_URL}
+
+apple:
+  client-id: ${APPLE_CLIENT_ID}
+  issuer: https://appleid.apple.com
+  keys-url: https://appleid.apple.com/auth/keys

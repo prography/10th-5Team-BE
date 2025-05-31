@@ -14,6 +14,8 @@ public class OAuth2UserInfoFactory {
                 return new KakaoOAuth2UserInfo(attributes);
             case NAVER:
                 return new NaverOAuth2UserInfo(attributes);
+            case APPLE:
+                return new AppleOAuth2UserInfo(attributes);
             default:
                 throw new OAuthException(ErrorMessage.OAUTH_PROVIDER_NOT_SUPPORTED);
         }

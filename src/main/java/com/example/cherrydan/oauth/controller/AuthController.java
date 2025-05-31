@@ -4,7 +4,7 @@ import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.oauth.dto.TokenDTO;
+import com.example.cherrydan.oauth.dto.AccessTokenDTO;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
@@ -38,7 +38,7 @@ public class AuthController {
      */
     @Operation(summary = "Access Token 갱신", description = "Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.")
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<TokenDTO>> refresh(
+    public ResponseEntity<ApiResponse<AccessTokenDTO>> refresh(
             @CookieValue(value = "refreshToken", required = false) String refreshToken) {
 
         Optional<User> userOpt = validateToken(refreshToken);
@@ -50,7 +50,7 @@ public class AuthController {
         
         log.info("Access Token 갱신 완료: 사용자 ID = {}", user.getId());
         
-        return ResponseEntity.ok(ApiResponse.success("토큰 갱신이 완료되었습니다.", new TokenDTO(newAccessToken)));
+        return ResponseEntity.ok(ApiResponse.success("토큰 갱신이 완료되었습니다.", new AccessTokenDTO(newAccessToken)));
     }
 
     private Optional<User> validateToken(String refreshToken) {
