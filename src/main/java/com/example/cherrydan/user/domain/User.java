@@ -35,6 +35,7 @@ public class User extends BaseTimeEntity {
     private String socialId;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private AuthProvider provider;
     
     private String uuid;

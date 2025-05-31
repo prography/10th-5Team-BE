@@ -21,6 +21,13 @@ public enum ErrorMessage {
     OAUTH_PROVIDER_NOT_SUPPORTED(BAD_REQUEST, "지원하지 않는 OAuth 제공자입니다."),
     OAUTH_AUTHENTICATION_FAILED(UNAUTHORIZED, "OAuth 인증에 실패했습니다."),
     
+    // Apple 관련 에러
+    APPLE_IDENTITY_TOKEN_INVALID(UNAUTHORIZED, "Apple Identity Token이 유효하지 않습니다."),
+    APPLE_IDENTITY_TOKEN_EXPIRED(UNAUTHORIZED, "Apple Identity Token이 만료되었습니다."),
+    APPLE_PUBLIC_KEY_NOT_FOUND(UNAUTHORIZED, "일치하는 Apple 공개키를 찾을 수 없습니다."),
+    APPLE_JWT_VERIFICATION_FAILED(UNAUTHORIZED, "Apple JWT 검증에 실패했습니다."),
+    APPLE_USER_INFO_MISSING(BAD_REQUEST, "Apple 사용자 정보가 누락되었습니다."),
+    
     // 인증 관련 에러
     AUTH_INVALID_TOKEN(UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     AUTH_EXPIRED_TOKEN(UNAUTHORIZED, "만료된 토큰입니다."),
