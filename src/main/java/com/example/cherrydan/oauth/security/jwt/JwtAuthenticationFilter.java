@@ -43,7 +43,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                         SecurityContextHolder.getContext().setAuthentication(authentication);
-                        log.debug("사용자 인증 설정 완료: userId = {}, email = {}", userId, email);
+                        log.info("사용자 인증 설정 완료: userId = {}, email = {}", userId, email);
+                    }
+                    else{
+                        log.error("올바른 키이지만 DB에서 해당 사용자를 찾을 수 없습니다. userId = {}, email = {}", userId,email);
                     }
                 }
             }
