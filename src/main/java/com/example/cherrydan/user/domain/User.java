@@ -3,6 +3,7 @@ package com.example.cherrydan.user.domain;
 import com.example.cherrydan.common.entity.BaseTimeEntity;
 import com.example.cherrydan.oauth.model.AuthProvider;
 import com.example.cherrydan.oauth.model.RefreshToken;
+import com.example.cherrydan.utils.MaskingUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,15 +68,7 @@ public class User extends BaseTimeEntity {
         this.picture = picture;
     }
 
-    // 새로운 OAuth 사용자 생성
-    public static User createOAuthUser(String email, String name, String picture, String socialId, 
-                                     AuthProvider provider) {
-        return User.builder()
-                .email(email)
-                .name(name)
-                .picture(picture)
-                .socialId(socialId)
-                .provider(provider)
-                .build();
+    public String getMaskedEmail() {
+        return MaskingUtil.maskEmail(this.email);
     }
 }
