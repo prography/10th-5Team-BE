@@ -5,11 +5,14 @@ import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.example.cherrydan.utils.MaskingUtil.maskEmail;
 
 @Service
 @RequiredArgsConstructor
