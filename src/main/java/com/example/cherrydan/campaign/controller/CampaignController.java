@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.dto.CampaignFilterDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.dto.RegionSearchDTO;
 import com.example.cherrydan.campaign.service.CampaignService;
+import com.example.cherrydan.common.dto.PageResponseDTO;
 import com.example.cherrydan.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -35,7 +36,7 @@ public class CampaignController {
     @PostMapping("/search/region")
     @Operation(summary = "지역별 캠페인 검색", 
                description = "특정 지역과 카테고리로 캠페인을 검색합니다.")
-    public ResponseEntity<ApiResponse<Page<CampaignResponseDTO>>> searchByRegion(
+    public ResponseEntity<ApiResponse<PageResponseDTO<CampaignResponseDTO>>> searchByRegion(
             @RequestBody RegionSearchDTO searchDto,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size) {
@@ -43,7 +44,7 @@ public class CampaignController {
         log.info("지역별 캠페인 검색: {}", searchDto);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<CampaignResponseDTO> campaigns = campaignService.searchByRegionAndCategory(searchDto, pageable);
+        PageResponseDTO<CampaignResponseDTO> campaigns = campaignService.searchByRegionAndCategory(searchDto, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(campaigns));
     }
@@ -54,7 +55,7 @@ public class CampaignController {
     @PostMapping("/search/filter")
     @Operation(summary = "키워드 + 필터 검색", 
                description = "키워드와 다양한 필터 조건으로 캠페인을 검색합니다.")
-    public ResponseEntity<ApiResponse<Page<CampaignResponseDTO>>> searchWithFilters(
+    public ResponseEntity<ApiResponse<PageResponseDTO<CampaignResponseDTO>>> searchWithFilters(
             @RequestBody CampaignFilterDTO filter,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size) {
@@ -62,7 +63,7 @@ public class CampaignController {
         log.info("키워드+필터 검색: {}", filter);
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<CampaignResponseDTO> campaigns = campaignService.searchWithFilters(filter, pageable);
+        PageResponseDTO<CampaignResponseDTO> campaigns = campaignService.searchWithFilters(filter, pageable);
 
         return ResponseEntity.ok(ApiResponse.success(campaigns));
     }

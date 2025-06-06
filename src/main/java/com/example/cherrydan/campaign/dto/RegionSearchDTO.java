@@ -18,10 +18,19 @@ import lombok.NoArgsConstructor;
 @Schema(description = "지역별 캠페인 검색 조건")
 public class RegionSearchDTO {
 
-    @Schema(description = "지역", example = "SEOUL", required = true)
+    @Schema(description = "지역", 
+            example = "SEOUL", 
+            required = true,
+            allowableValues = {"ALL", "SEOUL", "SEOUL_GANGNAM_NONHYEON", "SEOUL_GANGDONG_CHEONHO", 
+                              "BUSAN", "BUSAN_HAEUNDAE_CENTUM", "DAEGU", "INCHEON", "GWANGJU", 
+                              "DAEJEON", "ULSAN", "SEJONG", "GYEONGGI", "GANGWON", "CHUNGBUK", 
+                              "CHUNGNAM", "JEONBUK", "JEONNAM", "GYEONGBUK", "GYEONGNAM", "JEJU"})
     private Region region;
 
-    @Schema(description = "지역 카테고리", example = "RESTAURANT", required = true)
+    @Schema(description = "지역 카테고리", 
+            example = "RESTAURANT", 
+            required = true,
+            allowableValues = {"ALL", "RESTAURANT", "BEAUTY", "ACCOMMODATION", "CULTURE", "DELIVERY", "PACKAGING", "ETC"})
     private RegionCategory regionCategory;
 
     /**

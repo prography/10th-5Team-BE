@@ -68,6 +68,20 @@ public class Campaign extends BaseTimeEntity {
     @Column(name = "campaign_type")
     private Integer campaignType;
 
+    // 지역 정보
+    @Enumerated(EnumType.STRING)
+    @Column(name = "main_region")
+    private Region mainRegion;  // 행정구역 (서울, 부산, 경기 등)
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "detail_region")
+    private Region detailRegion;  // 상세지역 (강남/논현, 노원/강북 등)
+
+    // 지역 카테고리
+    @Enumerated(EnumType.STRING)
+    @Column(name = "region_category")
+    private RegionCategory regionCategory;
+
     // 소셜미디어 플랫폼 정보
     @Embedded
     private SocialPlatforms socialPlatforms;

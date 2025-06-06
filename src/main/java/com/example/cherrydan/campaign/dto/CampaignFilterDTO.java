@@ -21,13 +21,21 @@ public class CampaignFilterDTO {
     @Schema(description = "키워드 검색", example = "맛집")
     private String keyword;
 
+    // 지역 필터
+    @Schema(description = "지역", 
+            example = "SEOUL",
+            allowableValues = {"ALL", "SEOUL", "SEOUL_GANGNAM_NONHYEON", "SEOUL_GANGDONG_CHEONHO", 
+                              "BUSAN", "BUSAN_HAEUNDAE_CENTUM", "DAEGU", "INCHEON", "GWANGJU", 
+                              "DAEJEON", "ULSAN", "SEJONG", "GYEONGGI", "GANGWON", "CHUNGBUK", 
+                              "CHUNGNAM", "JEONBUK", "JEONNAM", "GYEONGBUK", "GYEONGNAM", "JEJU"})
+    private Region region;
+
+    @Schema(description = "지역 카테고리", 
+            example = "RESTAURANT",
+            allowableValues = {"ALL", "RESTAURANT", "BEAUTY", "ACCOMMODATION", "CULTURE", "DELIVERY", "PACKAGING", "ETC"})
+    private RegionCategory regionCategory;
+
     // 체크박스 필터들 (1 or 0)
-    @Schema(description = "지역1 포함 여부", example = "1")
-    private Integer region1;
-
-    @Schema(description = "지역2 포함 여부", example = "1")
-    private Integer region2;
-
     @Schema(description = "제품 캠페인 포함 여부", example = "1")
     private Integer product;
 
@@ -58,8 +66,8 @@ public class CampaignFilterDTO {
      * 체크박스 필터가 있는지 확인
      */
     public boolean hasCheckboxFilters() {
-        return isChecked(region1) || isChecked(region2) || isChecked(product) || 
-               isChecked(reporter) || isChecked(reviewPlatform) || 
+        return region != null || regionCategory != null || 
+               isChecked(product) || isChecked(reporter) || isChecked(reviewPlatform) || 
                (sns != null && sns.hasAnyFilter());
     }
 

@@ -1,6 +1,8 @@
 package com.example.cherrydan.campaign.repository;
 
 import com.example.cherrydan.campaign.domain.Campaign;
+import com.example.cherrydan.campaign.domain.Region;
+import com.example.cherrydan.campaign.domain.RegionCategory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,27 +20,30 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
 
     /**
      * 지역과 카테고리로 캠페인 검색
-     * TODO: 실제 지역/카테고리 필드가 있을 때 구현
+     * - "전체": 모든 지역
+     * - "서울": main_region이 서울인 모든 캠페인  
+     * - "강남/논현": detail_region이 강남/논현인 캠페인
      */
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true " +
-           "AND c.campaignType = 0 " +  // 지역 캠페인만
+           "AND (:mainRegion IS NULL OR c.mainRegion = :mainRegion) " +
+           "AND (:detailRegion IS NULL OR c.detailRegion = :detailRegion) " +
+           "AND (:regionCategory = 'ALL' OR c.regionCategory = :regionCategory) " +
            "ORDER BY c.created DESC")
     Page<Campaign> findByRegionAndCategory(
-            @Param("region") String region,
-            @Param("category") String category,
+            @Param("mainRegion") Region mainRegion,
+            @Param("detailRegion") Region detailRegion,
+            @Param("regionCategory") String regionCategory,
             Pageable pageable);
 
     /**
      * 키워드 + 필터 조건으로 복합 검색
-     * 캠페인 타입: null = 조건무시, 1 = 해당타입만
-     * SNS 플랫폼: 0 = 불포함, 1 = 포함 조건
-     * 날짜: Service에서 극단값으로 변환해서 전달
      */
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true " +
            "AND (LOWER(c.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
            "OR LOWER(c.benefit) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-           "AND (:region1 IS NULL OR (:region1 = 1 AND c.campaignType = 0)) " +
-           "AND (:region2 IS NULL OR (:region2 = 1 AND c.campaignType = 0)) " +
+           "AND (:mainRegion IS NULL OR c.mainRegion = :mainRegion) " +
+           "AND (:detailRegion IS NULL OR c.detailRegion = :detailRegion) " +
+           "AND (:regionCategory IS NULL OR :regionCategory = 'ALL' OR c.regionCategory = :regionCategory) " +
            "AND (:product IS NULL OR (:product = 1 AND c.campaignType = 1)) " +
            "AND (:reporter IS NULL OR (:reporter = 1 AND c.campaignType = 2)) " +
            "AND c.socialPlatforms.youtube = :youtube " +
@@ -54,8 +59,9 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long> {
            "ORDER BY c.created DESC")
     Page<Campaign> findByKeywordAndFilters(
             @Param("keyword") String keyword,
-            @Param("region1") Integer region1,
-            @Param("region2") Integer region2,
+            @Param("mainRegion") Region mainRegion,
+            @Param("detailRegion") Region detailRegion,
+            @Param("regionCategory") RegionCategory regionCategory,
             @Param("product") Integer product,
             @Param("reporter") Integer reporter,
             @Param("youtube") Integer youtube,

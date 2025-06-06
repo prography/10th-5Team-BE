@@ -51,6 +51,7 @@ public enum ErrorMessage {
 
     // 캠페인 관련 에러
     CAMPAIGN_NOT_FOUND(NOT_FOUND, "존재하지 않는 캠페인입니다."),
+    CAMPAIGN_SEARCH_NO_RESULTS(NOT_FOUND, "검색 조건에 맞는 캠페인이 없습니다."),
     CAMPAIGN_TYPE_INVALID(BAD_REQUEST, "유효하지 않은 캠페인 타입입니다."),
     CAMPAIGN_REGION_INVALID(BAD_REQUEST, "유효하지 않은 지역 코드입니다."),
     CAMPAIGN_CATEGORY_INVALID(BAD_REQUEST, "유효하지 않은 카테고리 코드입니다."),
