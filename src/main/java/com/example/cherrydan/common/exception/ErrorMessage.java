@@ -49,6 +49,17 @@ public enum ErrorMessage {
     // 리프레쉬 토큰 에러
     REFRESH_TOKEN_DELETE_ERROR(BAD_REQUEST, "토큰 삭제에 실패했습니다."),
 
+    // 캠페인 관련 에러
+    CAMPAIGN_NOT_FOUND(NOT_FOUND, "존재하지 않는 캠페인입니다."),
+    CAMPAIGN_TYPE_INVALID(BAD_REQUEST, "유효하지 않은 캠페인 타입입니다."),
+    CAMPAIGN_REGION_INVALID(BAD_REQUEST, "유효하지 않은 지역 코드입니다."),
+    CAMPAIGN_CATEGORY_INVALID(BAD_REQUEST, "유효하지 않은 카테고리 코드입니다."),
+    CAMPAIGN_KEYWORD_EMPTY(BAD_REQUEST, "검색 키워드를 입력해주세요."),
+    CAMPAIGN_FILTER_INVALID(BAD_REQUEST, "유효하지 않은 필터 조건입니다."),
+    CAMPAIGN_NOT_APPLICABLE(BAD_REQUEST, "현재 신청할 수 없는 캠페인입니다."),
+    CAMPAIGN_APPLICATION_PERIOD_EXPIRED(BAD_REQUEST, "캠페인 신청 기간이 만료되었습니다."),
+    CAMPAIGN_INACTIVE(BAD_REQUEST, "비활성화된 캠페인입니다."),
+
     // 공통 에러
     INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다."),
     INVALID_PARAMETER(BAD_REQUEST, "잘못된 파라미터입니다."),
