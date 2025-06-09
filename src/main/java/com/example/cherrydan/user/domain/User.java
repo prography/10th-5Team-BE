@@ -1,4 +1,4 @@
-package com.example.cherrydan.user.entity;
+package com.example.cherrydan.user.domain;
 
 import com.example.cherrydan.common.entity.BaseTimeEntity;
 import com.example.cherrydan.oauth.model.AuthProvider;
@@ -40,18 +40,6 @@ public class User extends BaseTimeEntity {
     private AuthProvider provider;
     
     private String uuid;
-    
-    @Column(name = "fcm_token")
-    private String fcmToken;
-    
-    @Column(name = "app_version")
-    private String appVersion;
-    
-    @Column(name = "os_version")
-    private String osVersion;
-    
-    @Column(name = "device_model")
-    private String deviceModel;
     
     @Column(name = "last_login")
     private String lastLogin;

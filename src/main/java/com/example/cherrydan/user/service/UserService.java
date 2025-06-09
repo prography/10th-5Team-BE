@@ -5,7 +5,6 @@ import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
-import com.example.cherrydan.user.dto.SignUpRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

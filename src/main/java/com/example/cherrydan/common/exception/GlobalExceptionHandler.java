@@ -64,6 +64,17 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * FCMException 처리
+     */
+    @ExceptionHandler(FCMException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFCMException(FCMException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.warn("FCMException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+    
+    /**
      * 유효성 검사 실패 예외 처리
      */
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})

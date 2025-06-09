@@ -49,6 +49,28 @@ public enum ErrorMessage {
     // 리프레쉬 토큰 에러
     REFRESH_TOKEN_DELETE_ERROR(BAD_REQUEST, "토큰 삭제에 실패했습니다."),
 
+    // FCM 관련 에러
+    FCM_TOKEN_INVALID_REQUEST(BAD_REQUEST, "FCM 토큰 요청 데이터가 유효하지 않습니다."),
+    FCM_TOKEN_NOT_FOUND(NOT_FOUND, "FCM 토큰을 찾을 수 없습니다."),
+    FCM_TOKEN_REGISTRATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 토큰 등록에 실패했습니다."),
+    FCM_TOKEN_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 토큰 업데이트에 실패했습니다."),
+    FCM_TOKEN_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 토큰 삭제에 실패했습니다."),
+    FCM_DEVICE_TYPE_INVALID(BAD_REQUEST, "지원하지 않는 디바이스 타입입니다."),
+    FCM_TOKEN_ACCESS_DENIED(FORBIDDEN, "FCM 토큰에 대한 접근 권한이 없습니다."),
+    FCM_SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 서비스를 사용할 수 없습니다."),
+    FCM_NOTIFICATION_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 전송에 실패했습니다."),
+    FCM_NOTIFICATION_INVALID_REQUEST(BAD_REQUEST, "알림 요청 데이터가 유효하지 않습니다."),
+    FCM_USER_NO_ACTIVE_TOKENS(NOT_FOUND, "사용자의 활성화된 FCM 토큰이 없습니다."),
+
+    // 알림 관련 에러
+    NOTIFICATION_FIREBASE_INIT_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Firebase 초기화에 실패했습니다."),
+    NOTIFICATION_SERVICE_UNAVAILABLE(HttpStatus.INTERNAL_SERVER_ERROR, "알림 서비스를 사용할 수 없습니다."),
+    NOTIFICATION_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "알림 전송에 실패했습니다."),
+    NOTIFICATION_USER_NO_TOKENS(NOT_FOUND, "사용자의 활성화된 토큰이 없습니다."),
+    NOTIFICATION_TOPIC_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토픽 알림 전송에 실패했습니다."),
+    NOTIFICATION_TOKEN_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 알림 전송에 실패했습니다."),
+    NOTIFICATION_MULTIPLE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "다중 알림 전송에 실패했습니다."),
+
     // 공통 에러
     INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다."),
     INVALID_PARAMETER(BAD_REQUEST, "잘못된 파라미터입니다."),
