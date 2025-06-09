@@ -1,4 +1,4 @@
-package com.example.cherrydan.user.domain;
+package com.example.cherrydan.user.entity;
 
 public enum Role {
     ROLE_USER,
