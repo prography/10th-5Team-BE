@@ -17,13 +17,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Table(
-    name = "user_fcm_tokens",
-    indexes = {
-        @Index(name = "idx_user_id", columnList = "user_id"),
-        @Index(name = "idx_user_device", columnList = "user_id, device_type"),
-        @Index(name = "idx_fcm_token", columnList = "fcm_token")
-    }
-)
+    name = "user_fcm_tokens")
 @Getter
 @Builder
 @AllArgsConstructor
