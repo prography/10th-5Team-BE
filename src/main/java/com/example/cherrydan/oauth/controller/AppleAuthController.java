@@ -4,6 +4,7 @@ import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.oauth.dto.AppleLoginRequest;
+import com.example.cherrydan.oauth.dto.LoginResponse;
 import com.example.cherrydan.oauth.dto.TokenDTO;
 import com.example.cherrydan.oauth.security.oauth2.CustomOAuth2UserService;
 import com.example.cherrydan.oauth.security.oauth2.user.AppleOAuth2UserInfo;
@@ -34,7 +35,7 @@ public class AppleAuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Apple 로그인", description = "iOS에서 받은 Identity Token으로 Apple 로그인 처리")
-    public ResponseEntity<ApiResponse<TokenDTO>> appleLogin(@RequestBody AppleLoginRequest request) {
+    public ResponseEntity<ApiResponse<LoginResponse>> appleLogin(@RequestBody AppleLoginRequest request) {
         // 1. 입력 값 검증
         validateAppleLoginRequest(request);
         
@@ -51,8 +52,10 @@ public class AppleAuthController {
         TokenDTO tokenDTO = authService.generateTokens(user);
         
         log.info("Apple 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
-        
-        return ResponseEntity.ok(ApiResponse.success(tokenDTO));
+
+        LoginResponse loginResponse = new LoginResponse(tokenDTO,user.getId());
+
+        return ResponseEntity.ok(ApiResponse.success(loginResponse));
     }
 
     /**

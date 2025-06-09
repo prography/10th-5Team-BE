@@ -75,3 +75,7 @@ apple:
   client-id: ${APPLE_CLIENT_ID}
   issuer: https://appleid.apple.com
   keys-url: https://appleid.apple.com/auth/keys
+
+# FCM 설정
+#fcm:
+#  service-account-key-path: ${FCM_SERVICE_ACCOUNT_KEY_PATH:classpath:firebase-service-account.json}
