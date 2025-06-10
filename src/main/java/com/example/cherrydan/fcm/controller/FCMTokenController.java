@@ -4,6 +4,7 @@ import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.fcm.service.FCMTokenService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,7 @@ import java.util.List;
  * FCM 토큰 관리 컨트롤러
  * FCM 토큰 등록, 수정, 삭제 관련 API 엔드포인트를 제공하는 컨트롤러
  */
+@Tag(name = "FCM Token Management", description = "FCM 토큰 등록/삭제/조회 관리 API - 클라이언트에서 토큰을 등록하고 관리할 때 사용해요")
 @Slf4j
 @RestController
 @RequestMapping("/api/fcm/tokens")
