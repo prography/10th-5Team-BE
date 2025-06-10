@@ -10,8 +10,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Entity
 @Table(name = "auth_token")
 @Data

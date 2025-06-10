@@ -42,10 +42,11 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             log.info("OAuth2 로그인 성공: userId={}, email={}, provider={}", 
                     userDetails.getId(), userDetails.getEmail(), userDetails.getProvider());
 
-            // 리다이렉트 URL에 TokenDTO 정보 포함
+            // 리다이렉트 URL에 TokenDTO 정보 및 userId 포함
             String targetUrl = UriComponentsBuilder.fromUriString(redirectSuccessUrl)
                     .queryParam("accessToken", tokenDTO.getAccessToken())
                     .queryParam("refreshToken", tokenDTO.getRefreshToken())
+                    .queryParam("userId", userDetails.getId())
                     .build().toUriString();
 
             // 리다이렉트 수행
