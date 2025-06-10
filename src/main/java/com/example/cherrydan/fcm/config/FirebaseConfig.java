@@ -11,8 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * Firebase Configuration
@@ -26,31 +25,16 @@ public class FirebaseConfig {
     @Value("${fcm.service-account-key-path}")
     private String serviceAccountKeyPath;
 
-    /**
-     * Firebase App 초기화
-     * 애플리케이션 시작 시 Firebase Admin SDK를 초기화합니다.
-     */
     @PostConstruct
     public void initializeFirebase() {
         try {
-            // Firebase App이 이미 초기화되었는지 확인
             if (FirebaseApp.getApps().isEmpty()) {
-                // Service Account Key 파일 로드
-                InputStream serviceAccount;
+                InputStream serviceAccount = getServiceAccountStream();
 
-                if (serviceAccountKeyPath.startsWith("classpath:")) {
-                    String path = serviceAccountKeyPath.substring("classpath:".length());
-                    serviceAccount = new ClassPathResource(path).getInputStream();
-                } else {
-                    serviceAccount = new ClassPathResource(serviceAccountKeyPath).getInputStream();
-                }
-
-                // Firebase Options 설정
                 FirebaseOptions options = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
 
-                // Firebase App 초기화
                 FirebaseApp.initializeApp(options);
                 log.info("Firebase 초기화 완료");
             } else {
@@ -65,4 +49,30 @@ public class FirebaseConfig {
             throw new NotificationException(ErrorMessage.NOTIFICATION_FIREBASE_INIT_FAILED);
         }
     }
+
+    private InputStream getServiceAccountStream() throws IOException {
+        log.info("Firebase 서비스 계정 키 경로: {}", serviceAccountKeyPath);
+
+        // classpath 경로인 경우
+        if (serviceAccountKeyPath.startsWith("classpath:")) {
+            String path = serviceAccountKeyPath.substring("classpath:".length());
+            log.info("classpath에서 Firebase 키 파일 로드: {}", path);
+            return new ClassPathResource(path).getInputStream();
+        }
+        // 절대 경로인 경우 (/ 로 시작)
+        else if (serviceAccountKeyPath.startsWith("/")) {
+            File keyFile = new File(serviceAccountKeyPath);
+            if (!keyFile.exists()) {
+                throw new FileNotFoundException("Firebase 키 파일을 찾을 수 없습니다: " + serviceAccountKeyPath);
+            }
+            log.info("절대 경로에서 Firebase 키 파일 로드: {}", serviceAccountKeyPath);
+            return new FileInputStream(keyFile);
+        }
+        // 상대 경로는 classpath로 처리
+        else {
+            log.info("상대 경로를 classpath로 처리: {}", serviceAccountKeyPath);
+            return new ClassPathResource(serviceAccountKeyPath).getInputStream();
+        }
+    }
 }
+
