@@ -44,6 +44,13 @@ public class MyPageController {
         return ResponseEntity.ok(ApiResponse.success("체리단 소식 조회가 완료되었습니다.", response));
     }
 
+    @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회하고 조회수를 증가시킵니다.")
+    @GetMapping("/notices/{id}")
+    public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable Long id) {
+        NoticeResponseDTO response = noticeService.getNoticeDetail(id);
+        return ResponseEntity.ok(ApiResponse.success("공지사항 상세 조회가 완료되었습니다.", response));
+    }
+
     @Operation(summary = "내 문의 목록 조회")
     @GetMapping("/inquiries")
     public ResponseEntity<ApiResponse<Page<InquiryResponseDTO>>> getMyInquiries(
