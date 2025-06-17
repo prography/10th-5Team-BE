@@ -4,19 +4,14 @@ import com.example.cherrydan.common.entity.BaseTimeEntity;
 import com.example.cherrydan.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "auth_token")
-@Data
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = false)
 public class RefreshToken extends BaseTimeEntity {
 
     @Id
