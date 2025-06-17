@@ -1,6 +1,7 @@
 package com.example.cherrydan.fcm.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 /**
  * FCM 디바이스 타입 열거형
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
  * @version 1.0
  * @since 2025-06-09
  */
+@Getter
 @Schema(description = "FCM 디바이스 타입", example = "ANDROID")
 public enum DeviceType {
     
@@ -25,10 +27,6 @@ public enum DeviceType {
 
     DeviceType(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     /**
