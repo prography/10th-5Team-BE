@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class RefreshToken extends BaseTimeEntity {
 
     @Id
@@ -25,9 +25,6 @@ public class RefreshToken extends BaseTimeEntity {
 
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
-
-    @Column(name = "user_id", insertable = false, updatable = false)
-    private Long userId;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
