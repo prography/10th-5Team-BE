@@ -19,7 +19,7 @@ spring:
           kakao:
             client-id: ${KAKAO_CLIENT_ID}
             client-secret: ${KAKAO_CLIENT_SECRET}
-            redirect-uri: "http://3.39.160.72/api/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://cherrydan.com/api/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
             client-authentication-method: client_secret_post
             scope:
@@ -28,7 +28,7 @@ spring:
           naver:
             client-id: ${NAVER_CLIENT_ID}
             client-secret: ${NAVER_CLIENT_SECRET}
-            redirect-uri: "http://3.39.160.72/api/login/oauth2/code/{registrationId}"
+            redirect-uri: "https://cherrydan.com/api/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
             scope:
               - name
