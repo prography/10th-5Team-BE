@@ -62,6 +62,7 @@ public class NotificationRequest {
         }
         """
     )
+    @Builder.Default
     private Map<String, String> data = new HashMap<>();
     
     // Android 전용 설정
@@ -72,6 +73,7 @@ public class NotificationRequest {
     private String androidColor;
     
     @Schema(description = "안드로이드 알림 사운드", example = "default")
+    @Builder.Default
     private String androidSound = "default";
     
     @Schema(description = "안드로이드 클릭 액션", example = "FLUTTER_NOTIFICATION_CLICK")
@@ -79,6 +81,7 @@ public class NotificationRequest {
     
     // iOS 전용 설정
     @Schema(description = "iOS 알림 사운드", example = "default")
+    @Builder.Default
     private String iosSound = "default";
     
     @Schema(description = "iOS 앱 아이콘 뱃지 숫자", example = "1")
@@ -88,6 +91,7 @@ public class NotificationRequest {
     private String iosCategory;
     
     @Schema(description = "알림 우선순위 (high 또는 normal)", example = "high")
+    @Builder.Default
     private String priority = "high";
     
     @Schema(description = "알림 TTL (Time To Live, 초 단위)", example = "3600")
