@@ -36,7 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthException(AuthException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("AuthException: {}", errorMessage.getMessage());
+        logger.error("AuthException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserException(UserException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("UserException: {}", errorMessage.getMessage());
+        logger.error("UserException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
@@ -58,7 +58,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OAuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleOAuthException(OAuthException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("OAuthException: {}", errorMessage.getMessage());
+        logger.error("OAuthException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
@@ -69,11 +69,45 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FCMException.class)
     public ResponseEntity<ApiResponse<Void>> handleFCMException(FCMException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("FCMException: {}", errorMessage.getMessage());
+        logger.error("FCMException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
-    
+
+    /**
+     * AppVersionException 처리
+     */
+    @ExceptionHandler(AppVersionException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppVersionException(AppVersionException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("AppVersionException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * NoticeException 처리
+     */
+    @ExceptionHandler(NoticeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoticeException(NoticeException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("NoticeException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * InquiryException 처리
+     */
+    @ExceptionHandler(InquiryException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInquiryException(InquiryException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("InquiryException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+
     /**
      * 유효성 검사 실패 예외 처리
      */

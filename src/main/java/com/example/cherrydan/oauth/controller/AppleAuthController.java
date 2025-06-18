@@ -6,6 +6,7 @@ import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.oauth.dto.AppleLoginRequest;
 import com.example.cherrydan.oauth.dto.LoginResponse;
 import com.example.cherrydan.oauth.dto.TokenDTO;
+import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.oauth2.CustomOAuth2UserService;
 import com.example.cherrydan.oauth.security.oauth2.user.AppleOAuth2UserInfo;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
@@ -31,7 +32,7 @@ public class AppleAuthController {
 
     private final AppleIdentityTokenService appleIdentityTokenService;
     private final CustomOAuth2UserService customOAuth2UserService;
-    private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
     @Operation(summary = "Apple 로그인", description = "iOS에서 받은 Identity Token으로 Apple 로그인 처리")
@@ -49,13 +50,11 @@ public class AppleAuthController {
         User user = customOAuth2UserService.processAppleUser(oAuth2UserInfo);
         
         // 5. Access Token과 Refresh Token 생성
-        TokenDTO tokenDTO = authService.generateTokens(user);
+        TokenDTO tokenDTO = jwtTokenProvider.generateTokens(user.getId(), user.getEmail());
         
         log.info("Apple 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
 
-        LoginResponse loginResponse = new LoginResponse(tokenDTO,user.getId());
-
-        return ResponseEntity.ok(ApiResponse.success(loginResponse));
+        return ResponseEntity.ok(ApiResponse.success(new LoginResponse(tokenDTO,user.getId())));
     }
 
     /**

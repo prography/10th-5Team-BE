@@ -1,6 +1,7 @@
 package com.example.cherrydan.oauth.security.oauth2;
 
 import com.example.cherrydan.oauth.dto.TokenDTO;
+import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final AuthService authService;
+    private final JwtTokenProvider authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${oauth2.redirect.success-url}")
     private String redirectSuccessUrl;
@@ -37,7 +39,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
             // AuthService를 통해 토큰 생성 (UserDetailsImpl 직접 전달)
-            TokenDTO tokenDTO = authService.generateTokens(userDetails);
+            TokenDTO tokenDTO = jwtTokenProvider.generateTokens(userDetails.getId(),userDetails.getEmail());
 
             log.info("OAuth2 로그인 성공: userId={}, email={}, provider={}", 
                     userDetails.getId(), userDetails.getEmail(), userDetails.getProvider());

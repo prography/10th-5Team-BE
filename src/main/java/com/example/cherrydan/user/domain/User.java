@@ -12,12 +12,12 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "users", schema = "oddong")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = false)
 public class User extends BaseTimeEntity {
 
     @Id
@@ -43,6 +43,9 @@ public class User extends BaseTimeEntity {
     
     @Column(name = "last_login")
     private String lastLogin;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
     
     // 프로필 이미지 URL
     private String picture;

@@ -1,5 +1,6 @@
 package com.example.cherrydan.oauth.security.jwt;
 
+import com.example.cherrydan.oauth.dto.TokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,18 @@ public class JwtTokenProvider {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenValidityInMinutes = accessTokenValidityInMinutes;
         this.refreshTokenValidityInDays = refreshTokenValidityInDays;
+    }
+
+    /**
+     * Access Token과 Refresh Token을 함께 생성하여 TokenDTO로 반환
+     */
+    public TokenDTO generateTokens(Long userId, String email) {
+        String accessToken = generateAccessToken(userId, email);
+        String refreshToken = generateRefreshToken(userId);
+
+        log.info("토큰 생성 완료: 사용자 ID = {}", userId);
+
+        return new TokenDTO(accessToken, refreshToken);
     }
 
     // Access Token 생성 (15분)

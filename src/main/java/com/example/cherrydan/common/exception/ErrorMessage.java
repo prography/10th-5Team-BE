@@ -71,6 +71,21 @@ public enum ErrorMessage {
     NOTIFICATION_TOKEN_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "토큰 알림 전송에 실패했습니다."),
     NOTIFICATION_MULTIPLE_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "다중 알림 전송에 실패했습니다."),
 
+    // 앱 버전 관련 에러
+    APP_VERSION_NOT_FOUND(NOT_FOUND, "앱 버전 정보를 찾을 수 없습니다."),
+
+    // 공지사항 관련 에러
+    NOTICE_NOT_FOUND(NOT_FOUND, "공지사항을 찾을 수 없습니다."),
+    NOTICE_INACTIVE(BAD_REQUEST, "비활성화된 공지사항입니다."),
+    NOTICE_CATEGORY_INVALID(BAD_REQUEST, "잘못된 공지사항 카테고리입니다."),
+
+    // 문의 관련 에러
+    INQUIRY_NOT_FOUND(NOT_FOUND, "문의 정보를 찾을 수 없습니다."),
+    INQUIRY_ACCESS_DENIED(FORBIDDEN, "본인의 문의가 아닙니다."),
+    INQUIRY_CATEGORY_INVALID(BAD_REQUEST, "잘못된 문의 카테고리입니다."),
+    INQUIRY_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "문의 등록에 실패했습니다."),
+    INQUIRY_REPLY_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "문의 답변 등록에 실패했습니다."),
+
     // 공통 에러
     INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다."),
     INVALID_PARAMETER(BAD_REQUEST, "잘못된 파라미터입니다."),

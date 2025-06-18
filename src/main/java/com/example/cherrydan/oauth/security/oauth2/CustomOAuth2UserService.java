@@ -7,6 +7,7 @@ import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfoFactory;
+import com.example.cherrydan.user.domain.Role;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -130,7 +131,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * 신규 사용자 등록
+     * 신규 사용자 (role_user) 등록
      * Register a new user from OAuth2 information
      */
     private User registerNewUser(AuthProvider provider, OAuth2UserInfo oAuth2UserInfo) {
@@ -139,6 +140,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                 .name(oAuth2UserInfo.getName())
                 .picture(oAuth2UserInfo.getImageUrl())
                 .socialId(oAuth2UserInfo.getId())
+                .role(Role.ROLE_USER)
                 .provider(provider)
                 .build();
 
