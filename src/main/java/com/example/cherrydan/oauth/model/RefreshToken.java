@@ -21,8 +21,7 @@ public class RefreshToken extends BaseTimeEntity {
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "refreshToken")
     @JsonIgnore
     private User user;
 }
