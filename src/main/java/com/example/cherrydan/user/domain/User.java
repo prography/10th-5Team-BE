@@ -11,6 +11,10 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Entity
 @Table(name = "users")
 @Data
@@ -62,6 +66,10 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "user_tos_id")
     private UserTos userTos;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<UserKeyword> keywords = new ArrayList<>();
+
     // OAuth 정보 업데이트 (기존 사용자)
     public void updateOAuth2Info(String name, String picture) {
         this.name = name;
@@ -70,5 +78,9 @@ public class User extends BaseTimeEntity {
 
     public String getMaskedEmail() {
         return MaskingUtil.maskEmail(this.email);
+    }
+
+    public String getMaskedMdn() {
+        return MaskingUtil.maskMdn(this.mdn);
     }
 }
