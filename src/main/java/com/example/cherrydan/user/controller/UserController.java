@@ -6,7 +6,10 @@ import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.UserDto;
+import com.example.cherrydan.user.dto.UserUpdateRequestDTO;
+import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.service.UserService;
+import com.example.cherrydan.user.service.UserKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserKeywordService userKeywordService;
 
     @Operation(
         summary = "현재 사용자 정보 조회",
@@ -41,5 +47,62 @@ public class UserController {
         UserDto userDto = new UserDto(user);
         
         return ResponseEntity.ok(ApiResponse.success("사용자 정보 조회가 완료되었습니다.", userDto));
+    }
+
+    @Operation(
+        summary = "사용자 정보 수정",
+        description = "닉네임, 핸드폰번호만 수정 가능",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
+    @PatchMapping("/me")
+    public ResponseEntity<ApiResponse<UserDto>> updateCurrentUser(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody UserUpdateRequestDTO request) {
+        if (currentUser == null) {
+            throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        }
+        User user = userService.updateUser(currentUser.getId(), request.getNickname(), request.getMdn());
+        UserDto userDto = new UserDto(user);
+        return ResponseEntity.ok(ApiResponse.success("사용자 정보가 수정되었습니다.", userDto));
+    }
+
+    @Operation(
+        summary = "사용자 탈퇴",
+        description = "현재 로그인한 사용자를 탈퇴 처리합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<String>> deleteCurrentUser(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        if (currentUser == null) {
+            throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        }
+        userService.deleteUser(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("사용자 탈퇴가 완료되었습니다."));
+    }
+
+    @Operation(summary = "내 키워드 목록 조회", security = { @SecurityRequirement(name = "bearerAuth") })
+    @GetMapping("/me/keywords")
+    public ResponseEntity<ApiResponse<List<UserKeywordResponseDTO>>> getMyKeywords(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        List<UserKeywordResponseDTO> dtos = userKeywordService.getKeywords(currentUser.getId())
+            .stream().map(UserKeywordResponseDTO::fromKeyword).toList();
+        return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", dtos));
+    }
+
+    @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
+    @PostMapping("/me/keywords")
+    public ResponseEntity<ApiResponse<Void>> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam String keyword) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        userKeywordService.addKeyword(currentUser.getId(), keyword);
+        return ResponseEntity.ok(ApiResponse.success("키워드 등록 성공", null));
+    }
+
+    @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
+    @DeleteMapping("/me/keywords")
+    public ResponseEntity<ApiResponse<Void>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam String keyword) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        userKeywordService.removeKeyword(currentUser.getId(), keyword);
+        return ResponseEntity.ok(ApiResponse.success("키워드 삭제 성공", null));
     }
 }
