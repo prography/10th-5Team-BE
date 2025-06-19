@@ -40,6 +40,12 @@ public class InquiryService {
         return inquiries.map(InquiryResponseDTO::from);
     }
 
+    public InquiryResponseDTO getInquiryDetail(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId)
+                .orElseThrow(() -> new InquiryException(ErrorMessage.INQUIRY_NOT_FOUND));
+        return InquiryResponseDTO.from(inquiry);
+    }
+
     /**
      * 상태별 사용자 문의 목록 조회
      */
@@ -78,9 +84,9 @@ public class InquiryService {
 
             return InquiryResponseDTO.from(savedInquiry);
         } catch (Exception e) {
-            log.error("문의 등록 실패: userId={}, error={}", userId, e.getMessage());
+            log.error("문의 등록 실패: userId={}, error={}", userId, e.getMessage());   
             throw new InquiryException(ErrorMessage.INQUIRY_CREATE_FAILED);
-        }
+        }                                                                       
     }
 
     public InquiryResponseDTO getInquiryDetail(Long inquiryId, Long userId) {
