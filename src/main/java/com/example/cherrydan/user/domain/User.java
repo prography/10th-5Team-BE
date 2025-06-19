@@ -50,8 +50,13 @@ public class User extends BaseTimeEntity {
     // 프로필 이미지 URL
     private String picture;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "refresh_token_id")
     private RefreshToken refreshToken;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "push_settings_id")
+    private UserPushSettings pushSettings;
 
     // OAuth 정보 업데이트 (기존 사용자)
     public void updateOAuth2Info(String name, String picture) {
