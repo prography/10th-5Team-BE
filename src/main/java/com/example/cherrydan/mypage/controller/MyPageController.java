@@ -10,6 +10,9 @@ import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.push.dto.PushSettingsRequestDTO;
 import com.example.cherrydan.push.dto.PushSettingsResponseDTO;
 import com.example.cherrydan.push.service.PushSettingsService;
+import com.example.cherrydan.user.dto.UserTosRequestDTO;
+import com.example.cherrydan.user.dto.UserTosResponseDTO;
+import com.example.cherrydan.user.service.UserTosService;
 import com.example.cherrydan.version.dto.AppVersionResponseDTO;
 import com.example.cherrydan.version.service.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +36,24 @@ public class MyPageController {
     private final NoticeService noticeService;
     private final InquiryService inquiryService;
     private final PushSettingsService pushSettingsService;
+    private final UserTosService userTosService;
+
+    @Operation(summary = "이용약관 동의 설정 조회")
+    @GetMapping("/tos")
+    public ResponseEntity<ApiResponse<UserTosResponseDTO>> getUserTos(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        UserTosResponseDTO response = userTosService.getUserTos(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("이용약관 동의 설정 조회가 완료되었습니다.", response));
+    }
+
+    @Operation(summary = "이용약관 동의 설정 업데이트")
+    @PutMapping("/tos")
+    public ResponseEntity<ApiResponse<UserTosResponseDTO>> updateUserTos(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody UserTosRequestDTO request) {
+        UserTosResponseDTO response = userTosService.updateUserTos(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("이용약관 동의 설정이 업데이트되었습니다.", response));
+    }
 
     @Operation(summary = "푸시 알림 설정 조회")
     @GetMapping("/push-settings")
