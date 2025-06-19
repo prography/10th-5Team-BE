@@ -5,7 +5,6 @@ import com.example.cherrydan.common.exception.PushException;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.push.dto.PushSettingsRequestDTO;
 import com.example.cherrydan.push.dto.PushSettingsResponseDTO;
-import com.example.cherrydan.push.dto.PushCategory;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.UserPushSettings;
 import com.example.cherrydan.user.repository.UserRepository;
@@ -103,9 +102,9 @@ public class PushSettingsService {
     }
 
     /**
-     * 특정 카테고리 푸시 알림 허용 여부 확인
+     * 특정 카테고리 푸시 알림 허용 여부 확인 (카테고리명을 String으로 받음)
      */
-    public boolean isPushAllowed(Long userId, PushCategory category) {
+    public boolean isPushAllowed(Long userId, String category) {
         log.info("푸시 알림 허용 여부 확인 - userId: {}, category: {}", userId, category);
         
         if (category == null) {
@@ -128,12 +127,12 @@ public class PushSettingsService {
             return false;
         }
 
-        // 전체 푸시가 켜져있을 때만 세부 설정 확인
-        boolean isAllowed = switch (category) {
-            case ACTIVITY -> settings.getActivityEnabled();
-            case PERSONALIZED -> settings.getPersonalizedEnabled();
-            case SERVICE -> settings.getServiceEnabled();
-            case MARKETING -> settings.getMarketingEnabled();
+        boolean isAllowed = switch (category.toLowerCase()) {
+            case "activity" -> settings.getActivityEnabled();
+            case "personalized" -> settings.getPersonalizedEnabled();
+            case "service" -> settings.getServiceEnabled();
+            case "marketing" -> settings.getMarketingEnabled();
+            default -> throw new PushException(ErrorMessage.PUSH_CATEGORY_INVALID);
         };
         
         log.info("푸시 알림 허용 여부 확인 완료 - userId: {}, category: {}, allowed: {}", userId, category, isAllowed);
