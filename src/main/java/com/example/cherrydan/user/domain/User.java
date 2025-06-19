@@ -58,6 +58,10 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "push_settings_id")
     private UserPushSettings pushSettings;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_tos_id")
+    private UserTos userTos;
+
     // OAuth 정보 업데이트 (기존 사용자)
     public void updateOAuth2Info(String name, String picture) {
         this.name = name;
