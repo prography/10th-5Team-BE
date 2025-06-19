@@ -7,6 +7,9 @@ import com.example.cherrydan.inquiry.service.InquiryService;
 import com.example.cherrydan.notice.dto.NoticeResponseDTO;
 import com.example.cherrydan.notice.service.NoticeService;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
+import com.example.cherrydan.push.dto.PushSettingsRequestDTO;
+import com.example.cherrydan.push.dto.PushSettingsResponseDTO;
+import com.example.cherrydan.push.service.PushSettingsService;
 import com.example.cherrydan.version.dto.AppVersionResponseDTO;
 import com.example.cherrydan.version.service.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +32,33 @@ public class MyPageController {
     private final AppVersionService appVersionService;
     private final NoticeService noticeService;
     private final InquiryService inquiryService;
+    private final PushSettingsService pushSettingsService;
+
+    @Operation(summary = "푸시 알림 설정 조회")
+    @GetMapping("/push-settings")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> getPushSettings(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        PushSettingsResponseDTO response = pushSettingsService.getUserPushSettings(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 설정 조회가 완료되었습니다.", response));
+    }
+
+    @Operation(summary = "푸시 알림 설정 업데이트")
+    @PutMapping("/push-settings")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> updatePushSettings(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody PushSettingsRequestDTO request) {
+        PushSettingsResponseDTO response = pushSettingsService.updatePushSettings(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 설정이 업데이트되었습니다.", response));
+    }
+
+    @Operation(summary = "푸시 알림 전체 on/off")
+    @PatchMapping("/push-settings/toggle")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> togglePushEnabled(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestParam boolean enabled) {
+        PushSettingsResponseDTO response = pushSettingsService.togglePushEnabled(currentUser.getId(), enabled);
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 전체 설정이 변경되었습니다.", response));
+    }
 
     @Operation(summary = "앱 버전 정보 조회")
     @GetMapping("/version")
@@ -49,6 +79,13 @@ public class MyPageController {
     public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable Long id) {
         NoticeResponseDTO response = noticeService.getNoticeDetail(id);
         return ResponseEntity.ok(ApiResponse.success("공지사항 상세 조회가 완료되었습니다.", response));
+    }
+
+    @Operation(summary = "내 문의 상세 조회")
+    @GetMapping("/inquiries/{id}")
+    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable Long id) {
+        InquiryResponseDTO response = inquiryService.getInquiryDetail(id);
+        return ResponseEntity.ok(ApiResponse.success("문의 상세 조회가 완료되었습니다.", response));
     }
 
     @Operation(summary = "내 문의 목록 조회")
