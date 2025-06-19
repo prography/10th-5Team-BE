@@ -23,6 +23,20 @@ public class UserService {
         
         return UserInfoDTO.fromEntity(user);
     }
+
+    @Transactional
+    public User updateUser(Long userId, String nickname, String mdn) {
+        User user = getUserById(userId);
+        if (nickname != null) user.setNickname(nickname);
+        if (mdn != null) user.setMdn(mdn);
+        return user;
+    }
+
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = getUserById(userId);
+        userRepository.delete(user);
+    }
     
     public User getUserById(Long id) {
         return userRepository.findById(id)
