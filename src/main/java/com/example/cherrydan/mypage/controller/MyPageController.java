@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 public class MyPageController {
 
     private final AppVersionService appVersionService;
-    private final NoticeService noticeService;
     private final InquiryService inquiryService;
     private final PushSettingsService pushSettingsService;
     private final UserTosService userTosService;
@@ -86,20 +85,6 @@ public class MyPageController {
     public ResponseEntity<ApiResponse<AppVersionResponseDTO>> getAppVersion() {
         AppVersionResponseDTO response = appVersionService.getLatestVersion();
         return ResponseEntity.ok(ApiResponse.success("앱 버전 정보 조회가 완료되었습니다.", response));
-    }
-
-    @Operation(summary = "체리단 소식 목록 조회")
-    @GetMapping("/notices")
-    public ResponseEntity<ApiResponse<Page<NoticeResponseDTO>>> getNotices(Pageable pageable) {
-        Page<NoticeResponseDTO> response = noticeService.getActiveNotices(pageable);
-        return ResponseEntity.ok(ApiResponse.success("체리단 소식 조회가 완료되었습니다.", response));
-    }
-
-    @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회하고 조회수를 증가.")
-    @GetMapping("/notices/{id}")
-    public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable Long id) {
-        NoticeResponseDTO response = noticeService.getNoticeDetail(id);
-        return ResponseEntity.ok(ApiResponse.success("공지사항 상세 조회가 완료되었습니다.", response));
     }
 
     @Operation(summary = "내 문의 상세 조회")
