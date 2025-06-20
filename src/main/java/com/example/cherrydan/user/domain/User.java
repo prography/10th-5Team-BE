@@ -34,8 +34,6 @@ public class User extends BaseTimeEntity {
     
     private String email;
     
-    private String mdn;
-    
     @Column(name = "social_id")
     private String socialId;
     
@@ -78,9 +76,5 @@ public class User extends BaseTimeEntity {
 
     public String getMaskedEmail() {
         return MaskingUtil.maskEmail(this.email);
-    }
-
-    public String getMaskedMdn() {
-        return MaskingUtil.maskMdn(this.mdn);
     }
 }

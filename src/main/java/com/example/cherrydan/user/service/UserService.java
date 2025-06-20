@@ -25,10 +25,9 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(Long userId, String nickname, String mdn) {
+    public User updateUser(Long userId, String nickname) {
         User user = getUserById(userId);
         if (nickname != null) user.setNickname(nickname);
-        if (mdn != null) user.setMdn(mdn);
         return user;
     }
 

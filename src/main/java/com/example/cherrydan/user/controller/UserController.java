@@ -51,7 +51,7 @@ public class UserController {
 
     @Operation(
         summary = "사용자 정보 수정",
-        description = "닉네임, 핸드폰번호만 수정 가능",
+        description = "닉네임만 수정 가능",
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @PatchMapping("/me")
@@ -61,7 +61,7 @@ public class UserController {
         if (currentUser == null) {
             throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         }
-        User user = userService.updateUser(currentUser.getId(), request.getNickname(), request.getMdn());
+        User user = userService.updateUser(currentUser.getId(), request.getNickname());
         UserDto userDto = new UserDto(user);
         return ResponseEntity.ok(ApiResponse.success("사용자 정보가 수정되었습니다.", userDto));
     }
