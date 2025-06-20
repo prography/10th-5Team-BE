@@ -7,6 +7,12 @@ import com.example.cherrydan.inquiry.service.InquiryService;
 import com.example.cherrydan.notice.dto.NoticeResponseDTO;
 import com.example.cherrydan.notice.service.NoticeService;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
+import com.example.cherrydan.push.dto.PushSettingsRequestDTO;
+import com.example.cherrydan.push.dto.PushSettingsResponseDTO;
+import com.example.cherrydan.push.service.PushSettingsService;
+import com.example.cherrydan.user.dto.UserTosRequestDTO;
+import com.example.cherrydan.user.dto.UserTosResponseDTO;
+import com.example.cherrydan.user.service.UserTosService;
 import com.example.cherrydan.version.dto.AppVersionResponseDTO;
 import com.example.cherrydan.version.service.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,8 +33,52 @@ import org.springframework.web.bind.annotation.*;
 public class MyPageController {
 
     private final AppVersionService appVersionService;
-    private final NoticeService noticeService;
     private final InquiryService inquiryService;
+    private final PushSettingsService pushSettingsService;
+    private final UserTosService userTosService;
+
+    @Operation(summary = "이용약관 동의 설정 조회")
+    @GetMapping("/tos")
+    public ResponseEntity<ApiResponse<UserTosResponseDTO>> getUserTos(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        UserTosResponseDTO response = userTosService.getUserTos(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("이용약관 동의 설정 조회가 완료되었습니다.", response));
+    }
+
+    @Operation(summary = "이용약관 동의 설정 업데이트")
+    @PutMapping("/tos")
+    public ResponseEntity<ApiResponse<UserTosResponseDTO>> updateUserTos(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody UserTosRequestDTO request) {
+        UserTosResponseDTO response = userTosService.updateUserTos(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("이용약관 동의 설정이 업데이트되었습니다.", response));
+    }
+
+    @Operation(summary = "푸시 알림 설정 조회")
+    @GetMapping("/push-settings")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> getPushSettings(
+            @AuthenticationPrincipal UserDetailsImpl currentUser) {
+        PushSettingsResponseDTO response = pushSettingsService.getUserPushSettings(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 설정 조회가 완료되었습니다.", response));
+    }
+
+    @Operation(summary = "푸시 알림 설정 업데이트")
+    @PutMapping("/push-settings")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> updatePushSettings(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody PushSettingsRequestDTO request) {
+        PushSettingsResponseDTO response = pushSettingsService.updatePushSettings(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 설정이 업데이트되었습니다.", response));
+    }
+
+    @Operation(summary = "푸시 알림 전체 on/off")
+    @PatchMapping("/push-settings/toggle")
+    public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> togglePushEnabled(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestParam boolean enabled) {
+        PushSettingsResponseDTO response = pushSettingsService.togglePushEnabled(currentUser.getId(), enabled);
+        return ResponseEntity.ok(ApiResponse.success("푸시 알림 전체 설정이 변경되었습니다.", response));
+    }
 
     @Operation(summary = "앱 버전 정보 조회")
     @GetMapping("/version")
@@ -37,18 +87,11 @@ public class MyPageController {
         return ResponseEntity.ok(ApiResponse.success("앱 버전 정보 조회가 완료되었습니다.", response));
     }
 
-    @Operation(summary = "체리단 소식 목록 조회")
-    @GetMapping("/notices")
-    public ResponseEntity<ApiResponse<Page<NoticeResponseDTO>>> getNotices(Pageable pageable) {
-        Page<NoticeResponseDTO> response = noticeService.getActiveNotices(pageable);
-        return ResponseEntity.ok(ApiResponse.success("체리단 소식 조회가 완료되었습니다.", response));
-    }
-
-    @Operation(summary = "공지사항 상세 조회", description = "공지사항 상세 정보를 조회하고 조회수를 증가시킵니다.")
-    @GetMapping("/notices/{id}")
-    public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable Long id) {
-        NoticeResponseDTO response = noticeService.getNoticeDetail(id);
-        return ResponseEntity.ok(ApiResponse.success("공지사항 상세 조회가 완료되었습니다.", response));
+    @Operation(summary = "내 문의 상세 조회")
+    @GetMapping("/inquiries/{id}")
+    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable Long id) {
+        InquiryResponseDTO response = inquiryService.getInquiryDetail(id);
+        return ResponseEntity.ok(ApiResponse.success("문의 상세 조회가 완료되었습니다.", response));
     }
 
     @Operation(summary = "내 문의 목록 조회")

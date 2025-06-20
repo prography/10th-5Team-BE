@@ -1,4 +1,3 @@
-
 package com.example.cherrydan.notice.repository;
 
 import com.example.cherrydan.notice.domain.Notice;
@@ -28,4 +27,8 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Modifying
     @Query("UPDATE Notice n SET n.viewCount = n.viewCount + 1 WHERE n.id = :id")
     int incrementViewCount(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Notice n SET n.empathyCount = n.empathyCount + 1 WHERE n.id = :id")
+    int incrementEmpathyCount(@Param("id") Long id);
 }

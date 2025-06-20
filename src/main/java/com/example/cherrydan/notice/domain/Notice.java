@@ -44,6 +44,10 @@ public class Notice extends BaseTimeEntity {
     @Builder.Default
     private Integer viewCount = 0;
 
+    @Column(name = "empathy_count", nullable = false)
+    @Builder.Default
+    private Integer empathyCount = 0;
+
     @Enumerated(EnumType.STRING)
     private NoticeCategory noticeCategory;
 

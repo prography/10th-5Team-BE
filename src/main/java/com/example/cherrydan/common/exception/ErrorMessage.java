@@ -86,6 +86,15 @@ public enum ErrorMessage {
     INQUIRY_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "문의 등록에 실패했습니다."),
     INQUIRY_REPLY_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "문의 답변 등록에 실패했습니다."),
 
+    // 푸시 알림 설정 관련 에러
+    PUSH_SETTINGS_NOT_FOUND(NOT_FOUND, "푸시 알림 설정을 찾을 수 없습니다."),
+    PUSH_SETTINGS_CREATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "푸시 알림 설정 생성에 실패했습니다."),
+    PUSH_SETTINGS_UPDATE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "푸시 알림 설정 업데이트에 실패했습니다."),
+    PUSH_SETTINGS_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "푸시 알림 설정 삭제에 실패했습니다."),
+    PUSH_CATEGORY_INVALID(BAD_REQUEST, "잘못된 푸시 알림 카테고리입니다."),
+    PUSH_SETTINGS_ACCESS_DENIED(FORBIDDEN, "푸시 알림 설정에 대한 접근 권한이 없습니다."),
+    PUSH_SETTINGS_INVALID_REQUEST(BAD_REQUEST, "잘못된 푸시 알림 설정 요청입니다."),
+
     // 공통 에러
     INVALID_REQUEST(BAD_REQUEST, "잘못된 요청입니다."),
     INVALID_PARAMETER(BAD_REQUEST, "잘못된 파라미터입니다."),

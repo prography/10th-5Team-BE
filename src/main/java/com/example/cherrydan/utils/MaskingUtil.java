@@ -12,6 +12,9 @@ public class MaskingUtil {
         return local.substring(0, Math.min(2, local.length())) +
                 "*".repeat(Math.max(0, local.length() - 2)) + "@" + domain;
     }
+    public static String maskMdn(String mdn) {
+        return maskPhone(mdn);
+    }
 
     public static String maskPhone(String phone) {
         if (phone == null || phone.length() < 4) return "***";

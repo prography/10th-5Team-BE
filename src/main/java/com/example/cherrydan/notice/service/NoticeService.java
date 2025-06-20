@@ -69,6 +69,26 @@ public class NoticeService {
     }
 
     /**
+     * 공감 버튼 클릭 시 공감 지수 증가
+     */
+    @Transactional
+    public NoticeResponseDTO incrementEmpathyCount(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NoticeException(ErrorMessage.NOTICE_NOT_FOUND));
+
+        if (!notice.getIsActive()) {
+            throw new NoticeException(ErrorMessage.NOTICE_INACTIVE);
+        }
+
+        // 공감 지수 증가
+        noticeRepository.incrementEmpathyCount(id);
+        log.info("공지사항 공감 지수 증가 완료: id={}, title={}, empathyCount={}",
+                id, notice.getTitle(), notice.getEmpathyCount());
+
+        return NoticeResponseDTO.from(notice);
+    }
+
+    /**
      * 고정된 공지사항 목록 조회
      */
     public List<NoticeResponseDTO> getPinnedNotices() {
