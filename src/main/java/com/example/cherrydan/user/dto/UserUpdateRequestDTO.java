@@ -9,4 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UserUpdateRequestDTO {
     private String nickname;
+    private String email;
 } 

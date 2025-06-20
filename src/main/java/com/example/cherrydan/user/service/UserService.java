@@ -25,9 +25,10 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(Long userId, String nickname) {
+    public User updateUser(Long userId, String nickname, String email) {
         User user = getUserById(userId);
         if (nickname != null) user.setNickname(nickname);
+        if (email != null) user.setEmail(email);
         return user;
     }
 
