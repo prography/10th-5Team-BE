@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.hsqldb:hsqldb'
     annotationProcessor 'org.projectlombok:lombok'
@@ -43,6 +44,9 @@ dependencies {
     
     // Firebase Admin SDK for FCM
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+    
+    // Google API Client for ID Token Verification
+    implementation 'com.google.api-client:google-api-client:2.0.0'
 }
 
 tasks.named('test') {
