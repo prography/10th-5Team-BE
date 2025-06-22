@@ -89,6 +89,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
+    /**
+     * Google 사용자 정보 처리 (ID Token 기반)
+     */
+    public User processGoogleUser(OAuth2UserInfo googleUserInfo) {
+        try {
+            validateEmail(googleUserInfo);
+            return findOrCreateUser(googleUserInfo, "google");
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Google 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     /**
      * 이메일 유효성 검증

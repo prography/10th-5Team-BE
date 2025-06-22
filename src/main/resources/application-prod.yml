@@ -33,6 +33,8 @@ spring:
             scope:
               - name
               - email
+          google:
+            client-id: ${GOOGLE_CLIENT_IDS} # 쉼표로 구분된 Android, iOS 클라이언트 ID
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
