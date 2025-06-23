@@ -77,7 +77,7 @@ public class MyPageController {
     @PatchMapping("/push-settings/toggle")
     public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> togglePushEnabled(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @RequestParam boolean enabled) {
+            @RequestParam("enabled") boolean enabled) {
         PushSettingsResponseDTO response = pushSettingsService.togglePushEnabled(currentUser.getId(), enabled);
         return ResponseEntity.ok(ApiResponse.success("푸시 알림 전체 설정이 변경되었습니다.", response));
     }
@@ -91,7 +91,7 @@ public class MyPageController {
 
     @Operation(summary = "내 문의 상세 조회")
     @GetMapping("/inquiries/{id}")
-    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable("id") Long id) {
         InquiryResponseDTO response = inquiryService.getInquiryDetail(id);
         return ResponseEntity.ok(ApiResponse.success("문의 상세 조회가 완료되었습니다.", response));
     }
