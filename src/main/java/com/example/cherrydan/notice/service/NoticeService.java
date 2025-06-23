@@ -69,10 +69,10 @@ public class NoticeService {
     }
 
     /**
-     * 공감 버튼 클릭 시 공감 지수 증가
+     * 공감 버튼 클릭 시 공감 지수 증가/감소
      */
     @Transactional
-    public NoticeResponseDTO incrementEmpathyCount(Long id) {
+    public NoticeResponseDTO toggleEmpathy(Long id, String action) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeException(ErrorMessage.NOTICE_NOT_FOUND));
 
@@ -80,12 +80,23 @@ public class NoticeService {
             throw new NoticeException(ErrorMessage.NOTICE_INACTIVE);
         }
 
-        // 공감 지수 증가
-        noticeRepository.incrementEmpathyCount(id);
-        log.info("공지사항 공감 지수 증가 완료: id={}, title={}, empathyCount={}",
-                id, notice.getTitle(), notice.getEmpathyCount());
+        if ("up".equals(action)) {
+            noticeRepository.incrementEmpathyCount(id);
+            log.info("공지사항 공감 지수 증가 완료: id={}, title={}, empathyCount={}",
+                    id, notice.getTitle(), notice.getEmpathyCount() + 1);
+        } else if ("down".equals(action)) {
+            noticeRepository.decrementEmpathyCount(id);
+            log.info("공지사항 공감 지수 감소 완료: id={}, title={}, empathyCount={}",
+                    id, notice.getTitle(), notice.getEmpathyCount() - 1);
+        } else {
+            throw new NoticeException(ErrorMessage.INVALID_ACTION);
+        }
 
-        return NoticeResponseDTO.from(notice);
+        // 업데이트된 공지사항 조회
+        Notice updatedNotice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NoticeException(ErrorMessage.NOTICE_NOT_FOUND));
+
+        return NoticeResponseDTO.from(updatedNotice);
     }
 
     /**
