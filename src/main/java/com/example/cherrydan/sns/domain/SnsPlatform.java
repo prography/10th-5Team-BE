@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SnsPlatform {
-    NAVER_BLOG("네이버 블로그", "naver-blog"),
     INSTAGRAM("인스타그램", "instagram"),
     YOUTUBE("유튜브", "youtube"),
     TIKTOK("틱톡", "tiktok");

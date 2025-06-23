@@ -4,9 +4,6 @@ import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.sns.dto.SnsConnectionResponse;
-import com.example.cherrydan.sns.dto.BlogVerificationRequest;
-import com.example.cherrydan.sns.dto.BlogVerificationResponse;
-import com.example.cherrydan.sns.service.BlogVerificationService;
 import com.example.cherrydan.sns.service.SnsOAuthService;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.service.UserService;
@@ -30,32 +27,7 @@ import java.util.List;
 public class SnsController {
 
     private final SnsOAuthService snsOAuthService;
-    private final BlogVerificationService blogVerificationService;
     private final UserService userService;
-
-    @Operation(summary = "블로그 URL 입력 및 인증 코드 생성 (개발용)")
-    @PostMapping("/blog/verify")
-    @org.springframework.context.annotation.Profile({"local", "dev", "test"})
-    public ApiResponse<BlogVerificationResponse> generateVerificationCode(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestBody BlogVerificationRequest request) {
-        User user = userService.getUserById(userDetails.getId());
-        
-        BlogVerificationResponse response = blogVerificationService.generateVerificationCode(user, request.getBlogUrl());
-        return ApiResponse.success("인증 코드가 생성되었습니다. 블로그 소개글에 추가해주세요.", response);
-    }
-
-    @Operation(summary = "블로그 인증 확인 (개발용)")
-    @PostMapping("/blog/confirm")
-    @org.springframework.context.annotation.Profile({"local", "dev", "test"})
-    public ApiResponse<SnsConnectionResponse> confirmBlogVerification(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @RequestParam("verificationCode") String verificationCode) {
-        User user = userService.getUserById(userDetails.getId());
-        
-        SnsConnectionResponse response = blogVerificationService.confirmVerification(user, verificationCode);
-        return ApiResponse.success("블로그 인증이 완료되었습니다.", response);
-    }
 
     @Operation(summary = "OAuth 인증 URL 생성")
     @GetMapping("/oauth/{platform}/auth-url")
