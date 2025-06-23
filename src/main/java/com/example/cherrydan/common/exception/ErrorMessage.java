@@ -78,6 +78,15 @@ public enum ErrorMessage {
     NOTICE_NOT_FOUND(NOT_FOUND, "공지사항을 찾을 수 없습니다."),
     NOTICE_INACTIVE(BAD_REQUEST, "비활성화된 공지사항입니다."),
     NOTICE_CATEGORY_INVALID(BAD_REQUEST, "잘못된 공지사항 카테고리입니다."),
+    INVALID_ACTION(BAD_REQUEST, "잘못된 액션입니다. 'up' 또는 'down'을 입력해주세요."),
+
+    // SNS 연동 관련 에러
+    SNS_PLATFORM_NOT_SUPPORTED(BAD_REQUEST, "지원하지 않는 SNS 플랫폼입니다."),
+    SNS_CONNECTION_NOT_FOUND(NOT_FOUND, "SNS 연동 정보를 찾을 수 없습니다."),
+    SNS_TOKEN_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 액세스 토큰 획득에 실패했습니다."),
+    SNS_USER_INFO_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 사용자 정보 획득에 실패했습니다."),
+    SNS_CONNECTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 연동에 실패했습니다."),
+    SNS_TOKEN_REFRESH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 토큰 갱신에 실패했습니다."),
 
     // 문의 관련 에러
     INQUIRY_NOT_FOUND(NOT_FOUND, "문의 정보를 찾을 수 없습니다."),

@@ -64,6 +64,17 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * SnsException 처리
+     */
+    @ExceptionHandler(SnsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSnsException(SnsException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("SnsException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+    
+    /**
      * FCMException 처리
      */
     @ExceptionHandler(FCMException.class)
