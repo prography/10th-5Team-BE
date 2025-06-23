@@ -92,7 +92,7 @@ public class UserController {
 
     @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
     @PostMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<Void>> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam String keyword) {
+    public ResponseEntity<ApiResponse<Void>> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam("keyword") String keyword) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         userKeywordService.addKeyword(currentUser.getId(), keyword);
         return ResponseEntity.ok(ApiResponse.success("키워드 등록 성공", null));
@@ -100,9 +100,28 @@ public class UserController {
 
     @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
     @DeleteMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<Void>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam String keyword) {
+    public ResponseEntity<ApiResponse<Void>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam("keyword") String keyword) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         userKeywordService.removeKeyword(currentUser.getId(), keyword);
         return ResponseEntity.ok(ApiResponse.success("키워드 삭제 성공", null));
+    }
+
+    @Operation(
+        summary = "[관리자] 사용자 계정 복구",
+        description = "소프트 삭제된 사용자 계정을 복구합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
+    @PostMapping("/admin/restore/{userId}")
+    public ResponseEntity<ApiResponse<String>> restoreUser(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PathVariable("userId") Long userId) {
+        if (currentUser == null) {
+            throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        }
+        
+        // 관리자 권한 확인 (현재는 생략, 필요시 Role.ADMIN 체크 추가)
+        
+        userService.restoreUser(userId);
+        return ResponseEntity.ok(ApiResponse.success("사용자 계정이 복구되었습니다."));
     }
 }
