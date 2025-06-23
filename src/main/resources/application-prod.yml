@@ -1,17 +1,21 @@
 spring:
+  config:
+    activate:
+      on-profile: prod
+
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    # 프로덕션 DB 정보 (환경변수 사용)
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update  # 운영 환경에서는 validate 또는 none 권장
+      ddl-auto: update # 프로덕션에서는 스키마를 자동으로 변경하지 않도록 validate 사용
     show-sql: false
     properties:
       hibernate:
         format_sql: false
-        dialect: org.hibernate.dialect.MySQLDialect
   security:
     oauth2:
       client:
@@ -34,7 +38,7 @@ spring:
               - name
               - email
           google:
-            client-id: ${GOOGLE_CLIENT_IDS} # 쉼표로 구분된 Android, iOS 클라이언트 ID
+            client-id: ${GOOGLE_CLIENT_IDS}
         provider:
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
@@ -62,8 +66,9 @@ server:
 
 logging:
   level:
-    org.springframework.security: INFO
-    com.example.cherrydan: INFO
+    com.example.cherrydan: INFO # 프로덕션에서는 INFO 레벨로 로깅
+    org.hibernate.SQL: off
+    org.springframework.web: INFO
   file:
     name: /var/log/cherrydan/application.log
 
@@ -77,6 +82,32 @@ apple:
   client-id: ${APPLE_CLIENT_ID}
   issuer: https://appleid.apple.com
   keys-url: https://appleid.apple.com/auth/keys
+
+# SNS OAuth 설정 (프로덕션)
+sns:
+  oauth:
+    platforms:
+      instagram:
+        client-id: ${INSTAGRAM_CLIENT_ID}
+        client-secret: ${INSTAGRAM_CLIENT_SECRET}
+        redirect-uri: ${INSTAGRAM_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        auth-url: https://api.instagram.com/oauth/authorize
+        token-url: https://api.instagram.com/oauth/access_token
+        scope: user_profile,user_media
+      youtube:
+        client-id: ${YOUTUBE_CLIENT_ID}
+        client-secret: ${YOUTUBE_CLIENT_SECRET}
+        redirect-uri: ${YOUTUBE_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        auth-url: https://accounts.google.com/o/oauth2/v2/auth
+        token-url: https://oauth2.googleapis.com/token
+        scope: https://www.googleapis.com/auth/youtube.readonly
+      tiktok:
+        client-id: ${TIKTOK_CLIENT_ID}
+        client-secret: ${TIKTOK_CLIENT_SECRET}
+        redirect-uri: ${TIKTOK_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        auth-url: https://www.tiktok.com/v2/auth/authorize
+        token-url: https://open.tiktokapis.com/v2/oauth/token
+        scope: user.info.basic
 
 fcm:
   service-account-key-path: ${FCM_SERVICE_ACCOUNT_KEY_PATH}
