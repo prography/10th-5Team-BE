@@ -24,7 +24,6 @@ public class BookmarkController {
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.addBookmark(currentUser.getId(), campaignId);
     }
 
@@ -34,7 +33,6 @@ public class BookmarkController {
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.cancelBookmark(currentUser.getId(), campaignId);
     }
 
@@ -43,7 +41,6 @@ public class BookmarkController {
     public List<BookmarkResponseDTO> getBookmarks(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        System.out.println("currentUser.getId() = " + currentUser.getId());
         return bookmarkService.getBookmarks(currentUser.getId());
     }
 
@@ -53,7 +50,6 @@ public class BookmarkController {
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.deleteBookmark(currentUser.getId(), campaignId);
     }
 } 

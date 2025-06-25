@@ -24,10 +24,8 @@ public class CampaignServiceImpl implements CampaignService {
         Page<Campaign> campaigns;
         
         if (type != null) {
-            System.out.println("Executing filtered query for type: " + type + " with ordinal: " + type.ordinal());
             campaigns = campaignRepository.findByCampaignType(type, pageable);
         } else {
-            System.out.println("Executing query for all campaigns (no type filter)");
             campaigns = campaignRepository.findAll(pageable);
         }
         
