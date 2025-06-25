@@ -7,43 +7,51 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Bookmark", description = "캠페인 북마크(찜) 관련 API")
 @RestController
 @RequestMapping("/api/campaigns")
 @RequiredArgsConstructor
 public class BookmarkController {
     private final BookmarkService bookmarkService;
 
+    @Operation(summary = "북마크 추가", description = "캠페인에 북마크(찜)를 추가합니다.")
     @PostMapping("/{campaignId}/bookmark")
     public void addBookmark(
-            @PathVariable Long campaignId,
-            @AuthenticationPrincipal UserDetailsImpl currentUser
+            @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.addBookmark(currentUser.getId(), campaignId);
     }
 
+    @Operation(summary = "북마크 취소", description = "캠페인 북마크(찜)를 취소합니다. (is_active=0)")
     @PatchMapping("/{campaignId}/bookmark")
     public void cancelBookmark(
-            @PathVariable Long campaignId,
-            @AuthenticationPrincipal UserDetailsImpl currentUser
+            @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.cancelBookmark(currentUser.getId(), campaignId);
     }
 
+    @Operation(summary = "내 북마크 목록 조회", description = "내가 북마크(찜)한 캠페인 목록을 조회합니다.")
     @GetMapping("/bookmarks")
     public List<BookmarkResponseDTO> getBookmarks(
-            @AuthenticationPrincipal UserDetailsImpl currentUser
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         System.out.println("currentUser.getId() = " + currentUser.getId());
         return bookmarkService.getBookmarks(currentUser.getId());
     }
 
+    @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
     @DeleteMapping("/{campaignId}/bookmark")
     public void deleteBookmark(
-            @PathVariable Long campaignId,
-            @AuthenticationPrincipal UserDetailsImpl currentUser
+            @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         System.out.println("currentUser.getId() = " + currentUser.getId());
         bookmarkService.deleteBookmark(currentUser.getId(), campaignId);
