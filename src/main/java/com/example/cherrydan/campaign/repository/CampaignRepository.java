@@ -30,4 +30,35 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     
     @Query("SELECT c FROM Campaign c WHERE c.etc = true")
     Page<Campaign> findByEtcTrue(Pageable pageable);
+    
+    // 체험단 플랫폼별 조회 메서드들
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'cherivu'")
+    Page<Campaign> findByExperiencePlatformCherivu(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'revu'")
+    Page<Campaign> findByExperiencePlatformRevu(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'reviewnote'")
+    Page<Campaign> findByExperiencePlatformReviewnote(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'dailyview'")
+    Page<Campaign> findByExperiencePlatformDailyview(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = '4blog'")
+    Page<Campaign> findByExperiencePlatformFourblog(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'popomon'")
+    Page<Campaign> findByExperiencePlatformPopomon(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'dinnerqueen'")
+    Page<Campaign> findByExperiencePlatformDinnerqueen(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'seoulouba'")
+    Page<Campaign> findByExperiencePlatformSeoulouba(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'cometoplay'")
+    Page<Campaign> findByExperiencePlatformCometoplay(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.sourceSite = 'gangnam'")
+    Page<Campaign> findByExperiencePlatformGangnam(Pageable pageable);
 } 

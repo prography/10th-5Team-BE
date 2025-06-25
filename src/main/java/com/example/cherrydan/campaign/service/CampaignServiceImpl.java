@@ -3,6 +3,7 @@ package com.example.cherrydan.campaign.service;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
+import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
@@ -65,6 +66,59 @@ public class CampaignServiceImpl implements CampaignService {
                 break;
         }
         
+        return convertToResponseDTO(campaigns);
+    }
+
+    @Override
+    public CampaignListResponseDTO getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
+        Page<Campaign> campaigns;
+        switch (campaignPlatformType) {
+            case CHVU:
+                System.out.println("Executing query for cherivu campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformCherivu(pageable);
+                break;
+            case REVU:
+                System.out.println("Executing query for revu campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformRevu(pageable);
+                break;
+            case REVIEWNOTE:
+                System.out.println("Executing query for reviewnote campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformReviewnote(pageable);
+                break;
+            case DAILYVIEW:
+                System.out.println("Executing query for dailyview campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformDailyview(pageable);
+                break;
+            case FOURBLOG:
+                System.out.println("Executing query for 4blog campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformFourblog(pageable);
+                break;
+            case POPOMON:
+                System.out.println("Executing query for popomon campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformPopomon(pageable);
+                break;
+            case DINNERQUEEN:
+                System.out.println("Executing query for dinnerqueen campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformDinnerqueen(pageable);
+                break;
+            case SEOULOUBA:
+                System.out.println("Executing query for seoulouba campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformSeoulouba(pageable);
+                break;
+            case COMETOPLAY:
+                System.out.println("Executing query for cometoplay campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformCometoplay(pageable);
+                break;
+            case GANGNAM:
+                System.out.println("Executing query for gangnam campaigns");
+                campaigns = campaignRepository.findByExperiencePlatformGangnam(pageable);
+                break;
+            case ALL:
+            default:
+                System.out.println("Executing query for all campaigns (no campaign platform filter)");
+                campaigns = campaignRepository.findAll(pageable);
+                break;
+        }
         return convertToResponseDTO(campaigns);
     }
 

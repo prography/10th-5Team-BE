@@ -2,6 +2,7 @@ package com.example.cherrydan.campaign.controller;
 
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
+import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.service.CampaignService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,6 +40,25 @@ public class CampaignController {
             }
         }
         return campaignService.getCampaigns(campaignType, region, sort, pageable);
+    }
+
+    @GetMapping("/campaign-platforms")
+    public CampaignListResponseDTO getCampaignsByCampaignPlatform(
+        @RequestParam(required = false, defaultValue = "all") String platform,
+        @RequestParam(required = false, defaultValue = "popular") String sort,
+        @RequestParam(required = false, defaultValue = "0") int page,
+        @RequestParam(required = false, defaultValue = "20") int size
+    ) {
+        Pageable pageable = createPageable(sort, page, size);
+        CampaignPlatformType platformType = CampaignPlatformType.ALL;
+        if (!"all".equalsIgnoreCase(platform.trim())) {
+            try {
+                platformType = CampaignPlatformType.fromCode(platform.trim());
+            } catch (IllegalArgumentException e) {
+                platformType = CampaignPlatformType.ALL;
+            }
+        }
+        return campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable);
     }
 
     @GetMapping("/sns-platforms")
