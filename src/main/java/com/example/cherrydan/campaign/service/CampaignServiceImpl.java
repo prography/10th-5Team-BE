@@ -38,28 +38,22 @@ public class CampaignServiceImpl implements CampaignService {
         
         switch (snsPlatformType) {
             case BLOG:
-                System.out.println("Executing query for blog campaigns");
                 campaigns = campaignRepository.findByBlogTrue(pageable);
                 break;
             case INSTAGRAM:
-                System.out.println("Executing query for instagram campaigns (insta OR reels)");
                 campaigns = campaignRepository.findByInstagramTrue(pageable);
                 break;
             case YOUTUBE:
-                System.out.println("Executing query for youtube campaigns (youtube OR shorts)");
                 campaigns = campaignRepository.findByYoutubeTrue(pageable);
                 break;
             case TIKTOK:
-                System.out.println("Executing query for tiktok campaigns");
                 campaigns = campaignRepository.findByTiktokTrue(pageable);
                 break;
             case ETC:
-                System.out.println("Executing query for etc campaigns");
                 campaigns = campaignRepository.findByEtcTrue(pageable);
                 break;
             case ALL:
             default:
-                System.out.println("Executing query for all campaigns (no platform filter)");
                 campaigns = campaignRepository.findAll(pageable);
                 break;
         }
@@ -72,48 +66,37 @@ public class CampaignServiceImpl implements CampaignService {
         Page<Campaign> campaigns;
         switch (campaignPlatformType) {
             case CHVU:
-                System.out.println("Executing query for cherivu campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformCherivu(pageable);
                 break;
             case REVU:
-                System.out.println("Executing query for revu campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformRevu(pageable);
                 break;
             case REVIEWNOTE:
-                System.out.println("Executing query for reviewnote campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformReviewnote(pageable);
                 break;
             case DAILYVIEW:
-                System.out.println("Executing query for dailyview campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformDailyview(pageable);
                 break;
             case FOURBLOG:
-                System.out.println("Executing query for 4blog campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformFourblog(pageable);
                 break;
             case POPOMON:
-                System.out.println("Executing query for popomon campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformPopomon(pageable);
                 break;
             case DINNERQUEEN:
-                System.out.println("Executing query for dinnerqueen campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformDinnerqueen(pageable);
                 break;
             case SEOULOUBA:
-                System.out.println("Executing query for seoulouba campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformSeoulouba(pageable);
                 break;
             case COMETOPLAY:
-                System.out.println("Executing query for cometoplay campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformCometoplay(pageable);
                 break;
             case GANGNAM:
-                System.out.println("Executing query for gangnam campaigns");
                 campaigns = campaignRepository.findByExperiencePlatformGangnam(pageable);
                 break;
             case ALL:
             default:
-                System.out.println("Executing query for all campaigns (no campaign platform filter)");
                 campaigns = campaignRepository.findAll(pageable);
                 break;
         }
@@ -142,12 +125,7 @@ public class CampaignServiceImpl implements CampaignService {
             .title(campaign.getTitle())
             .detailUrl(campaign.getDetailUrl())
             .benefit(campaign.getBenefit())
-            .applyStart(campaign.getApplyStart())
-            .applyEnd(campaign.getApplyEnd())
-            .reviewerAnnouncement(campaign.getReviewerAnnouncement())
-            .contentSubmissionStart(campaign.getContentSubmissionStart())
-            .contentSubmissionEnd(campaign.getContentSubmissionEnd())
-            .resultAnnouncement(campaign.getResultAnnouncement())
+            .reviewerAnnouncementStatus(CampaignResponseDTO.getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
             .applicantCount(campaign.getApplicantCount())
             .recruitCount(campaign.getRecruitCount())
             .sourceSite(campaign.getSourceSite())
