@@ -39,13 +39,11 @@ public class CampaignController {
     ) {
         Pageable pageable = createPageable(sort, page, size);
         CampaignType campaignType = null;
-        if (!"all".equalsIgnoreCase(type.trim())) {
-            try {
-                String upperCaseType = type.trim().toUpperCase();
-                campaignType = CampaignType.valueOf(upperCaseType);
-            } catch (IllegalArgumentException e) {
-                campaignType = CampaignType.ALL;
-            }
+        try {
+            String upperCaseType = type.trim().toUpperCase();
+            campaignType = CampaignType.valueOf(upperCaseType);
+        } catch (IllegalArgumentException e) {
+            campaignType = null;
         }
         return campaignService.getCampaigns(campaignType, region, sort, pageable);
     }
