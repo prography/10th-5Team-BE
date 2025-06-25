@@ -5,12 +5,14 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
+@Schema(description = "캠페인 상태 응답 DTO")
 public class CampaignStatusResponseDTO {
     private Long id;
     private Long campaignId;
