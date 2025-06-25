@@ -3,6 +3,7 @@ package com.example.cherrydan.notice.controller;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.notice.dto.NoticeResponseDTO;
 import com.example.cherrydan.notice.service.NoticeService;
+import com.example.cherrydan.notice.service.NoticeBannerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
+import com.example.cherrydan.notice.dto.NoticeBannerResponseDTO;
 
 @RestController
 @RequestMapping("/api/notices")
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class NoticeController {
 
     private final NoticeService noticeService;
+    private final NoticeBannerService noticeBannerService;
 
     @Operation(summary = "공지사항 목록 조회")
     @GetMapping
@@ -39,4 +43,10 @@ public class NoticeController {
         NoticeResponseDTO notice = noticeService.incrementEmpathyCount(id);
         return ResponseEntity.ok(ApiResponse.success("공감이 반영되었습니다.", notice));
     }
-} 
+
+    @GetMapping("/banners")
+    public ResponseEntity<ApiResponse<List<NoticeBannerResponseDTO>>> getBanners() {
+        List<NoticeBannerResponseDTO> banners = noticeBannerService.getActiveBanners();
+        return ResponseEntity.ok(ApiResponse.success("배너 목록 조회가 완료되었습니다.", banners));
+    }
+}
