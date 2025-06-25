@@ -2,6 +2,7 @@ package com.example.cherrydan.campaign.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.time.temporal.ChronoUnit;
 import lombok.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,12 +17,7 @@ public class CampaignResponseDTO {
     private String title;
     private String detailUrl;
     private String benefit;
-    private LocalDate applyStart;
-    private LocalDate applyEnd;
-    private LocalDate reviewerAnnouncement;
-    private LocalDate contentSubmissionStart;
-    private LocalDate contentSubmissionEnd;
-    private LocalDate resultAnnouncement;
+    private String reviewerAnnouncementStatus;
     private Integer applicantCount;
     private Integer recruitCount;
     private String sourceSite;
@@ -52,5 +48,18 @@ public class CampaignResponseDTO {
         if (Boolean.TRUE.equals(tiktok)) platforms.add(SnsPlatformType.TIKTOK.getLabel());
         if (Boolean.TRUE.equals(etc)) platforms.add(SnsPlatformType.ETC.getLabel());
         return platforms;
+    }
+
+    public static String getReviewerAnnouncementStatus(LocalDate reviewerAnnouncement) {
+        if (reviewerAnnouncement == null) return null;
+        LocalDate today = LocalDate.now();
+        long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
+        if (days > 0) {
+            return "발표 " + days + "일 전";
+        } else if (days < 0) {
+            return "발표 " + Math.abs(days) + "일 지남";
+        } else {
+            return "오늘 발표";
+        }
     }
 } 
