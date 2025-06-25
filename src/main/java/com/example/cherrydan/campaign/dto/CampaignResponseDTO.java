@@ -55,9 +55,9 @@ public class CampaignResponseDTO {
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
         if (days > 0) {
-            return "발표 " + days + "일 전";
+            return days + "일 남음";
         } else if (days < 0) {
-            return "발표 " + Math.abs(days) + "일 지남";
+            return Math.abs(days) + "일 지남";
         } else {
             return "오늘 발표";
         }
