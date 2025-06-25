@@ -18,6 +18,8 @@ public class BookmarkResponseDTO {
     private Long id;
     private Long campaignId;
     private String campaignTitle;
+    private String campaignDetailUrl;
+    private String campaignImageUrl;
     private String benefit;
     private Integer applicantCount;
     private Integer recruitCount;
@@ -31,6 +33,8 @@ public class BookmarkResponseDTO {
                 .id(bookmark.getId())
                 .campaignId(campaign.getId())
                 .campaignTitle(campaign.getTitle())
+                .campaignDetailUrl(campaign.getDetailUrl())
+                .campaignImageUrl(campaign.getImageUrl())
                 .benefit(campaign.getBenefit())
                 .applicantCount(campaign.getApplicantCount())
                 .recruitCount(campaign.getRecruitCount())
