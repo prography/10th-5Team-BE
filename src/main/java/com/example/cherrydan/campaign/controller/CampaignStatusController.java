@@ -3,6 +3,7 @@ package com.example.cherrydan.campaign.controller;
 import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
 import com.example.cherrydan.campaign.service.CampaignStatusService;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,13 @@ public class CampaignStatusController {
     ) {
         campaignStatusService.deleteStatus(request.getCampaignId(), currentUser.getId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/popup")
+    public ResponseEntity<CampaignStatusPopupResponseDTO> getPopupStatus(
+        @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        return ResponseEntity.ok(campaignStatusService.getPopupStatusByUser(currentUser.getId()));
     }
 
     public static class DeleteRequest {
