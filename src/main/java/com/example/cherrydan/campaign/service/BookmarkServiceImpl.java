@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +31,19 @@ public class BookmarkServiceImpl implements BookmarkService {
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        Bookmark bookmark = bookmarkRepository.findByUserAndCampaign(user, campaign)
-                .orElse(Bookmark.builder().user(user).campaign(campaign).isActive(true).build());
-        bookmark.setIsActive(true);
-        bookmarkRepository.save(bookmark);
+        Optional<Bookmark> optionalBookmark = bookmarkRepository.findByUserAndCampaign(user, campaign);
+        if (optionalBookmark.isPresent()) {
+            Bookmark bookmark = optionalBookmark.get();
+            bookmark.setIsActive(true);
+            bookmarkRepository.save(bookmark);
+        } else {
+            Bookmark bookmark = Bookmark.builder()
+                    .user(user)
+                    .campaign(campaign)
+                    .isActive(true)
+                    .build();
+            bookmarkRepository.save(bookmark);
+        }
     }
 
     @Override
