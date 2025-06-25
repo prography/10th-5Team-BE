@@ -15,4 +15,19 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query("SELECT c FROM Campaign c WHERE c.campaignType = :campaignType")
     Page<Campaign> findByCampaignType(@Param("campaignType") CampaignType campaignType, Pageable pageable);
     
+    // SNS 플랫폼별 조회 메서드들
+    @Query("SELECT c FROM Campaign c WHERE c.blog = true")
+    Page<Campaign> findByBlogTrue(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.insta = true OR c.reels = true")
+    Page<Campaign> findByInstagramTrue(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.youtube = true OR c.shorts = true")
+    Page<Campaign> findByYoutubeTrue(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.tiktok = true")
+    Page<Campaign> findByTiktokTrue(Pageable pageable);
+    
+    @Query("SELECT c FROM Campaign c WHERE c.etc = true")
+    Page<Campaign> findByEtcTrue(Pageable pageable);
 } 

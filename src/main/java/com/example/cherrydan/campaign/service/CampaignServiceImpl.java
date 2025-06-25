@@ -3,7 +3,6 @@ package com.example.cherrydan.campaign.service;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
-import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
@@ -29,6 +28,41 @@ public class CampaignServiceImpl implements CampaignService {
         } else {
             System.out.println("Executing query for all campaigns (no type filter)");
             campaigns = campaignRepository.findAll(pageable);
+        }
+        
+        return convertToResponseDTO(campaigns);
+    }
+
+    @Override
+    public CampaignListResponseDTO getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable) {
+        Page<Campaign> campaigns;
+        
+        switch (snsPlatformType) {
+            case BLOG:
+                System.out.println("Executing query for blog campaigns");
+                campaigns = campaignRepository.findByBlogTrue(pageable);
+                break;
+            case INSTAGRAM:
+                System.out.println("Executing query for instagram campaigns (insta OR reels)");
+                campaigns = campaignRepository.findByInstagramTrue(pageable);
+                break;
+            case YOUTUBE:
+                System.out.println("Executing query for youtube campaigns (youtube OR shorts)");
+                campaigns = campaignRepository.findByYoutubeTrue(pageable);
+                break;
+            case TIKTOK:
+                System.out.println("Executing query for tiktok campaigns");
+                campaigns = campaignRepository.findByTiktokTrue(pageable);
+                break;
+            case ETC:
+                System.out.println("Executing query for etc campaigns");
+                campaigns = campaignRepository.findByEtcTrue(pageable);
+                break;
+            case ALL:
+            default:
+                System.out.println("Executing query for all campaigns (no platform filter)");
+                campaigns = campaignRepository.findAll(pageable);
+                break;
         }
         
         return convertToResponseDTO(campaigns);
