@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 public enum SnsPlatformType {
     ALL("all", "전체"),
-    BLOG("blog", "블로그"),
+    BLOG("blog", "네이버 블로그"),
     INSTAGRAM("insta", "인스타그램"),
     YOUTUBE("youtube", "유튜브"),
     TIKTOK("tiktok", "틱톡"),
