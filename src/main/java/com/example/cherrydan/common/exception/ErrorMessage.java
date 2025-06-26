@@ -14,6 +14,14 @@ public enum ErrorMessage {
     USER_EMAIL_ALREADY_EXISTS(BAD_REQUEST, "이미 사용 중인 이메일입니다."),
     USER_USERNAME_ALREADY_EXISTS(BAD_REQUEST, "이미 사용 중인 사용자 이름입니다."),
     USER_INVALID_CREDENTIALS(UNAUTHORIZED, "잘못된 이메일 또는 비밀번호입니다."),
+
+    // 캠페인 관련 에러
+    CAMPAIGN_REGION_GROUP_NOT_FOUND(NOT_FOUND, "존재하지 않는 대분류 지역명입니다."),
+    CAMPAIGN_REGION_DETAIL_NOT_FOUND(NOT_FOUND, "존재하지 않는 하위 지역명입니다."),
+    CAMPAIGN_PRODUCT_CATEGORY_NOT_FOUND(NOT_FOUND, "존재하지 않는 제품 카테고리입니다."),
+    CAMPAIGN_REPORTER_NOT_FOUND(NOT_FOUND, "존재하지 않는 기자단입니다."),
+    CAMPAIGN_SNS_NOT_FOUND(NOT_FOUND, "존재하지 않는 SNS 플랫폼입니다."),
+    CAMPAIGN_EXPERIENCE_PLATFORM_NOT_FOUND(NOT_FOUND, "존재하지 않는 체험단 플랫폼입니다."),
     
     // OAuth 관련 에러
     OAUTH_DUPLICATE_EMAIL(BAD_REQUEST, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
