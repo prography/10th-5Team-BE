@@ -111,4 +111,10 @@ public class Campaign extends BaseTimeEntity {
 
     @Column(name = "product_category")
     private Integer productCategory;
+
+    @Column(name = "region_group")
+    private Integer regionGroup;
+
+    @Column(name = "region_detail")
+    private Integer regionDetail;
 }
