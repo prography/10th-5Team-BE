@@ -6,7 +6,6 @@ import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import lombok.Builder;
 import lombok.Getter;
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -44,7 +43,7 @@ public class BookmarkResponseDTO {
                 .build();
     }
 
-    private static List<String> getPlatforms(Campaign campaign) {
+    public static List<String> getPlatforms(Campaign campaign) {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(campaign.getYoutube())) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
         if (Boolean.TRUE.equals(campaign.getShorts())) platforms.add("쇼츠");
@@ -57,7 +56,7 @@ public class BookmarkResponseDTO {
         return platforms;
     }
 
-    private static String getReviewerAnnouncementStatus(LocalDate reviewerAnnouncement) {
+    public static String getReviewerAnnouncementStatus(LocalDate reviewerAnnouncement) {
         if (reviewerAnnouncement == null) return null;
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
@@ -70,12 +69,12 @@ public class BookmarkResponseDTO {
         }
     }
 
-    private static String getCampaignPlatformLabel(String code) {
+    public static String getCampaignPlatformLabel(String code) {
         if (code == null) return null;
         try {
             return CampaignPlatformType.fromCode(code).getLabel();
         } catch (IllegalArgumentException e) {
-            return code; // 매칭 안 되면 코드 그대로 반환
+            return code;
         }
     }
 } 
