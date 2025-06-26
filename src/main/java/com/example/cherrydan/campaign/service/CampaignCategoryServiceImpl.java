@@ -7,13 +7,14 @@ import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.domain.RegionGroup;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.CampaignException;
+import com.example.cherrydan.common.util.StringUtil;
+import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import jakarta.persistence.criteria.Predicate;
-import com.example.cherrydan.common.util.StringUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,29 +149,6 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     }
 
     private CampaignResponseDTO toDTO(Campaign campaign) {
-        return CampaignResponseDTO.builder()
-                .id(campaign.getId())
-                .title(campaign.getTitle())
-                .detailUrl(campaign.getDetailUrl())
-                .benefit(campaign.getBenefit())
-                .reviewerAnnouncementStatus(CampaignResponseDTO.getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
-                .applicantCount(campaign.getApplicantCount())
-                .recruitCount(campaign.getRecruitCount())
-                .sourceSite(campaign.getSourceSite())
-                .imageUrl(campaign.getImageUrl())
-                .youtube(campaign.getYoutube())
-                .shorts(campaign.getShorts())
-                .insta(campaign.getInsta())
-                .reels(campaign.getReels())
-                .blog(campaign.getBlog())
-                .clip(campaign.getClip())
-                .tiktok(campaign.getTiktok())
-                .etc(campaign.getEtc())
-                .campaignType(campaign.getCampaignType())
-                .address(campaign.getAddress())
-                .competitionRate(campaign.getCompetitionRate())
-                .localCategory(campaign.getLocalCategory())
-                .productCategory(campaign.getProductCategory())
-                .build();
+        return com.example.cherrydan.campaign.dto.CampaignResponseDTO.fromEntity(campaign);
     }
 } 

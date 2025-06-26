@@ -143,29 +143,6 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     private CampaignResponseDTO toDTO(Campaign campaign) {
-        return CampaignResponseDTO.builder()
-            .id(campaign.getId())
-            .title(campaign.getTitle())
-            .detailUrl(campaign.getDetailUrl())
-            .benefit(campaign.getBenefit())
-            .reviewerAnnouncementStatus(CampaignResponseDTO.getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
-            .applicantCount(campaign.getApplicantCount())
-            .recruitCount(campaign.getRecruitCount())
-            .sourceSite(campaign.getSourceSite())
-            .imageUrl(campaign.getImageUrl())
-            .youtube(campaign.getYoutube())
-            .shorts(campaign.getShorts())
-            .insta(campaign.getInsta())
-            .reels(campaign.getReels())
-            .blog(campaign.getBlog())
-            .clip(campaign.getClip())
-            .tiktok(campaign.getTiktok())
-            .etc(campaign.getEtc())
-            .campaignType(campaign.getCampaignType())
-            .address(campaign.getAddress())
-            .competitionRate(campaign.getCompetitionRate())
-            .localCategory(campaign.getLocalCategory())
-            .productCategory(campaign.getProductCategory())
-            .build();
+        return CampaignResponseDTO.fromEntity(campaign);
     }
 } 
