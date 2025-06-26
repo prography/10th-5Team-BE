@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth2 로그인 실패</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: #dc3545;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .error-info {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="error">OAuth2 로그인 실패</div>
+        <div id="errorInfo" class="error-info">
+            로그인 처리 중 오류가 발생했습니다.
+        </div>
+        <div>
+            <a href="/" class="btn">홈으로 돌아가기</a>
+            <a href="/api/oauth2/authorization/kakao" class="btn">카카오로 다시 로그인</a>
+            <a href="/api/oauth2/authorization/naver" class="btn">네이버로 다시 로그인</a>
+        </div>
+    </div>
+
+    <script>
+        // URL 파라미터에서 에러 메시지 추출
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 페이지 로드 시 에러 정보 표시
+        window.onload = function() {
+            const error = getUrlParameter('error');
+            const message = getUrlParameter('message');
+
+            const errorInfoDiv = document.getElementById('errorInfo');
+
+            if (error) {
+                errorInfoDiv.textContent = '오류: ' + decodeURIComponent(error);
+            } else if (message) {
+                errorInfoDiv.textContent = decodeURIComponent(message);
+            }
+
+            console.log('OAuth2 로그인 실패');
+            console.log('Error:', error);
+            console.log('Message:', message);
+        };
+    </script>
+</body>
+</html> 
