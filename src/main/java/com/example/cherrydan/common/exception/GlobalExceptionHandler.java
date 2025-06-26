@@ -13,6 +13,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -160,6 +162,15 @@ public class GlobalExceptionHandler {
     }
     
     /**
+     * 리소스 없음 예외 처리
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse<?> handleNoResourceFound(NoResourceFoundException ex) {
+        return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Not Found");
+    }
+
+    /**
      * 그 외 모든 예외 처리
      */
     @ExceptionHandler(Exception.class)
@@ -168,4 +179,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError()
                 .body(ApiResponse.serverError("예상치 못한 오류가 발생했습니다."));
     }
+
 }
