@@ -12,6 +12,10 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
+import com.example.cherrydan.common.util.StringUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +105,25 @@ public class CampaignServiceImpl implements CampaignService {
                 break;
         }
         return convertToResponseDTO(campaigns);
+    }
+
+    @Override
+    public CampaignListResponseDTO searchByKeyword(String keyword, Pageable pageable) {
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.or(
+                cb.equal(root.get("campaignType"), CampaignType.REGION),
+                cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
+            ));
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likeKeyword = "%" + keyword.trim() + "%";
+                predicates.add(cb.like(root.get("title"), likeKeyword));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Campaign> result = campaignRepository.findAll(spec, pageable);
+        return convertToResponseDTO(result);
     }
 
     private CampaignListResponseDTO convertToResponseDTO(Page<Campaign> campaigns) {

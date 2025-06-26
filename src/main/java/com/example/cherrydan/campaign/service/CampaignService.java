@@ -21,4 +21,6 @@ public interface CampaignService {
     );
     
     CampaignListResponseDTO getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable);
+
+    CampaignListResponseDTO searchByKeyword(String keyword, Pageable pageable);
 } 

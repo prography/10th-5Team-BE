@@ -96,6 +96,16 @@ public class CampaignController {
         return campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable);
     }
 
+    @GetMapping("/search")
+    public CampaignListResponseDTO searchCampaignsByKeyword(
+        @RequestParam String keyword,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return campaignService.searchByKeyword(keyword, pageable);
+    }
+
     private Pageable createPageable(String sort, int page, int size) {
         switch (sort) {
             case "popular":
