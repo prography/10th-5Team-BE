@@ -96,10 +96,17 @@ public class CampaignController {
         return campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable);
     }
 
+    @Operation(
+        summary = "키워드 기반 캠페인 검색",
+        description = "title에 키워드가 포함된 캠페인(지역/제품 타입, is_active=1)만 검색합니다."
+    )
     @GetMapping("/search")
     public CampaignListResponseDTO searchCampaignsByKeyword(
+        @Parameter(description = "검색 키워드 (title에 포함)")
         @RequestParam String keyword,
+        @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "20")
         @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
