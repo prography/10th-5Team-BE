@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum CampaignType {
-    PRODUCT(1, "제품"),
-    REGION(2, "지역"),
+    REGION(1, "지역"),
+    PRODUCT(2, "제품"),
     REPORTER(3, "기자단"),
     ETC(4, "기타");
 

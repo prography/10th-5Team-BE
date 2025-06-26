@@ -96,7 +96,7 @@ public class Campaign extends BaseTimeEntity {
     @ColumnDefault("0")
     private Boolean etc;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Convert(converter = CampaignTypeConverter.class)
     @Column(name = "campaign_type")
     private CampaignType campaignType;
 
