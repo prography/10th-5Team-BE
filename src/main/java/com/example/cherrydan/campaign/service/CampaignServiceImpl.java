@@ -66,43 +66,18 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public CampaignListResponseDTO getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
-        Page<Campaign> campaigns;
-        switch (campaignPlatformType) {
-            case CHVU:
-                campaigns = campaignRepository.findByExperiencePlatformCherivu(pageable);
-                break;
-            case REVU:
-                campaigns = campaignRepository.findByExperiencePlatformRevu(pageable);
-                break;
-            case REVIEWNOTE:
-                campaigns = campaignRepository.findByExperiencePlatformReviewnote(pageable);
-                break;
-            case DAILYVIEW:
-                campaigns = campaignRepository.findByExperiencePlatformDailyview(pageable);
-                break;
-            case FOURBLOG:
-                campaigns = campaignRepository.findByExperiencePlatformFourblog(pageable);
-                break;
-            case POPOMON:
-                campaigns = campaignRepository.findByExperiencePlatformPopomon(pageable);
-                break;
-            case DINNERQUEEN:
-                campaigns = campaignRepository.findByExperiencePlatformDinnerqueen(pageable);
-                break;
-            case SEOULOUBA:
-                campaigns = campaignRepository.findByExperiencePlatformSeoulouba(pageable);
-                break;
-            case COMETOPLAY:
-                campaigns = campaignRepository.findByExperiencePlatformCometoplay(pageable);
-                break;
-            case GANGNAM:
-                campaigns = campaignRepository.findByExperiencePlatformGangnam(pageable);
-                break;
-            case ALL:
-            default:
-                campaigns = campaignRepository.findAll(pageable);
-                break;
+        if (campaignPlatformType == CampaignPlatformType.ALL) {
+            return convertToResponseDTO(campaignRepository.findAll(pageable));
         }
+        
+        Specification<Campaign> spec = (root, query, cb) -> {
+            return cb.and(
+                cb.isTrue(root.get("isActive")),
+                cb.equal(root.get("sourceSite"), campaignPlatformType.getSourceSiteCode())
+            );
+        };
+        
+        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(campaigns);
     }
 

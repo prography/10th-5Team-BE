@@ -33,4 +33,8 @@ public enum CampaignPlatformType {
         }
         throw new IllegalArgumentException("Unknown CampaignPlatformType code: " + code);
     }
+
+    public String getSourceSiteCode() {
+        return this.code;
+    }
 } 
