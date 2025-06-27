@@ -12,6 +12,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.jpa.domain.Specification;
 
 @Service
 @RequiredArgsConstructor
@@ -63,44 +66,38 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public CampaignListResponseDTO getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
-        Page<Campaign> campaigns;
-        switch (campaignPlatformType) {
-            case CHVU:
-                campaigns = campaignRepository.findByExperiencePlatformCherivu(pageable);
-                break;
-            case REVU:
-                campaigns = campaignRepository.findByExperiencePlatformRevu(pageable);
-                break;
-            case REVIEWNOTE:
-                campaigns = campaignRepository.findByExperiencePlatformReviewnote(pageable);
-                break;
-            case DAILYVIEW:
-                campaigns = campaignRepository.findByExperiencePlatformDailyview(pageable);
-                break;
-            case FOURBLOG:
-                campaigns = campaignRepository.findByExperiencePlatformFourblog(pageable);
-                break;
-            case POPOMON:
-                campaigns = campaignRepository.findByExperiencePlatformPopomon(pageable);
-                break;
-            case DINNERQUEEN:
-                campaigns = campaignRepository.findByExperiencePlatformDinnerqueen(pageable);
-                break;
-            case SEOULOUBA:
-                campaigns = campaignRepository.findByExperiencePlatformSeoulouba(pageable);
-                break;
-            case COMETOPLAY:
-                campaigns = campaignRepository.findByExperiencePlatformCometoplay(pageable);
-                break;
-            case GANGNAM:
-                campaigns = campaignRepository.findByExperiencePlatformGangnam(pageable);
-                break;
-            case ALL:
-            default:
-                campaigns = campaignRepository.findAll(pageable);
-                break;
+        if (campaignPlatformType == CampaignPlatformType.ALL) {
+            return convertToResponseDTO(campaignRepository.findAll(pageable));
         }
+        
+        Specification<Campaign> spec = (root, query, cb) -> {
+            return cb.and(
+                cb.isTrue(root.get("isActive")),
+                cb.equal(root.get("sourceSite"), campaignPlatformType.getSourceSiteCode())
+            );
+        };
+        
+        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(campaigns);
+    }
+
+    @Override
+    public CampaignListResponseDTO searchByKeyword(String keyword, Pageable pageable) {
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.or(
+                cb.equal(root.get("campaignType"), CampaignType.REGION),
+                cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
+            ));
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                String likeKeyword = "%" + keyword.trim() + "%";
+                predicates.add(cb.like(root.get("title"), likeKeyword));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Campaign> result = campaignRepository.findAll(spec, pageable);
+        return convertToResponseDTO(result);
     }
 
     private CampaignListResponseDTO convertToResponseDTO(Page<Campaign> campaigns) {
@@ -120,29 +117,6 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     private CampaignResponseDTO toDTO(Campaign campaign) {
-        return CampaignResponseDTO.builder()
-            .id(campaign.getId())
-            .title(campaign.getTitle())
-            .detailUrl(campaign.getDetailUrl())
-            .benefit(campaign.getBenefit())
-            .reviewerAnnouncementStatus(CampaignResponseDTO.getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
-            .applicantCount(campaign.getApplicantCount())
-            .recruitCount(campaign.getRecruitCount())
-            .sourceSite(campaign.getSourceSite())
-            .imageUrl(campaign.getImageUrl())
-            .youtube(campaign.getYoutube())
-            .shorts(campaign.getShorts())
-            .insta(campaign.getInsta())
-            .reels(campaign.getReels())
-            .blog(campaign.getBlog())
-            .clip(campaign.getClip())
-            .tiktok(campaign.getTiktok())
-            .etc(campaign.getEtc())
-            .campaignType(campaign.getCampaignType())
-            .address(campaign.getAddress())
-            .competitionRate(campaign.getCompetitionRate())
-            .localCategory(campaign.getLocalCategory())
-            .productCategory(campaign.getProductCategory())
-            .build();
+        return CampaignResponseDTO.fromEntity(campaign);
     }
 } 

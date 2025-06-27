@@ -62,4 +62,41 @@ public class CampaignResponseDTO {
             return "오늘 발표";
         }
     }
+
+    public static String toPlatformLabel(String code) {
+        if (code == null) return null;
+        String trimmedCode = code.trim();
+        try {
+            return com.example.cherrydan.campaign.domain.CampaignPlatformType.fromCode(trimmedCode).getLabel();
+        } catch (IllegalArgumentException e) {
+            return trimmedCode;
+        }
+    }
+
+    public static CampaignResponseDTO fromEntity(com.example.cherrydan.campaign.domain.Campaign campaign) {
+        return CampaignResponseDTO.builder()
+            .id(campaign.getId())
+            .title(campaign.getTitle())
+            .detailUrl(campaign.getDetailUrl())
+            .benefit(campaign.getBenefit())
+            .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
+            .applicantCount(campaign.getApplicantCount())
+            .recruitCount(campaign.getRecruitCount())
+            .sourceSite(toPlatformLabel(campaign.getSourceSite()))
+            .imageUrl(campaign.getImageUrl())
+            .youtube(campaign.getYoutube())
+            .shorts(campaign.getShorts())
+            .insta(campaign.getInsta())
+            .reels(campaign.getReels())
+            .blog(campaign.getBlog())
+            .clip(campaign.getClip())
+            .tiktok(campaign.getTiktok())
+            .etc(campaign.getEtc())
+            .campaignType(campaign.getCampaignType())
+            .address(campaign.getAddress())
+            .competitionRate(campaign.getCompetitionRate())
+            .localCategory(campaign.getLocalCategory())
+            .productCategory(campaign.getProductCategory())
+            .build();
+    }
 } 

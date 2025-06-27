@@ -96,7 +96,7 @@ public class Campaign extends BaseTimeEntity {
     @ColumnDefault("0")
     private Boolean etc;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Convert(converter = CampaignTypeConverter.class)
     @Column(name = "campaign_type")
     private CampaignType campaignType;
 
@@ -111,4 +111,10 @@ public class Campaign extends BaseTimeEntity {
 
     @Column(name = "product_category")
     private Integer productCategory;
+
+    @Column(name = "region_group")
+    private Integer regionGroup;
+
+    @Column(name = "region_detail")
+    private Integer regionDetail;
 }
