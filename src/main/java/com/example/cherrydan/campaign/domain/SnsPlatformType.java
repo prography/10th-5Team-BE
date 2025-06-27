@@ -20,8 +20,11 @@ public enum SnsPlatformType {
     }
 
     public static SnsPlatformType fromCode(String code) {
+        String trimmedCode = code.trim();
         for (SnsPlatformType type : values()) {
-            if (type.code.equalsIgnoreCase(code)) return type;
+            if (type.code.equalsIgnoreCase(trimmedCode)) {
+                return type;
+            }
         }
         throw new IllegalArgumentException("Unknown platform code: " + code);
     }

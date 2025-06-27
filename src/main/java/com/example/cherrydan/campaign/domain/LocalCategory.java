@@ -1,7 +1,5 @@
 package com.example.cherrydan.campaign.domain;
 
-import com.example.cherrydan.common.util.StringUtil;
-
 public enum LocalCategory {
     RESTAURANT(1, "맛집", "restaurant"),
     BEAUTY(2, "뷰티", "beauty"),
@@ -26,9 +24,9 @@ public enum LocalCategory {
     public String getEngLabel() { return engLabel; }
 
     public static LocalCategory fromString(String value) {
-        String v = StringUtil.normalize(value);
+        String trimmedValue = value.trim();
         for (LocalCategory c : values()) {
-            if (c.engLabel.equalsIgnoreCase(v)) {
+            if (c.engLabel.equalsIgnoreCase(trimmedValue)) {
                 return c;
             }
         }

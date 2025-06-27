@@ -96,9 +96,10 @@ public enum RegionGroup {
      * ex) "gyodae_sadang" → (RegionGroup.서울, SubRegion(1, "교대/사당", "gyodae_sadang"))
      */
     public static Optional<RegionGroupSubRegionMatch> findBySubRegionCodeName(String codeName) {
+        String trimmedCodeName = codeName.trim();
         for (RegionGroup r : values()) {
             for (SubRegion sub : r.subRegions) {
-                if (sub.getCodeName().equalsIgnoreCase(codeName)) {
+                if (sub.getCodeName().equalsIgnoreCase(trimmedCodeName)) {
                     return Optional.of(new RegionGroupSubRegionMatch(r, sub));
                 }
             }
@@ -107,8 +108,9 @@ public enum RegionGroup {
     }
 
     public static RegionGroup fromCodeName(String codeName) {
+        String trimmedCodeName = codeName.trim();
         for (RegionGroup r : values()) {
-            if (r.codeName.equalsIgnoreCase(codeName)) {
+            if (r.codeName.equalsIgnoreCase(trimmedCodeName)) {
                 return r;
             }
         }

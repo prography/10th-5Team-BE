@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import com.example.cherrydan.common.util.StringUtil;
 
 @Service
 @RequiredArgsConstructor

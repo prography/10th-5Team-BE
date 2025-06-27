@@ -1,7 +1,5 @@
 package com.example.cherrydan.campaign.domain;
 
-import com.example.cherrydan.common.util.StringUtil;
-
 public enum ProductCategory {
     FOOD(1, "식품", "food"),
     LIVING(2, "생활", "living"),
@@ -30,9 +28,9 @@ public enum ProductCategory {
     public String getEngLabel() { return engLabel; }
 
     public static ProductCategory fromString(String value) {
-        String v = StringUtil.normalize(value);
+        String trimmedValue = value.trim();
         for (ProductCategory c : values()) {
-            if (c.engLabel.equalsIgnoreCase(v)) {
+            if (c.engLabel.equalsIgnoreCase(trimmedValue)) {
                 return c;
             }
         }

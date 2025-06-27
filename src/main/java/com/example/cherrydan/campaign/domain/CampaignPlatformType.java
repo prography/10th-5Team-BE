@@ -25,8 +25,9 @@ public enum CampaignPlatformType {
     }
 
     public static CampaignPlatformType fromCode(String code) {
+        String trimmedCode = code.trim();
         for (CampaignPlatformType type : values()) {
-            if (type.code.equalsIgnoreCase(code)) {
+            if (type.code.equalsIgnoreCase(trimmedCode)) {
                 return type;
             }
         }

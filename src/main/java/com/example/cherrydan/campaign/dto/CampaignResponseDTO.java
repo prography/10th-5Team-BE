@@ -65,11 +65,11 @@ public class CampaignResponseDTO {
 
     public static String toPlatformLabel(String code) {
         if (code == null) return null;
-        String normalized = com.example.cherrydan.common.util.StringUtil.normalize(code);
+        String trimmedCode = code.trim();
         try {
-            return com.example.cherrydan.campaign.domain.CampaignPlatformType.fromCode(normalized).getLabel();
+            return com.example.cherrydan.campaign.domain.CampaignPlatformType.fromCode(trimmedCode).getLabel();
         } catch (IllegalArgumentException e) {
-            return normalized;
+            return trimmedCode;
         }
     }
 
