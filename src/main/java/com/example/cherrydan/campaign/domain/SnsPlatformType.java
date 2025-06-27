@@ -28,4 +28,21 @@ public enum SnsPlatformType {
         }
         throw new IllegalArgumentException("Unknown platform code: " + code);
     }
+
+    public String[] getRelatedFields() {
+        switch (this) {
+            case BLOG:
+                return new String[]{"blog", "clip"};
+            case YOUTUBE:
+                return new String[]{"youtube", "shorts"};
+            case INSTAGRAM:
+                return new String[]{"insta", "reels"};
+            case TIKTOK:
+                return new String[]{"tiktok"};
+            case ETC:
+                return new String[]{"etc"};
+            default:
+                return new String[]{};
+        }
+    }
 } 

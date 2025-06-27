@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.LocalCategory;
 import com.example.cherrydan.campaign.domain.ProductCategory;
+import com.example.cherrydan.campaign.domain.SnsPlatformType;
 
 @Service
 @RequiredArgsConstructor
@@ -131,32 +132,21 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
                 List<Predicate> snsPlatformPredicates = new ArrayList<>();
                 for (String snsPlatformItem : snsPlatform) {
                     if (snsPlatformItem != null && !snsPlatformItem.trim().isEmpty() && !snsPlatformItem.trim().equalsIgnoreCase("all")) {
-                        String snsPlatformNorm = snsPlatformItem.trim();
-                        switch (snsPlatformNorm.toLowerCase()) {
-                            case "blog":
-                                snsPlatformPredicates.add(cb.or(
-                                    cb.isTrue(root.get("blog")),
-                                    cb.isTrue(root.get("clip"))
-                                ));
-                                break;
-                            case "youtube":
-                                snsPlatformPredicates.add(cb.or(
-                                    cb.isTrue(root.get("youtube")),
-                                    cb.isTrue(root.get("shorts"))
-                                ));
-                                break;
-                            case "insta":
-                                snsPlatformPredicates.add(cb.or(
-                                    cb.isTrue(root.get("insta")),
-                                    cb.isTrue(root.get("reels"))
-                                ));
-                                break;
-                            case "tiktok":
-                                snsPlatformPredicates.add(cb.isTrue(root.get("tiktok")));
-                                break;
-                            case "etc":
-                                snsPlatformPredicates.add(cb.isTrue(root.get("etc")));
-                                break;
+                        try {
+                            SnsPlatformType snsPlatformType = SnsPlatformType.fromCode(snsPlatformItem);
+                            String[] relatedFields = snsPlatformType.getRelatedFields();
+
+                            if (relatedFields.length == 1) {
+                                snsPlatformPredicates.add(cb.isTrue(root.get(relatedFields[0])));
+                            } else if (relatedFields.length > 1) {
+                                List<Predicate> platformPredicates = new ArrayList<>();
+                                for (String field : relatedFields) {
+                                    platformPredicates.add(cb.isTrue(root.get(field)));
+                                }
+                                snsPlatformPredicates.add(cb.or(platformPredicates.toArray(new Predicate[0])));
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_SNS_NOT_FOUND);
                         }
                     }
                 }
