@@ -7,7 +7,6 @@ import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.domain.RegionGroup;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.CampaignException;
-import com.example.cherrydan.common.util.StringUtil;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,55 +30,89 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public CampaignListResponseDTO searchByCategory(String regionGroup, String subRegion, String local, String product, String reporter, String snsPlatform, String experiencePlatform, Pageable pageable) {
+    public CampaignListResponseDTO searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
 
-            // regionGroup, subRegion 조건 처리
-            boolean hasRegionGroup = regionGroup != null && !regionGroup.isEmpty();
-            boolean hasSubRegion = subRegion != null && !subRegion.isEmpty();
-
-            if (hasRegionGroup) {
-                RegionGroup regionGroupEnum;
-                try {
-                    regionGroupEnum = RegionGroup.fromCodeName(regionGroup);
-                } catch (IllegalArgumentException e) {
-                    throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_GROUP_NOT_FOUND);
+            // regionGroup 조건 처리 (복수 선택 가능)
+            if (regionGroup != null && !regionGroup.isEmpty()) {
+                List<Predicate> regionGroupPredicates = new ArrayList<>();
+                for (String regionGroupItem : regionGroup) {
+                    if (regionGroupItem != null && !regionGroupItem.isEmpty()) {
+                        try {
+                            RegionGroup regionGroupEnum = RegionGroup.fromCodeName(regionGroupItem);
+                            regionGroupPredicates.add(cb.equal(root.get("regionGroup"), regionGroupEnum.getCode()));
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_GROUP_NOT_FOUND);
+                        }
+                    }
                 }
-                predicates.add(cb.equal(root.get("regionGroup"), regionGroupEnum.getCode()));
+                if (!regionGroupPredicates.isEmpty()) {
+                    predicates.add(cb.or(regionGroupPredicates.toArray(new Predicate[0])));
+                }
             }
-            if (hasSubRegion) {
-                RegionGroup.RegionGroupSubRegionMatch match = RegionGroup.findBySubRegionCodeName(subRegion)
-                        .orElseThrow(() -> new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND));
-                predicates.add(cb.equal(root.get("regionDetail"), match.getSubRegion().getCode()));
+
+            // subRegion 조건 처리 (복수 선택 가능)
+            if (subRegion != null && !subRegion.isEmpty()) {
+                List<Predicate> subRegionPredicates = new ArrayList<>();
+                for (String subRegionItem : subRegion) {
+                    if (subRegionItem != null && !subRegionItem.isEmpty()) {
+                        try {
+                            RegionGroup.RegionGroupSubRegionMatch match = RegionGroup.findBySubRegionCodeName(subRegionItem)
+                                    .orElseThrow(() -> new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND));
+                            subRegionPredicates.add(cb.equal(root.get("regionDetail"), match.getSubRegion().getCode()));
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND);
+                        }
+                    }
+                }
+                if (!subRegionPredicates.isEmpty()) {
+                    predicates.add(cb.or(subRegionPredicates.toArray(new Predicate[0])));
+                }
             }
 
             List<Predicate> typePredicates = new ArrayList<>();
 
-            // 지역 카테고리 조건 처리
-            if (local != null && !local.isEmpty() && !local.equalsIgnoreCase("all")) {
-                try {
-                    int code = LocalCategory.fromString(local).getCode();
-                    typePredicates.add(cb.and(
-                        cb.equal(root.get("campaignType"), CampaignType.REGION),
-                        cb.equal(root.get("localCategory"), code)
-                    ));
-                } catch (IllegalArgumentException e) {
-                    throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND);
+            // 지역 카테고리 조건 처리 (복수 선택 가능)
+            if (local != null && !local.isEmpty()) {
+                List<Predicate> localPredicates = new ArrayList<>();
+                for (String localItem : local) {
+                    if (localItem != null && !localItem.isEmpty() && !localItem.equalsIgnoreCase("all")) {
+                        try {
+                            int code = LocalCategory.fromString(localItem).getCode();
+                            localPredicates.add(cb.and(
+                                cb.equal(root.get("campaignType"), CampaignType.REGION),
+                                cb.equal(root.get("localCategory"), code)
+                            ));
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND);
+                        }
+                    }
+                }
+                if (!localPredicates.isEmpty()) {
+                    typePredicates.add(cb.or(localPredicates.toArray(new Predicate[0])));
                 }
             }
 
-            // 제품 카테고리 조건 처리
-            if (product != null && !product.isEmpty() && !product.equalsIgnoreCase("all")) {
-                try {
-                    int code = ProductCategory.fromString(product).getCode();
-                    typePredicates.add(cb.and(
-                        cb.equal(root.get("campaignType"), CampaignType.PRODUCT),
-                        cb.equal(root.get("productCategory"), code)
-                    ));
-                } catch (IllegalArgumentException e) {
-                    throw new CampaignException(ErrorMessage.CAMPAIGN_PRODUCT_CATEGORY_NOT_FOUND);
+            // 제품 카테고리 조건 처리 (복수 선택 가능)
+            if (product != null && !product.isEmpty()) {
+                List<Predicate> productPredicates = new ArrayList<>();
+                for (String productItem : product) {
+                    if (productItem != null && !productItem.isEmpty() && !productItem.equalsIgnoreCase("all")) {
+                        try {
+                            int code = ProductCategory.fromString(productItem).getCode();
+                            productPredicates.add(cb.and(
+                                cb.equal(root.get("campaignType"), CampaignType.PRODUCT),
+                                cb.equal(root.get("productCategory"), code)
+                            ));
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_PRODUCT_CATEGORY_NOT_FOUND);
+                        }
+                    }
+                }
+                if (!productPredicates.isEmpty()) {
+                    typePredicates.add(cb.or(productPredicates.toArray(new Predicate[0])));
                 }
             }
 
@@ -93,41 +126,56 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
                 predicates.add(cb.or(typePredicates.toArray(new Predicate[0])));
             }
 
-            // SNS 플랫폼 조건 처리
-            String snsPlatformNorm = StringUtil.normalize(snsPlatform);
-            if (snsPlatformNorm != null && !snsPlatformNorm.isEmpty() && !snsPlatformNorm.equals("all")) {
-                switch (snsPlatformNorm) {
-                    case "blog":
-                        predicates.add(cb.or(
-                            cb.isTrue(root.get("blog")),
-                            cb.isTrue(root.get("clip"))
-                        ));
-                        break;
-                    case "youtube":
-                        predicates.add(cb.or(
-                            cb.isTrue(root.get("youtube")),
-                            cb.isTrue(root.get("shorts"))
-                        ));
-                        break;
-                    case "insta":
-                        predicates.add(cb.or(
-                            cb.isTrue(root.get("insta")),
-                            cb.isTrue(root.get("reels"))
-                        ));
-                        break;
-                    case "tiktok":
-                        predicates.add(cb.isTrue(root.get("tiktok")));
-                        break;
-                    case "etc":
-                        predicates.add(cb.isTrue(root.get("etc")));
-                        break;
+            // SNS 플랫폼 조건 처리 (복수 선택 가능)
+            if (snsPlatform != null && !snsPlatform.isEmpty()) {
+                List<Predicate> snsPlatformPredicates = new ArrayList<>();
+                for (String snsPlatformItem : snsPlatform) {
+                    if (snsPlatformItem != null && !snsPlatformItem.trim().isEmpty() && !snsPlatformItem.trim().equalsIgnoreCase("all")) {
+                        String snsPlatformNorm = snsPlatformItem.trim();
+                        switch (snsPlatformNorm.toLowerCase()) {
+                            case "blog":
+                                snsPlatformPredicates.add(cb.or(
+                                    cb.isTrue(root.get("blog")),
+                                    cb.isTrue(root.get("clip"))
+                                ));
+                                break;
+                            case "youtube":
+                                snsPlatformPredicates.add(cb.or(
+                                    cb.isTrue(root.get("youtube")),
+                                    cb.isTrue(root.get("shorts"))
+                                ));
+                                break;
+                            case "insta":
+                                snsPlatformPredicates.add(cb.or(
+                                    cb.isTrue(root.get("insta")),
+                                    cb.isTrue(root.get("reels"))
+                                ));
+                                break;
+                            case "tiktok":
+                                snsPlatformPredicates.add(cb.isTrue(root.get("tiktok")));
+                                break;
+                            case "etc":
+                                snsPlatformPredicates.add(cb.isTrue(root.get("etc")));
+                                break;
+                        }
+                    }
+                }
+                if (!snsPlatformPredicates.isEmpty()) {
+                    predicates.add(cb.or(snsPlatformPredicates.toArray(new Predicate[0])));
                 }
             }
 
-            // 체험단 플랫폼 조건 처리
-            String experiencePlatformNorm = StringUtil.normalize(experiencePlatform);
-            if (experiencePlatformNorm != null && !experiencePlatformNorm.isEmpty()) {
-                predicates.add(cb.equal(root.get("sourceSite"), experiencePlatformNorm));
+            // 체험단 플랫폼 조건 처리 (복수 선택 가능)
+            if (experiencePlatform != null && !experiencePlatform.isEmpty()) {
+                List<Predicate> experiencePlatformPredicates = new ArrayList<>();
+                for (String experiencePlatformItem : experiencePlatform) {
+                    if (experiencePlatformItem != null && !experiencePlatformItem.trim().isEmpty()) {
+                        experiencePlatformPredicates.add(cb.equal(root.get("sourceSite"), experiencePlatformItem.trim()));
+                    }
+                }
+                if (!experiencePlatformPredicates.isEmpty()) {
+                    predicates.add(cb.or(experiencePlatformPredicates.toArray(new Predicate[0])));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

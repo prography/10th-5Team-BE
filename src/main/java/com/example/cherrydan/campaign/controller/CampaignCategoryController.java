@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/campaigns/categories")
@@ -31,20 +32,20 @@ public class CampaignCategoryController {
     )
     @GetMapping("/search")
     public CampaignListResponseDTO searchByCategory(
-        @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon 등)")
-        @RequestParam(required = false) String regionGroup,
-        @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등)")
-        @RequestParam(required = false) String subRegion,
-        @Parameter(description = "로컬 카테고리 (예: restaurant, beauty 등)")
-        @RequestParam(required = false) String local,
-        @Parameter(description = "제품 카테고리 (예: food, beauty 등)")
-        @RequestParam(required = false) String product,
+        @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> regionGroup,
+        @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> subRegion,
+        @Parameter(description = "로컬 카테고리 (예: restaurant, beauty 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> local,
+        @Parameter(description = "제품 카테고리 (예: food, beauty 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> product,
         @Parameter(description = "기자단 여부 (예: reporter)")
         @RequestParam(required = false) String reporter,
-        @Parameter(description = "SNS 플랫폼 (예: blog, youtube, insta, tiktok, etc)")
-        @RequestParam(required = false) String snsPlatform,
-        @Parameter(description = "체험단 플랫폼 (예: chvu, revu 등)")
-        @RequestParam(required = false) String experiencePlatform,
+        @Parameter(description = "SNS 플랫폼 (예: blog, youtube, insta, tiktok, etc) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> snsPlatform,
+        @Parameter(description = "체험단 플랫폼 (예: chvu, revu 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> experiencePlatform,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
         @RequestParam(required = false, defaultValue = "popular") String sort,
         @Parameter(description = "페이지 번호", example = "0")
