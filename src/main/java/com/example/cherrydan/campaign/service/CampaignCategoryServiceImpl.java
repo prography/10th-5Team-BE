@@ -18,6 +18,9 @@ import jakarta.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.LocalCategory;
@@ -31,7 +34,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public CampaignListResponseDTO searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, Pageable pageable) {
+    public CampaignListResponseDTO searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, String applyStart, String applyEnd, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -135,7 +138,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
                         try {
                             SnsPlatformType snsPlatformType = SnsPlatformType.fromCode(snsPlatformItem);
                             String[] relatedFields = snsPlatformType.getRelatedFields();
-
+                            
                             if (relatedFields.length == 1) {
                                 snsPlatformPredicates.add(cb.isTrue(root.get(relatedFields[0])));
                             } else if (relatedFields.length > 1) {
@@ -165,6 +168,25 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
                 }
                 if (!experiencePlatformPredicates.isEmpty()) {
                     predicates.add(cb.or(experiencePlatformPredicates.toArray(new Predicate[0])));
+                }
+            }
+
+            // 마감일 조건 처리
+            if (applyStart != null && !applyStart.trim().isEmpty()) {
+                try {
+                    LocalDate startDate = LocalDate.parse(applyStart.trim());
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("applyEnd"), startDate));
+                } catch (DateTimeParseException e) {
+                    throw new CampaignException(ErrorMessage.INVALID_PARAMETER);
+                }
+            }
+            
+            if (applyEnd != null && !applyEnd.trim().isEmpty()) {
+                try {
+                    LocalDate endDate = LocalDate.parse(applyEnd.trim());
+                    predicates.add(cb.lessThanOrEqualTo(root.get("applyEnd"), endDate));
+                } catch (DateTimeParseException e) {
+                    throw new CampaignException(ErrorMessage.INVALID_PARAMETER);
                 }
             }
 

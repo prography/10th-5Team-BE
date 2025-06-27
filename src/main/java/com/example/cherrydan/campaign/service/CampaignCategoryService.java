@@ -13,6 +13,8 @@ public interface CampaignCategoryService {
         String reporter,
         List<String> snsPlatform,
         List<String> experiencePlatform,
+        String applyStart,
+        String applyEnd,
         Pageable pageable
     );
 } 

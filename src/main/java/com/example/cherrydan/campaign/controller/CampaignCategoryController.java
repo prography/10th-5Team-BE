@@ -46,6 +46,10 @@ public class CampaignCategoryController {
         @RequestParam(required = false) List<String> snsPlatform,
         @Parameter(description = "체험단 플랫폼 (예: chvu, revu 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> experiencePlatform,
+        @Parameter(description = "마감일 시작일 (예: 2025-06-01)", example = "2025-06-01")
+        @RequestParam(required = false) String applyStart,
+        @Parameter(description = "마감일 종료일 (예: 2025-06-30)", example = "2025-06-30")
+        @RequestParam(required = false) String applyEnd,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
         @RequestParam(required = false, defaultValue = "popular") String sort,
         @Parameter(description = "페이지 번호", example = "0")
@@ -55,7 +59,7 @@ public class CampaignCategoryController {
     ) {
         Pageable pageable = createPageable(sort, page, size);
 
-        return campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform, pageable);
+        return campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform, applyStart, applyEnd, pageable);
     }
 
     private Pageable createPageable(String sort, int page, int size) {
