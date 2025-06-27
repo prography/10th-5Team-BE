@@ -24,40 +24,40 @@ public enum RegionGroup {
         new SubRegion(18, "기타", "etc")
     )),
     경기_인천(2, "경기/인천", "gyeonggi_incheon", Arrays.asList(
-        new SubRegion(19, "남양주/구리/하남", "namyangju_guri_hanam"),
-        new SubRegion(20, "일산/파주", "ilsan_paju"),
-        new SubRegion(21, "안양/안산/광명", "anam_ansan_gwangmyeong"),
-        new SubRegion(22, "용인/성남/수원", "yongin_sangnam_suwon"),
-        new SubRegion(23, "화성", "hwaseong"),
-        new SubRegion(24, "인천/부천", "incheon_buchon"),
-        new SubRegion(25, "기타", "etc")
+        new SubRegion(30, "남양주/구리/하남", "namyangju_guri_hanam"),
+        new SubRegion(31, "일산/파주", "ilsan_paju"),
+        new SubRegion(32, "안양/안산/광명", "anam_ansan_gwangmyeong"),
+        new SubRegion(33, "용인/성남/수원", "yongin_sangnam_suwon"),
+        new SubRegion(34, "화성", "hwaseong"),
+        new SubRegion(35, "인천/부천", "incheon_buchon"),
+        new SubRegion(36, "기타", "etc")
     )),
     강원(3, "강원", "gangwon", Arrays.asList(
-        new SubRegion(26, "속초/양양/강릉", "sokcho_yangyang_gangryong"),
-        new SubRegion(27, "춘천/홍천/원주", "chuncheon_hongcheon_wonju"),
-        new SubRegion(28, "기타", "etc")
+        new SubRegion(40, "속초/양양/강릉", "sokcho_yangyang_gangryong"),
+        new SubRegion(41, "춘천/홍천/원주", "chuncheon_hongcheon_wonju"),
+        new SubRegion(42, "기타", "etc")
     )),
     대전_충청(4, "대전/충청", "daejeon_chungcheong", Arrays.asList(
-        new SubRegion(29, "대전/세종", "daejeon_sejong"),
-        new SubRegion(30, "충북", "chungbuk"),
-        new SubRegion(31, "충남", "chungnam")
+        new SubRegion(50, "대전/세종", "daejeon_sejong"),
+        new SubRegion(51, "충북", "chungbuk"),
+        new SubRegion(52, "충남", "chungnam")
     )),
     대구_경북(5, "대구/경북", "daegu_gyeongbuk", Arrays.asList(
-        new SubRegion(32, "대구", "daegu"),
-        new SubRegion(33, "경북", "gyeongbuk")
+        new SubRegion(60, "대구", "daegu"),
+        new SubRegion(61, "경북", "gyeongbuk")
     )),
     부산_경남(6, "부산/경남", "busan_gyeongnam", Arrays.asList(
-        new SubRegion(34, "부산", "busan"),
-        new SubRegion(35, "울산", "ulsan"),
-        new SubRegion(36, "경남", "gyeongnam")
+        new SubRegion(70, "부산", "busan"),
+        new SubRegion(71, "울산", "ulsan"),
+        new SubRegion(72, "경남", "gyeongnam")
     )),
     광주_전라(7, "광주/전라", "gwangju_jeolla", Arrays.asList(
-        new SubRegion(37, "광주", "gwangju"),
-        new SubRegion(38, "전북", "jeonbuk"),
-        new SubRegion(39, "전남", "jeonnam")
+        new SubRegion(80, "광주", "gwangju"),
+        new SubRegion(81, "전북", "jeonbuk"),
+        new SubRegion(82, "전남", "jeonnam")
     )),
     제주(8, "제주", "jeju", Arrays.asList(
-        new SubRegion(40, "제주", "jeju")
+        new SubRegion(90, "제주", "jeju")
     ));
 
     private final int code;
