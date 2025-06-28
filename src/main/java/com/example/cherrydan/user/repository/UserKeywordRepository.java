@@ -1,6 +1,8 @@
 package com.example.cherrydan.user.repository;
 
 import com.example.cherrydan.user.domain.UserKeyword;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +13,9 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword, Long> 
     // 활성 사용자만 조회하는 메서드들
     @Query("SELECT uk FROM UserKeyword uk WHERE uk.user.id = :userId AND uk.user.isActive = true")
     List<UserKeyword> findByUserId(@Param("userId") Long userId);
+    
+    @Query("SELECT uk FROM UserKeyword uk WHERE uk.user.id = :userId AND uk.user.isActive = true")
+    Page<UserKeyword> findByUserId(@Param("userId") Long userId, Pageable pageable);
     
     @Query("SELECT uk FROM UserKeyword uk WHERE uk.user.id = :userId AND uk.keyword = :keyword AND uk.user.isActive = true")
     Optional<UserKeyword> findByUserIdAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);

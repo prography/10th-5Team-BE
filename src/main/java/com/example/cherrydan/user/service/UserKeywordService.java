@@ -54,11 +54,11 @@ public class UserKeywordService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserKeyword> getKeywords(Long userId) {
+    public Page<UserKeyword> getKeywords(Long userId, Pageable pageable) {
         // 활성 사용자인지 확인
         userRepository.findActiveById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return userKeywordRepository.findByUserId(userId);
+        return userKeywordRepository.findByUserId(userId, pageable);
     }
 
     @Transactional
@@ -294,16 +294,13 @@ public class UserKeywordService {
         log.info("키워드 맞춤 알림 발송 완료: 총 {}명에게 발송", totalSent);
     }
 
-
     /**
-     * 사용자의 키워드 알림 목록 조회
+     * 사용자의 키워드 알림 목록 조회 (페이지네이션)
      */
     @Transactional(readOnly = true)
-    public List<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(Long userId) {
-        return keywordAlertRepository.findByUserIdAndIsVisibleToUserTrue(userId)
-                .stream()
-                .map(KeywordCampaignAlertResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+    public Page<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(Long userId, Pageable pageable) {
+        return keywordAlertRepository.findByUserIdAndIsVisibleToUserTrue(userId, pageable)
+                .map(KeywordCampaignAlertResponseDTO::fromEntity);
     }
 
     private String getKeywordAlertTitle(int campaignCount) {

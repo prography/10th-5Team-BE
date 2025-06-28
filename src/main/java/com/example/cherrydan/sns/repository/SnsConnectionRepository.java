@@ -3,6 +3,8 @@ package com.example.cherrydan.sns.repository;
 import com.example.cherrydan.sns.domain.SnsConnection;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +21,9 @@ public interface SnsConnectionRepository extends JpaRepository<SnsConnection, Lo
 
     @Query("SELECT sc FROM SnsConnection sc WHERE sc.user = :user AND sc.isActive = true AND sc.user.isActive = true")
     List<SnsConnection> findByUser(@Param("user") User user);
+
+    @Query("SELECT sc FROM SnsConnection sc WHERE sc.user = :user AND sc.isActive = true AND sc.user.isActive = true")
+    Page<SnsConnection> findAllByUserAndIsActiveTrue(@Param("user") User user, Pageable pageable);
 
     @Query("SELECT sc FROM SnsConnection sc WHERE sc.user = :user AND sc.platform = :platform AND sc.user.isActive = true")
     Optional<SnsConnection> findByUserAndPlatformIgnoreActive(@Param("user") User user, @Param("platform") SnsPlatform platform);

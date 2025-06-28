@@ -7,6 +7,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +28,11 @@ public class ActivityController {
         description = "사용자의 활동 알림 목록을 조회합니다. 캠페인 타입에 따라 알림 타입이 구분됩니다."
     )
     @GetMapping("/notifications")
-    public List<ActivityNotificationResponseDTO> getActivityNotifications(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
+    public Page<ActivityNotificationResponseDTO> getActivityNotifications(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
-        return activityService.getActivityNotifications(currentUser.getId());
+        return activityService.getActivityNotifications(currentUser.getId(), pageable);
     }
     
     @Operation(

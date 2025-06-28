@@ -11,6 +11,8 @@ import com.example.cherrydan.sns.repository.SnsConnectionRepository;
 import com.example.cherrydan.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -80,29 +82,22 @@ public class SnsOAuthService {
     /**
      * 사용자의 SNS 연동 목록을 조회합니다.
      * @param user 사용자
+     * @param pageable 페이지네이션 정보
      * @return 연동 목록
      */
     @Transactional(readOnly = true)
-    public List<SnsConnectionResponse> getUserSnsConnections(User user) {
+    public Page<SnsConnectionResponse> getUserSnsConnections(User user, Pageable pageable) {
         // 활성 사용자인지 확인
         if (!user.getIsActive()) {
             throw new SnsException(ErrorMessage.USER_NOT_FOUND);
         }
         
-        Map<SnsPlatform, SnsConnection> connectionMap = snsConnectionRepository.findAllByUser(user)
-                .stream()
-                .filter(SnsConnection::getIsActive)
-                .collect(Collectors.toMap(SnsConnection::getPlatform, c -> c));
-
-        return getAvailablePlatforms()
-                .stream()
-                .map(platform -> {
-                    SnsConnection connection = connectionMap.get(platform);
-                    return connection != null ?
-                            SnsConnectionResponse.from(connection) :
-                            SnsConnectionResponse.notConnected(platform);
-                })
-                .collect(Collectors.toList());
+        Page<SnsConnection> connectionsPage = snsConnectionRepository.findAllByUserAndIsActiveTrue(user, pageable);
+        
+        return connectionsPage.map(connection -> {
+            // 연결된 플랫폼은 실제 연결 정보 반환
+            return SnsConnectionResponse.from(connection);
+        });
     }
     
     /**

@@ -14,6 +14,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -83,10 +86,12 @@ public class UserController {
 
     @Operation(summary = "내 키워드 목록 조회", security = { @SecurityRequirement(name = "bearerAuth") })
     @GetMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<List<UserKeywordResponseDTO>>> getMyKeywords(@AuthenticationPrincipal UserDetailsImpl currentUser) {
+    public ResponseEntity<ApiResponse<Page<UserKeywordResponseDTO>>> getMyKeywords(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        List<UserKeywordResponseDTO> dtos = userKeywordService.getKeywords(currentUser.getId())
-            .stream().map(UserKeywordResponseDTO::fromKeyword).toList();
+        Page<UserKeywordResponseDTO> dtos = userKeywordService.getKeywords(currentUser.getId(), pageable)
+            .map(UserKeywordResponseDTO::fromKeyword);
         return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", dtos));
     }
 

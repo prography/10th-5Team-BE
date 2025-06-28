@@ -4,6 +4,9 @@ import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -38,10 +41,11 @@ public class BookmarkController {
 
     @Operation(summary = "내 북마크 목록 조회", description = "내가 북마크(찜)한 캠페인 목록을 조회합니다.")
     @GetMapping("/bookmarks")
-    public List<BookmarkResponseDTO> getBookmarks(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
+    public Page<BookmarkResponseDTO> getBookmarks(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
-        return bookmarkService.getBookmarks(currentUser.getId());
+        return bookmarkService.getBookmarks(currentUser.getId(), pageable);
     }
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
