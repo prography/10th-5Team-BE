@@ -48,8 +48,6 @@ public class User extends BaseTimeEntity {
     @Column(length = 20)
     private AuthProvider provider;
     
-    private String uuid;
-    
     @Column(name = "last_login")
     private String lastLogin;
 
