@@ -63,7 +63,7 @@ public class InquiryService {
      */
     @Transactional
     public InquiryResponseDTO createInquiry(Long userId, InquiryRequestDTO requestDTO) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         // 카테고리 파싱
