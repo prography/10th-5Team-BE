@@ -16,19 +16,23 @@ import lombok.NoArgsConstructor;
 @Schema(description = "키워드 캠페인 알림 응답 DTO")
 public class KeywordCampaignAlertResponseDTO {
     
+    @Schema(description = "알림 ID", example = "1")
+    private Long id;
+    
     @Schema(description = "매칭된 키워드", example = "뷰티")
     private String keyword;
     
-    @Schema(description = "매칭된 캠페인 수", example = "15")
-    private Integer campaignCount;
+    @Schema(description = "읽음 상태", example = "false")
+    private Boolean isRead;
     
     /**
      * 엔티티를 DTO로 변환
      */
     public static KeywordCampaignAlertResponseDTO fromEntity(KeywordCampaignAlert alert) {
         return KeywordCampaignAlertResponseDTO.builder()
+                .id(alert.getId())
                 .keyword(alert.getKeyword())
-                .campaignCount(alert.getCampaignCount())
+                .isRead(alert.getIsRead())
                 .build();
     }
 } 

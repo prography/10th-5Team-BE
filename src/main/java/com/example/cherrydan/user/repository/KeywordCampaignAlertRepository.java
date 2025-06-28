@@ -12,18 +12,18 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
     /**
      * 사용자의 키워드 알림 목록 조회
      */
-    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isActive = true ORDER BY kca.alertDate DESC")
-    List<KeywordCampaignAlert> findByUserIdAndIsActiveTrue(@Param("userId") Long userId);
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isVisibleToUser = true ORDER BY kca.alertDate DESC")
+    List<KeywordCampaignAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId);
     
     /**
      * 알림 미발송된 키워드 알림들 조회
      */
-    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.isNotified = false AND kca.isActive = true")
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.isNotified = false AND kca.isVisibleToUser = true")
     List<KeywordCampaignAlert> findUnnotifiedAlerts();
 
     /**
      * 사용자와 키워드의 알림 조회 (사용자-키워드 조합당 하나)
      */
-    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.keyword = :keyword AND kca.isActive = true")
-    KeywordCampaignAlert findByUserIdAndKeywordAndIsActiveTrue(@Param("userId") Long userId, @Param("keyword") String keyword);
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.keyword = :keyword AND kca.isVisibleToUser = true")
+    KeywordCampaignAlert findByUserIdAndKeywordAndIsVisibleToUserTrue(@Param("userId") Long userId, @Param("keyword") String keyword);
 } 

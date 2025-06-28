@@ -21,10 +21,6 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_keyword_id", nullable = false)
-    private UserKeyword userKeyword;
-
     @Column(name = "keyword", nullable = false, length = 100)
     private String keyword; // 매칭된 키워드
 
@@ -42,9 +38,13 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
     @Builder.Default
     private Boolean isNotified = false; // 푸시 알림 발송 여부
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_visible_to_user", nullable = false)
     @Builder.Default
-    private Boolean isActive = true;
+    private Boolean isVisibleToUser = true;
+
+    @Column(name = "is_read", nullable = false)
+    @Builder.Default
+    private Boolean isRead = false; // 읽음 상태
 
     /**
      * 알림 단계 업데이트
@@ -59,6 +59,13 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
 
     public void markAsNotified() {
         this.isNotified = true;
+    }
+
+    /**
+     * 읽음 처리
+     */
+    public void markAsRead() {
+        this.isRead = true;
     }
 
     /**
