@@ -34,6 +34,13 @@ public class User extends BaseTimeEntity {
     
     private String email;
     
+    @Column(name = "birth_year")
+    private Integer birthYear;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
+    
     @Column(name = "social_id")
     private String socialId;
     
