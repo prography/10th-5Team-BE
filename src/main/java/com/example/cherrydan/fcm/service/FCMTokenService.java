@@ -55,6 +55,7 @@ public class FCMTokenService {
                 UserFCMToken newToken = UserFCMToken.builder()
                         .userId(userId)
                         .fcmToken(fcmToken)
+                        .isActive(true)
                         .deviceType(deviceType)
                         .build();
                 
