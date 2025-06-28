@@ -190,5 +190,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError()
                 .body(ApiResponse.serverError("예상치 못한 오류가 발생했습니다."));
     }
-
 }
