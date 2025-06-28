@@ -35,7 +35,7 @@ public class FCMTokenService {
         try {
             Long userId = request.getUserId();
             String fcmToken = request.getFcmToken();
-            DeviceType deviceType = DeviceType.fromString(request.getDeviceType());
+            DeviceType deviceType = DeviceType.from(request.getDeviceType());
             
             if (!isValidTokenRequest(request)) {
                 throw new FCMException(ErrorMessage.FCM_TOKEN_INVALID_REQUEST);
@@ -76,69 +76,6 @@ public class FCMTokenService {
     }
     
     /**
-     * 사용자의 모든 FCM 토큰 조회
-     */
-    public List<UserFCMToken> getUserTokens(Long userId) {
-        return tokenRepository.findActiveTokensByUserId(userId);
-    }
-
-    /**
-     * 특정 FCM 토큰 삭제 (비활성화)
-     */
-    @Transactional
-    public void deleteToken(Long userId, String fcmToken) {
-        try {
-            Optional<UserFCMToken> tokenOptional = tokenRepository.findByFcmToken(fcmToken);
-
-            if (tokenOptional.isEmpty()) {
-                throw new FCMException(ErrorMessage.FCM_TOKEN_NOT_FOUND);
-            }
-
-            UserFCMToken token = tokenOptional.get();
-
-            if (!token.getUserId().equals(userId)) {
-                log.warn("토큰 삭제 권한 없음 - 요청자: {}, 토큰 소유자: {}", userId, token.getUserId());
-                throw new FCMException(ErrorMessage.FCM_TOKEN_ACCESS_DENIED);
-            }
-
-            tokenRepository.delete(token);
-
-            log.info("FCM 토큰 삭제 - 사용자: {}, 디바이스: {}", userId, token.getDeviceType());
-
-        } catch (FCMException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("FCM 토큰 삭제 실패: {}", e.getMessage());
-            throw new FCMException(ErrorMessage.FCM_TOKEN_DELETE_FAILED);
-        }
-    }
-    
-    /**
-     * 사용자의 모든 FCM 토큰 삭제
-     */
-    @Transactional
-    public void deleteAllUserTokens(Long userId) {
-        try {
-            tokenRepository.deactivateAllTokensByUserId(userId);
-            
-            log.info("사용자 {}의 모든 FCM 토큰 삭제", userId);
-            
-        } catch (Exception e) {
-            log.error("사용자 {}의 모든 FCM 토큰 삭제 실패: {}", userId, e.getMessage());
-            throw new FCMException(ErrorMessage.FCM_TOKEN_DELETE_FAILED);
-        }
-    }
-    
-    /**
-     * 토큰 유효성 검증
-     */
-    public boolean isTokenValid(String fcmToken) {
-        return tokenRepository.findByFcmToken(fcmToken)
-                .map(token -> token.getIsActive())
-                .orElse(false);
-    }
-    
-    /**
      * 오래된 토큰 정리 (스케줄링)
      * 90일 이상 사용되지 않은 토큰들을 비활성화
      */
@@ -162,12 +99,5 @@ public class FCMTokenService {
                request.getUserId() != null &&
                request.getFcmToken() != null && !request.getFcmToken().trim().isEmpty() &&
                request.getDeviceType() != null && !request.getDeviceType().trim().isEmpty();
-    }
-    
-    /**
-     * 사용자 토큰 존재 여부 확인
-     */
-    public boolean hasActiveTokens(Long userId) {
-        return tokenRepository.existsByUserIdAndIsActiveTrue(userId);
     }
 }

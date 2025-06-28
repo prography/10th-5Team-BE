@@ -10,7 +10,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class FCMTokenRequest {
-    
     private Long userId;
     private String fcmToken;
     private String deviceType; // "android" or "ios"

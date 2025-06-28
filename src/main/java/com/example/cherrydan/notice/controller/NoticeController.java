@@ -15,9 +15,9 @@ import java.util.List;
 import com.example.cherrydan.notice.dto.NoticeBannerResponseDTO;
 
 @RestController
-@RequestMapping("/api/notices")
+@RequestMapping("/api/noticeboard")
 @RequiredArgsConstructor
-@Tag(name = "Notice", description = "공지사항 관련 API")
+@Tag(name = "NoticeBoard", description = "공지사항 게시판 관련 API")
 public class NoticeController {
 
     private final NoticeService noticeService;
@@ -41,9 +41,9 @@ public class NoticeController {
     @PostMapping("/{id}/empathy")
     public ResponseEntity<ApiResponse<NoticeResponseDTO>> toggleEmpathy(
             @PathVariable("id") Long id,
-            @RequestParam("action") String action) {
-        NoticeResponseDTO notice = noticeService.toggleEmpathy(id, action);
-        String message = "up".equals(action) ? "공감이 증가되었습니다." : "공감이 감소되었습니다.";
+            @RequestParam("isEmpathy") boolean isEmpathy) {
+        NoticeResponseDTO notice = noticeService.toggleEmpathy(id, isEmpathy);
+        String message = isEmpathy ? "공감이 증가되었습니다." : "공감이 감소되었습니다.";
         return ResponseEntity.ok(ApiResponse.success(message, notice));
     }
 

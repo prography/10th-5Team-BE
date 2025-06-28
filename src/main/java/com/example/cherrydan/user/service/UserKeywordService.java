@@ -69,6 +69,19 @@ public class UserKeywordService {
         userKeywordRepository.deleteByUserIdAndKeyword(userId, keyword);
     }
 
+    @Transactional
+    public void removeKeywordById(Long userId, Long keywordId) {
+        // 활성 사용자인지 확인
+        userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        // 키워드가 해당 사용자의 것인지 확인 후 삭제
+        UserKeyword userKeyword = userKeywordRepository.findByIdAndUserId(keywordId, userId)
+                .orElseThrow(() -> new IllegalArgumentException("키워드를 찾을 수 없거나 권한이 없습니다."));
+        
+        userKeywordRepository.delete(userKeyword);
+    }
+
     /**
      * 키워드 맞춤 캠페인 알림 대상 업데이트 (10개와 100개를 넘는 순간에만)
      * 새벽 5시에 배치 처리로 실행
@@ -164,7 +177,7 @@ public class UserKeywordService {
     private boolean shouldCreateKeywordAlert(UserKeyword userKeyword, String keyword, int campaignCount, LocalDate today) {
         // 기존 알림 조회
         KeywordCampaignAlert existingAlert = keywordAlertRepository
-                .findByUserIdAndKeywordAndIsActiveTrue(userKeyword.getUser().getId(), keyword);
+                .findByUserIdAndKeywordAndIsVisibleToUserTrue(userKeyword.getUser().getId(), keyword);
         
         if (existingAlert == null) {
             // 첫 번째 알림
@@ -189,7 +202,7 @@ public class UserKeywordService {
     private KeywordCampaignAlert createKeywordAlertEntity(UserKeyword userKeyword, String keyword, int campaignCount, LocalDate today) {
         // 기존 알림 조회
         KeywordCampaignAlert existingAlert = keywordAlertRepository
-                .findByUserIdAndKeywordAndIsActiveTrue(userKeyword.getUser().getId(), keyword);
+                .findByUserIdAndKeywordAndIsVisibleToUserTrue(userKeyword.getUser().getId(), keyword);
         
         if (existingAlert != null) {
             // 기존 알림 업데이트
@@ -200,13 +213,12 @@ public class UserKeywordService {
             int alertStage = campaignCount >= 100 ? 2 : 1;
             return KeywordCampaignAlert.builder()
                     .user(userKeyword.getUser())
-                    .userKeyword(userKeyword)
                     .keyword(keyword)
                     .campaignCount(campaignCount)
                     .alertDate(today)
                     .alertStage(alertStage)
                     .isNotified(false)
-                    .isActive(true)
+                    .isVisibleToUser(true)
                     .build();
         }
     }
@@ -255,13 +267,6 @@ public class UserKeywordService {
                                 "action", "open_personalized_page"
                         ))
                         .priority("high")
-                        .androidIcon("ic_keyword")
-                        .androidColor("#4CAF50")
-                        .androidSound("default")
-                        .iosSound("default")
-                        .iosBadge(1)
-                        .iosCategory("KEYWORD")
-                        .ttl(86400L) // 24시간
                         .build();
                 
                 notificationService.sendNotificationToUser(userId, notificationRequest);
@@ -295,7 +300,7 @@ public class UserKeywordService {
      */
     @Transactional(readOnly = true)
     public List<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(Long userId) {
-        return keywordAlertRepository.findByUserIdAndIsActiveTrue(userId)
+        return keywordAlertRepository.findByUserIdAndIsVisibleToUserTrue(userId)
                 .stream()
                 .map(KeywordCampaignAlertResponseDTO::fromEntity)
                 .collect(Collectors.toList());
@@ -358,15 +363,45 @@ public class UserKeywordService {
     }
 
     /**
-     * 맞춤형 알림 개별 삭제
+     * 맞춤형 알림 삭제 (배열)
      */
     @Transactional
-    public void deleteKeywordAlert(Long userId, Long alertId) {
-        KeywordCampaignAlert alert = keywordAlertRepository.findById(alertId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
-        if (!alert.getUser().getId().equals(userId)) {
-            throw new SecurityException("본인 알림만 삭제할 수 있습니다.");
+    public void deleteKeywordAlert(Long userId, List<Long> alertIds) {
+        List<KeywordCampaignAlert> alerts = keywordAlertRepository.findAllById(alertIds);
+        
+        // 모든 알림이 해당 사용자의 것인지 확인
+        for (KeywordCampaignAlert alert : alerts) {
+            if (!alert.getUser().getId().equals(userId)) {
+                throw new SecurityException("본인 알림만 삭제할 수 있습니다.");
+            }
         }
-        keywordAlertRepository.delete(alert);
+        
+        keywordAlertRepository.deleteAll(alerts);
+        log.info("키워드 알림 삭제 완료: userId={}, count={}", userId, alertIds.size());
+    }
+
+    /**
+     * 키워드 알림 읽음 처리 (배열)
+     */
+    @Transactional
+    public void markKeywordAlertsAsRead(Long userId, List<Long> alertIds) {
+        // 활성 사용자인지 확인
+        userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        
+        List<KeywordCampaignAlert> alerts = keywordAlertRepository.findAllById(alertIds);
+        
+        // 모든 알림이 해당 사용자의 것인지 확인
+        for (KeywordCampaignAlert alert : alerts) {
+            if (!alert.getUser().getId().equals(userId)) {
+                throw new SecurityException("본인의 알림만 읽음 처리할 수 있습니다.");
+            }
+        }
+        
+        // 읽음 처리
+        alerts.forEach(KeywordCampaignAlert::markAsRead);
+        keywordAlertRepository.saveAll(alerts);
+        
+        log.info("키워드 알림 일괄 읽음 처리 완료: userId={}, count={}", userId, alertIds.size());
     }
 } 

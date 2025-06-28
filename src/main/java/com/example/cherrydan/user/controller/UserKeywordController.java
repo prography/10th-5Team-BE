@@ -59,8 +59,8 @@ public class UserKeywordController {
     @DeleteMapping("/alerts/{alertId}")
     public void deleteKeywordAlert(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PathVariable Long alertId
+            @RequestBody List<Long> alertIds
     ) {
-        userKeywordService.deleteKeywordAlert(currentUser.getId(), alertId);
+        userKeywordService.deleteKeywordAlert(currentUser.getId(), alertIds);
     }
 } 

@@ -20,16 +20,13 @@ public class ActivityNotificationResponseDTO {
     private String notificationType;
     
     @Schema(description = "캠페인 제목", example = "체리단 카페 방문 후기 작성")
-    private String title;
+    private String notificationBoldText;
     
     @Schema(description = "전체 알림 텍스트", example = "D-3 [양주] 리치마트 양주점_피드&릴스 방문일이 3일 남았습니다.")
     private String fullText;
     
     @Schema(description = "읽음 여부 (false: 읽지 않음, true: 읽음)", example = "false")
     private Boolean isRead;
-    
-    @Schema(description = "마감까지 남은 일수", example = "3")
-    private Integer daysRemaining;
     
     @Schema(description = "오늘 날짜", example = "2025-06-29")
     private LocalDate today;
@@ -50,10 +47,9 @@ public class ActivityNotificationResponseDTO {
         return ActivityNotificationResponseDTO.builder()
                 .campaignStatusId(campaignStatus.getId())
                 .notificationType(notificationType)
-                .title(campaign.getTitle())
+                .notificationBoldText(campaign.getTitle())
                 .fullText(fullText)
                 .isRead(campaignStatus.getIsRead())
-                .daysRemaining(daysRemaining)
                 .today(LocalDate.now())
                 .build();
     }

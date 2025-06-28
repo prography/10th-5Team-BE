@@ -15,14 +15,14 @@ import java.util.List;
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
 
-    @Query("SELECT n FROM Notice n WHERE n.isActive = true ORDER BY n.isPinned DESC, n.publishedAt DESC")
-    Page<Notice> findActiveNoticesOrderByPinnedAndPublishedAt(Pageable pageable);
+    @Query("SELECT n FROM Notice n WHERE n.isActive = true ORDER BY n.isHot DESC, n.publishedAt DESC")
+    Page<Notice> findActiveNoticesOrderByHotAndPublishedAt(Pageable pageable);
 
-    @Query("SELECT n FROM Notice n WHERE n.isActive = true AND n.category = :category ORDER BY n.isPinned DESC, n.publishedAt DESC")
-    Page<Notice> findActiveNoticesByCategoryOrderByPinnedAndPublishedAt(@Param("category") NoticeCategory category, Pageable pageable);
+    @Query("SELECT n FROM Notice n WHERE n.isActive = true AND n.category = :category ORDER BY n.isHot DESC, n.publishedAt DESC")
+    Page<Notice> findActiveNoticesByCategoryOrderByHotAndPublishedAt(@Param("category") NoticeCategory category, Pageable pageable);
 
-    @Query("SELECT n FROM Notice n WHERE n.isActive = true AND n.isPinned = true ORDER BY n.publishedAt DESC")
-    List<Notice> findActivePinnedNotices();
+    @Query("SELECT n FROM Notice n WHERE n.isActive = true AND n.isHot = true ORDER BY n.publishedAt DESC")
+    List<Notice> findActiveHotNotices();
 
     @Modifying
     @Query("UPDATE Notice n SET n.viewCount = n.viewCount + 1 WHERE n.id = :id")

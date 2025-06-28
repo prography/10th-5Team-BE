@@ -29,7 +29,7 @@ public class NoticeService {
      * 활성화된 공지사항 목록 조회 (고정글 우선, 발행일 순)
      */
     public Page<NoticeResponseDTO> getActiveNotices(Pageable pageable) {
-        Page<Notice> notices = noticeRepository.findActiveNoticesOrderByPinnedAndPublishedAt(pageable);
+        Page<Notice> notices = noticeRepository.findActiveNoticesOrderByHotAndPublishedAt(pageable);
 
         log.info("공지사항 목록 조회 완료: totalElements={}", notices.getTotalElements());
 
@@ -40,7 +40,7 @@ public class NoticeService {
      * 카테고리별 공지사항 목록 조회
      */
     public Page<NoticeResponseDTO> getActiveNoticesByCategory(NoticeCategory category, Pageable pageable) {
-        Page<Notice> notices = noticeRepository.findActiveNoticesByCategoryOrderByPinnedAndPublishedAt(category, pageable);
+        Page<Notice> notices = noticeRepository.findActiveNoticesByCategoryOrderByHotAndPublishedAt(category, pageable);
 
         log.info("카테고리별 공지사항 조회 완료: category={}, totalElements={}",
                 category.getDescription(), notices.getTotalElements());
@@ -72,7 +72,7 @@ public class NoticeService {
      * 공감 버튼 클릭 시 공감 지수 증가/감소
      */
     @Transactional
-    public NoticeResponseDTO toggleEmpathy(Long id, String action) {
+    public NoticeResponseDTO toggleEmpathy(Long id, boolean isEmpathy) {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new NoticeException(ErrorMessage.NOTICE_NOT_FOUND));
 
@@ -80,16 +80,14 @@ public class NoticeService {
             throw new NoticeException(ErrorMessage.NOTICE_INACTIVE);
         }
 
-        if ("up".equals(action)) {
+        if (isEmpathy) {
             noticeRepository.incrementEmpathyCount(id);
             log.info("공지사항 공감 지수 증가 완료: id={}, title={}, empathyCount={}",
                     id, notice.getTitle(), notice.getEmpathyCount() + 1);
-        } else if ("down".equals(action)) {
+        } else {
             noticeRepository.decrementEmpathyCount(id);
             log.info("공지사항 공감 지수 감소 완료: id={}, title={}, empathyCount={}",
                     id, notice.getTitle(), notice.getEmpathyCount() - 1);
-        } else {
-            throw new NoticeException(ErrorMessage.INVALID_ACTION);
         }
 
         // 업데이트된 공지사항 조회
@@ -100,14 +98,14 @@ public class NoticeService {
     }
 
     /**
-     * 고정된 공지사항 목록 조회
+     * 핫한 공지사항 목록 조회
      */
-    public List<NoticeResponseDTO> getPinnedNotices() {
-        List<Notice> pinnedNotices = noticeRepository.findActivePinnedNotices();
+    public List<NoticeResponseDTO> getHotNotices() {
+        List<Notice> hotNotices = noticeRepository.findActiveHotNotices();
 
-        log.info("고정 공지사항 조회 완료: count={}", pinnedNotices.size());
+        log.info("핫 공지사항 조회 완료: count={}", hotNotices.size());
 
-        return pinnedNotices.stream()
+        return hotNotices.stream()
                 .map(NoticeResponseDTO::from)
                 .collect(Collectors.toList());
     }

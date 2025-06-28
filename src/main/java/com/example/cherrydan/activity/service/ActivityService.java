@@ -11,12 +11,8 @@ public interface ActivityService {
     List<ActivityNotificationResponseDTO> getActivityNotifications(Long userId);
     
     /**
-     * 활동 알림 읽음 처리 (단일)
-     */
-    void markNotificationAsRead(Long userId, Long campaignStatusId);
-    
-    /**
-     * 활동 알림 읽음 처리 (여러개)
+     * 활동 알림 읽음 처리 (배열)
+     * 1개 또는 여러개 모두 배열로 처리
      */
     void markNotificationsAsRead(Long userId, List<Long> campaignStatusIds);
     
@@ -26,7 +22,8 @@ public interface ActivityService {
     void sendActivityNotifications();
 
     /**
-     * 활동 알림(캠페인 상태) 개별 삭제 (isActive = false)
+     * 활동 알림(캠페인 상태) 삭제 (isActive = false)
+     * 1개 또는 여러개 모두 배열로 처리
      */
-    void deleteActivityAlert(Long userId, Long alertId);
+    void deleteActivityAlerts(Long userId, List<Long> alertIds);
 } 

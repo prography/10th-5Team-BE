@@ -1,12 +1,14 @@
 package com.example.cherrydan.oauth.controller;
 
 import com.example.cherrydan.common.response.ApiResponse;
+
 import com.example.cherrydan.oauth.dto.LoginResponse;
 import com.example.cherrydan.oauth.dto.NaverLoginRequest;
 import com.example.cherrydan.oauth.dto.TokenDTO;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.oauth2.CustomOAuth2UserService;
 import com.example.cherrydan.oauth.security.oauth2.user.NaverOAuth2UserInfo;
+
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
 import com.example.cherrydan.oauth.service.NaverOAuthService;
 import com.example.cherrydan.user.domain.User;
@@ -88,10 +90,12 @@ public class NaverAuthController {
         OAuth2UserInfo oAuth2UserInfo = new NaverOAuth2UserInfo(naverUserInfo);
         
         // 3. 사용자 조회 또는 생성
-        User user = customOAuth2UserService.processNaverUser(oAuth2UserInfo);
+        User user = customOAuth2UserService.processNaverUser(oAuth2UserInfo, request.getFcmToken(), request.getDeviceType());
         
         // 4. Access Token과 Refresh Token 생성
         TokenDTO tokenDTO = jwtTokenProvider.generateTokens(user.getId(), user.getEmail());
+        
+
         
         log.info("Naver 모바일 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
         

@@ -32,20 +32,8 @@ public class ActivityController {
     }
     
     @Operation(
-        summary = "활동 알림 읽음 처리 (단일)",
-        description = "특정 활동 알림을 읽음 처리합니다."
-    )
-    @PutMapping("/notifications/{campaignStatusId}/read")
-    public void markNotificationAsRead(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PathVariable Long campaignStatusId
-    ) {
-        activityService.markNotificationAsRead(currentUser.getId(), campaignStatusId);
-    }
-    
-    @Operation(
-        summary = "활동 알림 읽음 처리 (일괄)",
-        description = "여러 활동 알림을 일괄로 읽음 처리합니다."
+        summary = "활동 알림 읽음 처리",
+        description = "활동 알림을 읽음 처리합니다. 1개 또는 여러개 모두 배열로 전달하세요."
     )
     @PutMapping("/notifications/read")
     public void markNotificationsAsRead(
@@ -81,11 +69,15 @@ public class ActivityController {
         activityService.sendActivityNotifications();
     }
 
-    @DeleteMapping("/alerts/{alertId}")
-    public void deleteActivityAlert(
+    @Operation(
+        summary = "활동 알림 삭제",
+        description = "활동 알림을 삭제합니다. 1개 또는 여러개 모두 배열로 전달하세요."
+    )
+    @DeleteMapping("/alerts")
+    public void deleteActivityAlerts(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PathVariable Long alertId
+            @RequestBody List<Long> alertIds
     ) {
-        activityService.deleteActivityAlert(currentUser.getId(), alertId);
+        activityService.deleteActivityAlerts(currentUser.getId(), alertIds);
     }
 } 
