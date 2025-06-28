@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Apple 테스트 경로 허용
-                        .requestMatchers("/api/auth/apple/**").permitAll()
+                        .requestMatchers("/api/auth/apple/**","/api/auth/naver/**","/api/auth/kakao/**","/api/auth/google/**").permitAll()
                         .requestMatchers("/apple-login-test.html").permitAll()
                         // OAuth2 관련 경로
                         .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
