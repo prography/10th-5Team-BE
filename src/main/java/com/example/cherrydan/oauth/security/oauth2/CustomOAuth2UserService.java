@@ -105,6 +105,36 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
+     * Kakao 사용자 정보 처리 (액세스 토큰 기반)
+     */
+    public User processKakaoUser(OAuth2UserInfo kakaoUserInfo) {
+        try {
+            validateEmail(kakaoUserInfo);
+            return findOrCreateUser(kakaoUserInfo, "kakao");
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Kakao 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Naver 사용자 정보 처리 (액세스 토큰 기반)
+     */
+    public User processNaverUser(OAuth2UserInfo naverUserInfo) {
+        try {
+            validateEmail(naverUserInfo);
+            return findOrCreateUser(naverUserInfo, "naver");
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Naver 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * 이메일 유효성 검증
      * Validate email from OAuth2 provider
      */

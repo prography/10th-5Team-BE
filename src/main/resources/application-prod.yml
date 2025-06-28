@@ -21,7 +21,7 @@ spring:
       client:
         registration:
           kakao:
-            client-id: ${KAKAO_CLIENT_ID}
+            client-id: ${KAKAO_CLIENT_ID} # 웹용 클라이언트 ID
             client-secret: ${KAKAO_CLIENT_SECRET}
             redirect-uri: "https://cherrydan.com/api/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
@@ -30,7 +30,7 @@ spring:
               - profile_nickname
               - account_email
           naver:
-            client-id: ${NAVER_CLIENT_ID}
+            client-id: ${NAVER_CLIENT_ID} # 웹용 클라이언트 ID
             client-secret: ${NAVER_CLIENT_SECRET}
             redirect-uri: "https://cherrydan.com/api/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
