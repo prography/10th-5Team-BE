@@ -35,11 +35,9 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(RefreshTokenDTO refreshToken) {
-        if (refreshToken != null) {
-            refreshTokenService.deleteRefreshToken(refreshToken.getRefreshToken());
-            log.info("로그아웃 완료");
-        }
+    public void logout(Long userId) {
+        refreshTokenService.deleteRefreshTokenByUserId(userId);
+        log.info("사용자 {} 로그아웃 완료", userId);
     }
 
     // 공통 검증 로직
