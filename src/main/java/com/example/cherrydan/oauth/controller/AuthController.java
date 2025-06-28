@@ -13,6 +13,7 @@ import com.example.cherrydan.oauth.service.AuthService;
 import com.example.cherrydan.oauth.service.RefreshTokenService;
 import com.example.cherrydan.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -31,23 +32,19 @@ import java.util.Optional;
 @Tag(name = "Authentication", description = "인증 관련 API")
 public class AuthController {
 
-    private final AuthService authService; // RefreshTokenService 의존성 제거
+    private final AuthService authService;
 
     @PostMapping("/refresh")
     public ResponseEntity<ApiResponse<AccessTokenDTO>> refresh(@RequestBody RefreshTokenDTO refreshToken) {
-
         AccessTokenDTO newAccessToken = authService.refreshToken(refreshToken);
-
         return ResponseEntity.ok(ApiResponse.success("토큰 갱신이 완료되었습니다.", newAccessToken));
     }
 
-    @Operation(summary = "로그아웃 처리", description = "리프레쉬 토큰 받아서 삭제후 200 반환")
+    @Operation(summary = "로그아웃 처리", description = "현재 로그인한 사용자의 리프레쉬 토큰을 삭제합니다")
     @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(@RequestBody RefreshTokenDTO refreshToken){
-        // AuthService에서 토큰 삭제 처리
-        authService.logout(refreshToken);
-
+    public ResponseEntity<ApiResponse<Void>> logout(@Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser){
+        // 현재 사용자의 토큰 삭제 처리
+        authService.logout(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success());
     }
 }
-
