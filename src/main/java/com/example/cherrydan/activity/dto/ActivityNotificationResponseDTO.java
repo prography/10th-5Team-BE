@@ -28,8 +28,8 @@ public class ActivityNotificationResponseDTO {
     @Schema(description = "읽음 여부 (false: 읽지 않음, true: 읽음)", example = "false")
     private Boolean isRead;
     
-    @Schema(description = "오늘 날짜", example = "2025-06-29")
-    private LocalDate today;
+    @Schema(description = "알림 생성 날짜", example = "2025-06-29")
+    private LocalDate createdDate;
     
     /**
      * CampaignStatus를 ActivityNotificationResponseDTO로 변환
@@ -50,7 +50,9 @@ public class ActivityNotificationResponseDTO {
                 .notificationBoldText(campaign.getTitle())
                 .fullText(fullText)
                 .isRead(campaignStatus.getIsRead())
-                .today(LocalDate.now())
+                .createdDate(campaignStatus.getActivityNotifiedAt() != null ? 
+                    campaignStatus.getActivityNotifiedAt().toLocalDate() : 
+                    campaignStatus.getCreatedAt().toLocalDate())
                 .build();
     }
     

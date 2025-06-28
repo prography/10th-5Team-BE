@@ -5,6 +5,7 @@ import com.example.cherrydan.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
@@ -40,6 +41,12 @@ public class CampaignStatus extends BaseTimeEntity {
     @Builder.Default
     @Column(name = "activity_notified")
     private Boolean activityNotified = false;
+
+    /**
+     * 활동 알림 발송 시각
+     */
+    @Column(name = "activity_notified_at")
+    private LocalDateTime activityNotifiedAt;
 
     /**
      * 활동 알림 읽음 처리 여부
@@ -93,6 +100,7 @@ public class CampaignStatus extends BaseTimeEntity {
      */
     public void markActivityAsNotified() {
         this.activityNotified = true;
+        this.activityNotifiedAt = LocalDateTime.now();
     }
     
     /**

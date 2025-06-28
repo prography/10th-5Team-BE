@@ -53,14 +53,26 @@ public class UserKeywordController {
     }
 
     @Operation(
-        summary = "맞춤형 알림 개별 삭제",
-        description = "특정 맞춤형 알림을 삭제합니다."
+        summary = "맞춤형 알림 삭제",
+        description = "선택한 맞춤형 알림들을 삭제합니다."
     )
-    @DeleteMapping("/alerts/{alertId}")
+    @DeleteMapping("/alerts")
     public void deleteKeywordAlert(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @RequestBody List<Long> alertIds
     ) {
         userKeywordService.deleteKeywordAlert(currentUser.getId(), alertIds);
+    }
+
+    @Operation(
+        summary = "키워드 알림 읽음 처리",
+        description = "선택한 키워드 알림들을 읽음 상태로 변경합니다."
+    )
+    @PutMapping("/alerts/read")
+    public void markKeywordAlertsAsRead(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody List<Long> alertIds
+    ) {
+        userKeywordService.markKeywordAlertsAsRead(currentUser.getId(), alertIds);
     }
 } 
