@@ -1,6 +1,6 @@
 package com.example.cherrydan.activity.service;
 
-import com.example.cherrydan.activity.dto.ActivityCampaignResponseDTO;
+import com.example.cherrydan.activity.dto.ActivityNotificationResponseDTO;
 import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
 import com.example.cherrydan.fcm.service.NotificationService;
@@ -27,14 +27,51 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ActivityCampaignResponseDTO> getActivityCampaigns(Long userId) {
-        // 사용자의 활동 알림 내역 중 isVisibleToUser=true인 것만 조회
+    public List<ActivityNotificationResponseDTO> getActivityNotifications(Long userId) {
+        // 사용자의 활동 알림 목록 조회
+        // - isVisibleToUser=true인 것만 조회 (삭제되지 않은 것)
+        // - 읽음/안읽음 상관없이 모두 보여줌 (isRead 필드로 구분)
         List<CampaignStatus> activityStatuses = campaignStatusRepository
                 .findVisibleActivityByUserId(userId);
         return activityStatuses.stream()
                 .filter(CampaignStatus::isActivityEligible) // 3일 이내 마감인 것만 필터링
-                .map(ActivityCampaignResponseDTO::fromEntity)
+                .map(ActivityNotificationResponseDTO::fromEntity)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public void markNotificationAsRead(Long userId, Long campaignStatusId) {
+        CampaignStatus campaignStatus = campaignStatusRepository.findById(campaignStatusId)
+                .orElseThrow(() -> new IllegalArgumentException("캠페인 상태를 찾을 수 없습니다."));
+        
+        // 본인의 캠페인 상태인지 확인
+        if (!campaignStatus.getUser().getId().equals(userId)) {
+            throw new SecurityException("본인의 알림만 읽음 처리할 수 있습니다.");
+        }
+        
+        campaignStatus.markAsRead();
+        campaignStatusRepository.save(campaignStatus);
+        log.info("활동 알림 읽음 처리 완료: userId={}, campaignStatusId={}", userId, campaignStatusId);
+    }
+
+    @Override
+    @Transactional
+    public void markNotificationsAsRead(Long userId, List<Long> campaignStatusIds) {
+        List<CampaignStatus> campaignStatuses = campaignStatusRepository.findAllById(campaignStatusIds);
+        
+        // 모든 캠페인 상태가 해당 사용자의 것인지 확인
+        for (CampaignStatus campaignStatus : campaignStatuses) {
+            if (!campaignStatus.getUser().getId().equals(userId)) {
+                throw new SecurityException("본인의 알림만 읽음 처리할 수 있습니다.");
+            }
+        }
+        
+        // 읽음 처리
+        campaignStatuses.forEach(CampaignStatus::markAsRead);
+        campaignStatusRepository.saveAll(campaignStatuses);
+        
+        log.info("활동 알림 일괄 읽음 처리 완료: userId={}, count={}", userId, campaignStatusIds.size());
     }
 
     @Override

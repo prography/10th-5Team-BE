@@ -1,14 +1,24 @@
 package com.example.cherrydan.activity.service;
 
-import com.example.cherrydan.activity.dto.ActivityCampaignResponseDTO;
+import com.example.cherrydan.activity.dto.ActivityNotificationResponseDTO;
 import java.util.List;
 
 public interface ActivityService {
     
     /**
-     * 사용자의 활동 캠페인 목록 조회 (3일 이내 마감)
+     * 사용자의 활동 알림 목록 조회
      */
-    List<ActivityCampaignResponseDTO> getActivityCampaigns(Long userId);
+    List<ActivityNotificationResponseDTO> getActivityNotifications(Long userId);
+    
+    /**
+     * 활동 알림 읽음 처리 (단일)
+     */
+    void markNotificationAsRead(Long userId, Long campaignStatusId);
+    
+    /**
+     * 활동 알림 읽음 처리 (여러개)
+     */
+    void markNotificationsAsRead(Long userId, List<Long> campaignStatusIds);
     
     /**
      * 활동 알림 발송
