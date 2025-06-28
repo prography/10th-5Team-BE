@@ -48,7 +48,7 @@ public class GoogleAuthController {
                     
                     **iOS (Swift) 요청 예시:**
                     ```swift
-                    guard let url = URL(string: "cherrydan.com/api/auth/google/mobile") else { return }
+                    guard let url = URL(string: "cherrydan.com/api/auth/google/login") else { return }
                     var request = URLRequest(url: url)
                     request.httpMethod = "POST"
                     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -65,7 +65,7 @@ public class GoogleAuthController {
                     ```kotlin
                     // Retrofit Interface
                     interface ApiService {
-                        @POST("api/auth/google/mobile")
+                        @POST("api/auth/google/login")
                         suspend fun loginWithGoogle(@Body body: GoogleLoginRequest): Response<LoginResponse>
                     }
                     
