@@ -202,12 +202,8 @@ public class NotificationService {
     private AndroidConfig buildAndroidConfig(NotificationRequest request) {
         return AndroidConfig.builder()
                 .setNotification(AndroidNotification.builder()
-                        .setIcon(request.getAndroidIcon())
-                        .setColor(request.getAndroidColor())
-                        .setSound(request.getAndroidSound())
-                        .setClickAction(request.getClickAction())
                         .build())
-                .setPriority(AndroidConfig.Priority.HIGH)
+                .setPriority(getPriority(request.getPriority()))
                 .build();
     }
     
@@ -221,11 +217,18 @@ public class NotificationService {
                                 .setTitle(request.getTitle())
                                 .setBody(request.getBody())
                                 .build())
-                        .setSound(request.getIosSound())
-                        .setBadge(request.getIosBadge())
-                        .setCategory(request.getIosCategory())
                         .build())
                 .build();
+    }
+    
+    /**
+     * 우선순위 변환
+     */
+    private AndroidConfig.Priority getPriority(String priority) {
+        if ("high".equalsIgnoreCase(priority)) {
+            return AndroidConfig.Priority.HIGH;
+        }
+        return AndroidConfig.Priority.NORMAL;
     }
     
     /**
