@@ -41,22 +41,6 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional
-    public void markNotificationAsRead(Long userId, Long campaignStatusId) {
-        CampaignStatus campaignStatus = campaignStatusRepository.findById(campaignStatusId)
-                .orElseThrow(() -> new IllegalArgumentException("캠페인 상태를 찾을 수 없습니다."));
-        
-        // 본인의 캠페인 상태인지 확인
-        if (!campaignStatus.getUser().getId().equals(userId)) {
-            throw new SecurityException("본인의 알림만 읽음 처리할 수 있습니다.");
-        }
-        
-        campaignStatus.markAsRead();
-        campaignStatusRepository.save(campaignStatus);
-        log.info("활동 알림 읽음 처리 완료: userId={}, campaignStatusId={}", userId, campaignStatusId);
-    }
-
-    @Override
-    @Transactional
     public void markNotificationsAsRead(Long userId, List<Long> campaignStatusIds) {
         List<CampaignStatus> campaignStatuses = campaignStatusRepository.findAllById(campaignStatusIds);
         
@@ -71,7 +55,7 @@ public class ActivityServiceImpl implements ActivityService {
         campaignStatuses.forEach(CampaignStatus::markAsRead);
         campaignStatusRepository.saveAll(campaignStatuses);
         
-        log.info("활동 알림 일괄 읽음 처리 완료: userId={}, count={}", userId, campaignStatusIds.size());
+        log.info("활동 알림 읽음 처리 완료: userId={}, count={}", userId, campaignStatusIds.size());
     }
 
     @Override
@@ -118,13 +102,6 @@ public class ActivityServiceImpl implements ActivityService {
                                 "action", "open_activity_page"
                         ))
                         .priority("high")
-                        .androidIcon("ic_activity")
-                        .androidColor("#FF6B6B")
-                        .androidSound("default")
-                        .iosSound("default")
-                        .iosBadge(1)
-                        .iosCategory("ACTIVITY")
-                        .ttl(86400L) // 24시간
                         .build();
                 
                 notificationService.sendNotificationToUser(userId, notificationRequest);
@@ -156,13 +133,20 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional
-    public void deleteActivityAlert(Long userId, Long alertId) {
-        CampaignStatus alert = campaignStatusRepository.findById(alertId)
-            .orElseThrow(() -> new IllegalArgumentException("알림이 존재하지 않습니다."));
-        if (!alert.getUser().getId().equals(userId)) {
-            throw new SecurityException("본인 알림만 삭제할 수 있습니다.");
+    public void deleteActivityAlerts(Long userId, List<Long> alertIds) {
+        List<CampaignStatus> alerts = campaignStatusRepository.findAllById(alertIds);
+        
+        // 모든 알림이 해당 사용자의 것인지 확인
+        for (CampaignStatus alert : alerts) {
+            if (!alert.getUser().getId().equals(userId)) {
+                throw new SecurityException("본인 알림만 삭제할 수 있습니다.");
+            }
         }
-        alert.setIsVisibleToUser(false); // 사용자에게만 숨김
-        campaignStatusRepository.save(alert);
+        
+        // 사용자에게만 숨김 처리
+        alerts.forEach(alert -> alert.setIsVisibleToUser(false));
+        campaignStatusRepository.saveAll(alerts);
+        
+        log.info("활동 알림 삭제 완료: userId={}, count={}", userId, alertIds.size());
     }
 } 
