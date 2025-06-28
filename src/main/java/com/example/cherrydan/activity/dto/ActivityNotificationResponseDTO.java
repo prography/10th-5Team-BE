@@ -14,7 +14,7 @@ import java.time.LocalDate;
 public class ActivityNotificationResponseDTO {
     
     @Schema(description = "캠페인 상태 ID", example = "1")
-    private Long id;
+    private Long campaignStatusId;
     
     @Schema(description = "알림 타입", example = "방문알림")
     private String notificationType;
@@ -48,7 +48,7 @@ public class ActivityNotificationResponseDTO {
         String fullText = generateFullText(campaign.getTitle(), daysRemaining);
         
         return ActivityNotificationResponseDTO.builder()
-                .id(campaignStatus.getId())
+                .campaignStatusId(campaignStatus.getId())
                 .notificationType(notificationType)
                 .title(campaign.getTitle())
                 .fullText(fullText)
