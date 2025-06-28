@@ -110,7 +110,7 @@ public class ActivityServiceImpl implements ActivityService {
      * 푸시 설정과 활동 알림 설정이 모두 활성화되어 있어야 함
      */
     private boolean isActivityNotificationEnabled(Long userId) {
-        User user = userRepository.findById(userId).orElse(null);
+        User user = userRepository.findActiveById(userId).orElse(null);
         return user != null && 
                user.getPushSettings() != null && 
                user.getPushSettings().getPushEnabled() && 

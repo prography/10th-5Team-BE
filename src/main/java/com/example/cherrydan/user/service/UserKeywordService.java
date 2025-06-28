@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.data.domain.Page;
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
+import com.example.cherrydan.user.dto.KeywordCampaignAlertResponseDTO;
 
 @Slf4j
 @Service
@@ -293,8 +294,11 @@ public class UserKeywordService {
      * 사용자의 키워드 알림 목록 조회
      */
     @Transactional(readOnly = true)
-    public List<KeywordCampaignAlert> getUserKeywordAlerts(Long userId) {
-        return keywordAlertRepository.findByUserIdAndIsActiveTrue(userId);
+    public List<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(Long userId) {
+        return keywordAlertRepository.findByUserIdAndIsActiveTrue(userId)
+                .stream()
+                .map(KeywordCampaignAlertResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     private String getKeywordAlertTitle(int campaignCount) {

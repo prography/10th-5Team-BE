@@ -27,7 +27,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void addBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -49,7 +49,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void cancelBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -62,7 +62,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional(readOnly = true)
     public List<BookmarkResponseDTO> getBookmarks(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         return bookmarkRepository.findAllByUserAndIsActiveTrue(user).stream()
                 .map(BookmarkResponseDTO::fromEntity)
@@ -72,7 +72,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void deleteBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));

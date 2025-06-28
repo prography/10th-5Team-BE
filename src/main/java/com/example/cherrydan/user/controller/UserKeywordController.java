@@ -2,8 +2,9 @@ package com.example.cherrydan.user.controller;
 
 import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
-import com.example.cherrydan.user.domain.KeywordCampaignAlert;
+
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
+import com.example.cherrydan.user.dto.KeywordCampaignAlertResponseDTO;
 import com.example.cherrydan.user.service.UserKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,7 +30,7 @@ public class UserKeywordController {
         description = "사용자의 키워드 알림 히스토리를 조회합니다."
     )
     @GetMapping("/alerts")
-    public List<KeywordCampaignAlert> getUserKeywordAlerts(
+    public List<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         return userKeywordService.getUserKeywordAlerts(currentUser.getId());
