@@ -83,7 +83,7 @@ public class GoogleAuthController {
     )
     public ResponseEntity<ApiResponse<LoginResponse>> googleLogin(@RequestBody GoogleLoginRequest request) {
         // 1. Google ID Token 검증
-        GoogleIdToken.Payload payload = googleIdentityTokenService.verify(request.getIdToken());
+        GoogleIdToken.Payload payload = googleIdentityTokenService.verify(request.getAccessToken());
 
         // 2. OAuth2UserInfo 객체 생성
         OAuth2UserInfo oAuth2UserInfo = new GoogleOAuth2UserInfo(payload);

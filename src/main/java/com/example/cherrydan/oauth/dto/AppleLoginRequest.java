@@ -12,5 +12,5 @@ import lombok.NoArgsConstructor;
 public class AppleLoginRequest {
     
     @Schema(description = "Apple Identity Token (JWT)", example = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...", required = true)
-    private String identityToken;
+    private String accessToken;
 }

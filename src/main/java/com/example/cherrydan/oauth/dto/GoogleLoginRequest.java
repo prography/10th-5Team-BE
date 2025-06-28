@@ -12,5 +12,5 @@ public class GoogleLoginRequest {
     @Schema(description = "Google Sign-In SDK로부터 발급받은 ID Token 문자열", 
             example = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjEyMzRhYmM1Njc4Z...", 
             required = true)
-    private String idToken;
+    private String accessToken;
 } 
