@@ -13,4 +13,10 @@ public class GoogleLoginRequest {
             example = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjEyMzRhYmM1Njc4Z...", 
             required = true)
     private String accessToken;
+    
+    @Schema(description = "FCM 토큰", example = "fcm_token_here")
+    private String fcmToken;
+    
+    @Schema(description = "디바이스 타입", example = "android")
+    private String deviceType;
 } 
