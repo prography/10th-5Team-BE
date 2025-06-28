@@ -5,7 +5,7 @@ spring:
 
   datasource:
     # 프로덕션 DB 정보 (환경변수 사용)
-    url: ${DB_URL}
+    url: ${DB_HOST}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
