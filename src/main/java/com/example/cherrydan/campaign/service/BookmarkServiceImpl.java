@@ -11,6 +11,8 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -61,12 +63,11 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<BookmarkResponseDTO> getBookmarks(Long userId) {
+    public Page<BookmarkResponseDTO> getBookmarks(Long userId, Pageable pageable) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        return bookmarkRepository.findAllByUserAndIsActiveTrue(user).stream()
-                .map(BookmarkResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        return bookmarkRepository.findAllByUserAndIsActiveTrue(user, pageable)
+                .map(BookmarkResponseDTO::fromEntity);
     }
 
     @Override

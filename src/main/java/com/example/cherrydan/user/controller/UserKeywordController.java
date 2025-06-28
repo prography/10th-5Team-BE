@@ -10,8 +10,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +32,11 @@ public class UserKeywordController {
         description = "사용자의 키워드 알림 히스토리를 조회합니다."
     )
     @GetMapping("/alerts")
-    public List<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
+    public Page<KeywordCampaignAlertResponseDTO> getUserKeywordAlerts(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PageableDefault(size = 20, sort = "alertDate") Pageable pageable
     ) {
-        return userKeywordService.getUserKeywordAlerts(currentUser.getId());
+        return userKeywordService.getUserKeywordAlerts(currentUser.getId(), pageable);
     }
     
 

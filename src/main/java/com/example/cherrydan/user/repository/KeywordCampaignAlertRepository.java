@@ -1,6 +1,8 @@
 package com.example.cherrydan.user.repository;
 
 import com.example.cherrydan.user.domain.KeywordCampaignAlert;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,12 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
      */
     @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isVisibleToUser = true ORDER BY kca.alertDate DESC")
     List<KeywordCampaignAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId);
+    
+    /**
+     * 사용자의 키워드 알림 목록 조회 (페이지네이션)
+     */
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isVisibleToUser = true ORDER BY kca.alertDate DESC")
+    Page<KeywordCampaignAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId, Pageable pageable);
     
     /**
      * 알림 미발송된 키워드 알림들 조회

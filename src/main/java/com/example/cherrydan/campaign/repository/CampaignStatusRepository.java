@@ -4,6 +4,8 @@ import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -40,4 +42,10 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
      */
     @Query("SELECT cs FROM CampaignStatus cs WHERE cs.user.id = :userId AND cs.isVisibleToUser = true AND cs.isActive = true")
     List<CampaignStatus> findVisibleActivityByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 사용자별로 isVisibleToUser = true인 활동 알림만 조회 (페이지네이션)
+     */
+    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.user.id = :userId AND cs.isVisibleToUser = true AND cs.isActive = true")
+    Page<CampaignStatus> findVisibleActivityByUserId(@Param("userId") Long userId, Pageable pageable);
 } 

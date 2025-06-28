@@ -9,6 +9,8 @@ import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,16 +29,20 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ActivityNotificationResponseDTO> getActivityNotifications(Long userId) {
-        // 사용자의 활동 알림 목록 조회
+    public Page<ActivityNotificationResponseDTO> getActivityNotifications(Long userId, Pageable pageable) {
+        // 사용자의 활동 알림 목록 조회 (페이지네이션)
         // - isVisibleToUser=true인 것만 조회 (삭제되지 않은 것)
         // - 읽음/안읽음 상관없이 모두 보여줌 (isRead 필드로 구분)
-        List<CampaignStatus> activityStatuses = campaignStatusRepository
-                .findVisibleActivityByUserId(userId);
-        return activityStatuses.stream()
-                .filter(CampaignStatus::isActivityEligible) // 3일 이내 마감인 것만 필터링
-                .map(ActivityNotificationResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        Page<CampaignStatus> activityStatusesPage = campaignStatusRepository
+                .findVisibleActivityByUserId(userId, pageable);
+        
+        return activityStatusesPage.map(status -> {
+            if (status.isActivityEligible()) {
+                return ActivityNotificationResponseDTO.fromEntity(status);
+            } else {
+                return null; // 3일 이내 마감이 아닌 경우 null 반환
+            }
+        });
     }
 
     @Override

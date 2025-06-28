@@ -12,6 +12,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -52,11 +55,12 @@ public class SnsController {
 
     @Operation(summary = "사용자 SNS 연동 목록 조회")
     @GetMapping("/connections")
-    public ApiResponse<List<SnsConnectionResponse>> getConnections(
-            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<Page<SnsConnectionResponse>> getConnections(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         User user = userService.getUserById(userDetails.getId());
         
-        List<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user);
+        Page<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user, pageable);
         return ApiResponse.success("SNS 연동 목록 조회 성공", response);
     }
 
