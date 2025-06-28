@@ -31,7 +31,7 @@ public class GoogleAuthController {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    @PostMapping("/mobile")
+    @PostMapping("/login")
     @Operation(
             summary = "Google 모바일 로그인/회원가입",
             description = """
