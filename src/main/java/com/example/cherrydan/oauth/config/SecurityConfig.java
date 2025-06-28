@@ -49,10 +49,12 @@ public class SecurityConfig {
                         .requestMatchers("/apple-login-test.html").permitAll()
                         // OAuth2 관련 경로
                         .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
-                        // SNS 연동 테스트를 위한 임시 허용
-                        .requestMatchers("/api/v1/sns/**").permitAll()
-                        // 테스트용 엔드포인트 (인증 없이 접근 가능)
-                        .requestMatchers("/api/v1/sns/test/oauth/*/callback").permitAll()
+                        // 캠페인 관련 경로
+                        .requestMatchers("/api/campaigns/types").permitAll()
+                        .requestMatchers("/api/campaigns/sns-platforms").permitAll()
+                        .requestMatchers("/api/campaigns/campaign-platforms").permitAll()
+                        // 공지사항/홈 광고 배너 관련 경로
+                        .requestMatchers("/api/notices/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )

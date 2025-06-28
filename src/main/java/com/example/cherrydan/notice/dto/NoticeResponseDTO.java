@@ -1,4 +1,3 @@
-// src/main/java/com/example/cherrydan/notice/dto/NoticeResponse.java
 package com.example.cherrydan.notice.dto;
 
 import com.example.cherrydan.notice.domain.Notice;
