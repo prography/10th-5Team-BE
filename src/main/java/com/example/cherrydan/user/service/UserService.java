@@ -5,6 +5,7 @@ import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
+import com.example.cherrydan.user.dto.UserUpdateRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,21 @@ public class UserService {
         if (nickname != null) user.setNickname(nickname);
         if (email != null) user.setEmail(email);
         return user;
+    }
+
+    @Transactional
+    public User updateUserProfile(Long userId, UserUpdateRequestDTO request) {
+        User user = getActiveUserById(userId);
+        if (request.getNickname() != null) {
+            user.setNickname(request.getNickname());
+        }
+        if (request.getBirthYear() != null) {
+            user.setBirthYear(request.getBirthYear());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+        return userRepository.save(user);
     }
 
     @Transactional

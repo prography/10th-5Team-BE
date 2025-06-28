@@ -50,8 +50,8 @@ public class UserController {
     }
 
     @Operation(
-        summary = "사용자 정보 수정",
-        description = "닉네임, 이메일 수정 가능",
+        summary = "사용자 프로필 수정",
+        description = "닉네임, 출생연도, 성별 수정 가능",
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @PatchMapping("/me")
@@ -61,7 +61,7 @@ public class UserController {
         if (currentUser == null) {
             throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         }
-        User user = userService.updateUser(currentUser.getId(), request.getNickname(), request.getEmail());
+        User user = userService.updateUserProfile(currentUser.getId(), request);
         UserDto userDto = new UserDto(user);
         return ResponseEntity.ok(ApiResponse.success("사용자 정보가 수정되었습니다.", userDto));
     }
@@ -99,10 +99,10 @@ public class UserController {
     }
 
     @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
-    @DeleteMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<Void>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam("keyword") String keyword) {
+    @DeleteMapping("/me/keywords/{keywordId}")
+    public ResponseEntity<ApiResponse<Void>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @PathVariable Long keywordId) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        userKeywordService.removeKeyword(currentUser.getId(), keyword);
+        userKeywordService.removeKeywordById(currentUser.getId(), keywordId);
         return ResponseEntity.ok(ApiResponse.success("키워드 삭제 성공", null));
     }
 

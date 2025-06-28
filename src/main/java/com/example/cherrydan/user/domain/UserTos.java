@@ -36,7 +36,7 @@ public class UserTos extends BaseTimeEntity {
 
     @Builder.Default
     @Column(name = "is_agreed_3rd_party")
-    private Boolean isAgreed3rdParty = false;
+    private Boolean isAgreed3rdParty = true;
 
     @Column(name = "essential_consent_updated")
     private LocalDateTime essentialConsentUpdated;
