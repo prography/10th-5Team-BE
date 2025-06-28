@@ -4,8 +4,7 @@ spring:
       on-profile: prod
 
   datasource:
-    # 프로덕션 DB 정보 (환경변수 사용)
-    url: ${DB_HOST}
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
