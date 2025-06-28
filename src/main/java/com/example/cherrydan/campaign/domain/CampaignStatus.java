@@ -32,7 +32,7 @@ public class CampaignStatus extends BaseTimeEntity {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive = true; // 이건 캠페인이 종료되면 false로 할 듯
     
     /**
      * 활동 알림 발송 여부
@@ -40,6 +40,17 @@ public class CampaignStatus extends BaseTimeEntity {
     @Builder.Default
     @Column(name = "activity_notified")
     private Boolean activityNotified = false;
+
+    /**
+     * 활동 알림 읽음 처리 여부
+     */
+    @Builder.Default
+    @Column(name = "is_read")
+    private Boolean isRead = false;
+    
+    @Builder.Default
+    @Column(name = "is_visible_to_user", nullable = false)
+    private Boolean isVisibleToUser = true;
     
     /**
      * 활동 알림 대상인지 확인 (3일 이내 마감)
@@ -83,8 +94,11 @@ public class CampaignStatus extends BaseTimeEntity {
     public void markActivityAsNotified() {
         this.activityNotified = true;
     }
-
-    @Builder.Default
-    @Column(name = "is_visible_to_user", nullable = false)
-    private Boolean isVisibleToUser = true;
+    
+    /**
+     * 활동 알림 읽음 처리
+     */
+    public void markAsRead() {
+        this.isRead = true;
+    }
 } 

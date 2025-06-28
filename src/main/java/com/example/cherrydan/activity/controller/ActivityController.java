@@ -1,6 +1,6 @@
 package com.example.cherrydan.activity.controller;
 
-import com.example.cherrydan.activity.dto.ActivityCampaignResponseDTO;
+import com.example.cherrydan.activity.dto.ActivityNotificationResponseDTO;
 import com.example.cherrydan.activity.service.ActivityService;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,14 +21,38 @@ public class ActivityController {
     private final ActivityService activityService;
     
     @Operation(
-        summary = "내 활동 캠페인 목록 조회",
-        description = "사용자가 신청한 캠페인 중 마감 3일 이내인 캠페인들을 조회합니다."
+        summary = "내 활동 알림 목록 조회",
+        description = "사용자의 활동 알림 목록을 조회합니다. 캠페인 타입에 따라 알림 타입이 구분됩니다."
     )
-    @GetMapping("/campaigns")
-    public List<ActivityCampaignResponseDTO> getActivityCampaigns(
+    @GetMapping("/notifications")
+    public List<ActivityNotificationResponseDTO> getActivityNotifications(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        return activityService.getActivityCampaigns(currentUser.getId());
+        return activityService.getActivityNotifications(currentUser.getId());
+    }
+    
+    @Operation(
+        summary = "활동 알림 읽음 처리 (단일)",
+        description = "특정 활동 알림을 읽음 처리합니다."
+    )
+    @PutMapping("/notifications/{campaignStatusId}/read")
+    public void markNotificationAsRead(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @PathVariable Long campaignStatusId
+    ) {
+        activityService.markNotificationAsRead(currentUser.getId(), campaignStatusId);
+    }
+    
+    @Operation(
+        summary = "활동 알림 읽음 처리 (일괄)",
+        description = "여러 활동 알림을 일괄로 읽음 처리합니다."
+    )
+    @PutMapping("/notifications/read")
+    public void markNotificationsAsRead(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @RequestBody List<Long> campaignStatusIds
+    ) {
+        activityService.markNotificationsAsRead(currentUser.getId(), campaignStatusIds);
     }
     
     @Operation(
