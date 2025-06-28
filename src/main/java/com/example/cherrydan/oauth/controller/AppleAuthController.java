@@ -41,7 +41,7 @@ public class AppleAuthController {
         validateAppleLoginRequest(request);
         
         // 2. Apple Identity Token 검증
-        Map<String, Object> userInfo = appleIdentityTokenService.verifyIdentityToken(request.getIdentityToken());
+        Map<String, Object> userInfo = appleIdentityTokenService.verifyIdentityToken(request.getAccessToken());
         
         // 3. OAuth2UserInfo 객체 생성 (JWT 정보 + iOS 정보 결합)
         OAuth2UserInfo oAuth2UserInfo = new AppleOAuth2UserInfo(userInfo);
@@ -65,12 +65,12 @@ public class AppleAuthController {
             throw new AuthException(ErrorMessage.INVALID_REQUEST);
         }
         
-        if (!StringUtils.hasText(request.getIdentityToken())) {
+        if (!StringUtils.hasText(request.getAccessToken())) {
             throw new AuthException(ErrorMessage.APPLE_USER_INFO_MISSING);
         }
         
         // JWT 형식 기본 검증 (3개 파트로 구성되어야 함)
-        String[] tokenParts = request.getIdentityToken().split("\\.");
+        String[] tokenParts = request.getAccessToken().split("\\.");
         if (tokenParts.length != 3) {
             throw new AuthException(ErrorMessage.APPLE_IDENTITY_TOKEN_INVALID);
         }
