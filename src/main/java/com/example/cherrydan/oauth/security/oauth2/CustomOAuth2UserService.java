@@ -151,7 +151,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private User findOrCreateUser(OAuth2UserInfo oAuth2UserInfo, String registrationId) {
         AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
         
-        // 먼저 이메일로 사용자 조회
+        // 삭제된 사용자 포함하여 이메일로 사용자 조회
         Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
 
         // 이메일로 사용자를 찾았으면
@@ -164,6 +164,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                         String.format("이미 %s 계정으로 가입되어 있습니다. %s 계정으로 로그인해 주세요.", 
                         existingUser.getProvider(), existingUser.getProvider())
                 );
+            }
+            
+            // 소프트 삭제된 사용자라면 복구
+            if (existingUser.isDeleted()) {
+                existingUser.restore();
+                log.info("소프트 삭제된 사용자 복구: {}", existingUser.getEmail());
             }
             
             // 정보 업데이트 후 반환

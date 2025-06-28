@@ -48,7 +48,7 @@ public class FCMTokenController {
      * @return 사용자의 활성화된 토큰 리스트
      */
     @GetMapping("/users/{userId}")
-    public ResponseEntity<ApiResponse<List<UserFCMToken>>> getUserTokens(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<List<UserFCMToken>>> getUserTokens(@PathVariable("userId") Long userId) {
         
         log.info("사용자 {}의 FCM 토큰 조회", userId);
         
@@ -66,7 +66,7 @@ public class FCMTokenController {
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<ApiResponse<String>> deleteToken(
             @PathVariable Long userId,
-            @RequestParam String token) {
+            @RequestParam("token") String token) {
         
         log.info("FCM 토큰 삭제 요청 - 사용자: {}", userId);
         
@@ -81,7 +81,7 @@ public class FCMTokenController {
      * @return 삭제 결과
      */
     @DeleteMapping("/users/{userId}/all")
-    public ResponseEntity<ApiResponse<String>> deleteAllTokens(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<String>> deleteAllTokens(@PathVariable("userId") Long userId) {
         
         log.info("사용자 {}의 모든 FCM 토큰 삭제 요청", userId);
         
@@ -96,7 +96,7 @@ public class FCMTokenController {
      * @return 토큰 유효성 여부
      */
     @GetMapping("/validate")
-    public ResponseEntity<ApiResponse<Boolean>> validateToken(@RequestParam String token) {
+    public ResponseEntity<ApiResponse<Boolean>> validateToken(@RequestParam("token") String token) {
         
         boolean isValid = fcmTokenService.isTokenValid(token);
         return ResponseEntity.ok(ApiResponse.success("토큰 유효성 확인이 완료되었습니다.", isValid));
@@ -109,7 +109,7 @@ public class FCMTokenController {
      * @return 활성 토큰 존재 여부
      */
     @GetMapping("/users/{userId}/exists")
-    public ResponseEntity<ApiResponse<Boolean>> hasActiveTokens(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<Boolean>> hasActiveTokens(@PathVariable("userId") Long userId) {
         
         boolean hasTokens = fcmTokenService.hasActiveTokens(userId);
         return ResponseEntity.ok(ApiResponse.success("활성 토큰 존재 여부 확인이 완료되었습니다.", hasTokens));

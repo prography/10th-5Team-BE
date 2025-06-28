@@ -34,7 +34,7 @@ public class NotificationController {
      */
     @PostMapping("/users/{userId}")
     public ResponseEntity<ApiResponse<NotificationResultDto>> sendNotificationToUser(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody NotificationRequest request) {
         
         log.info("사용자 {}에게 알림 전송 요청: {}", userId, request.getTitle());
@@ -71,7 +71,7 @@ public class NotificationController {
      */
     @PostMapping("/topics/{topic}")
     public ResponseEntity<ApiResponse<NotificationResultDto>> sendNotificationToTopic(
-            @PathVariable String topic,
+            @PathVariable("topic") String topic,
             @RequestBody NotificationRequest request) {
         
         log.info("토픽 {}에 알림 전송 요청: {}", topic, request.getTitle());
@@ -89,7 +89,7 @@ public class NotificationController {
      */
     @PostMapping("/tokens/{token}")
     public ResponseEntity<ApiResponse<NotificationResultDto>> sendNotificationToToken(
-            @PathVariable String token,
+            @PathVariable("token") String token,
             @RequestBody NotificationRequest request) {
         
         log.info("FCM 토큰으로 직접 알림 전송: {}", request.getTitle());
@@ -108,7 +108,7 @@ public class NotificationController {
      */
     @PostMapping("/users/{userId}/simple")
     public ResponseEntity<ApiResponse<NotificationResultDto>> sendSimpleNotification(
-            @PathVariable Long userId,
+            @PathVariable("userId") Long userId,
             @RequestBody Map<String, String> requestBody) {
         
         String title = requestBody.get("title");
@@ -143,7 +143,7 @@ public class NotificationController {
      * @return 알림 전송 결과
      */
     @PostMapping("/users/{userId}/test")
-    public ResponseEntity<ApiResponse<NotificationResultDto>> sendTestNotification(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<NotificationResultDto>> sendTestNotification(@PathVariable("userId") Long userId) {
         
         log.info("사용자 {}에게 테스트 알림 전송", userId);
         

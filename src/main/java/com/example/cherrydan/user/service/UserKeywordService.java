@@ -44,7 +44,7 @@ public class UserKeywordService {
 
     @Transactional
     public void addKeyword(Long userId, String keyword) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
         if (userKeywordRepository.findByUserIdAndKeyword(userId, keyword).isPresent()) {
             throw new IllegalStateException("이미 등록된 키워드입니다.");
@@ -54,11 +54,17 @@ public class UserKeywordService {
 
     @Transactional(readOnly = true)
     public List<UserKeyword> getKeywords(Long userId) {
+        // 활성 사용자인지 확인
+        userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         return userKeywordRepository.findByUserId(userId);
     }
 
     @Transactional
     public void removeKeyword(Long userId, String keyword) {
+        // 활성 사용자인지 확인
+        userRepository.findActiveById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
         userKeywordRepository.deleteByUserIdAndKeyword(userId, keyword);
     }
 

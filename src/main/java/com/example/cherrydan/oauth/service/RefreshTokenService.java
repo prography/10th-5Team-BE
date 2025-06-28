@@ -37,7 +37,8 @@ public class RefreshTokenService {
     @Transactional(readOnly = true)
     public Optional<User> getUserByRefreshToken(String tokenValue) {
         return refreshTokenRepository.findByRefreshToken(tokenValue)
-                .map(RefreshToken::getUser);
+                .map(RefreshToken::getUser)
+                .filter(user -> user.getIsActive()); // 활성 사용자만 반환
     }
 
     public void deleteRefreshToken(String tokenValue) {

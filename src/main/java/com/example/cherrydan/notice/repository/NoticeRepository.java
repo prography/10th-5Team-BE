@@ -31,4 +31,8 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Modifying
     @Query("UPDATE Notice n SET n.empathyCount = n.empathyCount + 1 WHERE n.id = :id")
     int incrementEmpathyCount(@Param("id") Long id);
+
+    @Modifying
+    @Query("UPDATE Notice n SET n.empathyCount = n.empathyCount - 1 WHERE n.id = :id AND n.empathyCount > 0")
+    int decrementEmpathyCount(@Param("id") Long id);
 }

@@ -32,16 +32,19 @@ public class NoticeController {
 
     @Operation(summary = "공지사항 상세 조회")
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<NoticeResponseDTO>> getNoticeDetail(@PathVariable("id") Long id) {
         NoticeResponseDTO notice = noticeService.getNoticeDetail(id);
         return ResponseEntity.ok(ApiResponse.success("공지사항 상세 조회가 완료되었습니다.", notice));
     }
 
     @Operation(summary = "공감 버튼 클릭")
     @PostMapping("/{id}/empathy")
-    public ResponseEntity<ApiResponse<NoticeResponseDTO>> incrementEmpathy(@PathVariable Long id) {
-        NoticeResponseDTO notice = noticeService.incrementEmpathyCount(id);
-        return ResponseEntity.ok(ApiResponse.success("공감이 반영되었습니다.", notice));
+    public ResponseEntity<ApiResponse<NoticeResponseDTO>> toggleEmpathy(
+            @PathVariable("id") Long id,
+            @RequestParam("action") String action) {
+        NoticeResponseDTO notice = noticeService.toggleEmpathy(id, action);
+        String message = "up".equals(action) ? "공감이 증가되었습니다." : "공감이 감소되었습니다.";
+        return ResponseEntity.ok(ApiResponse.success(message, notice));
     }
 
     @GetMapping("/banners")

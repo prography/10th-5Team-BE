@@ -26,7 +26,7 @@ public class PushSettingsService {
     public PushSettingsResponseDTO getUserPushSettings(Long userId) {
         log.info("푸시 알림 설정 조회 시작 - userId: {}", userId);
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserPushSettings settings = user.getPushSettings();
@@ -49,7 +49,7 @@ public class PushSettingsService {
             throw new PushException(ErrorMessage.PUSH_SETTINGS_INVALID_REQUEST);
         }
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserPushSettings settings = user.getPushSettings();
@@ -81,7 +81,7 @@ public class PushSettingsService {
     public PushSettingsResponseDTO togglePushEnabled(Long userId, boolean enabled) {
         log.info("전체 푸시 알림 토글 시작 - userId: {}, enabled: {}", userId, enabled);
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserPushSettings settings = user.getPushSettings();
@@ -112,7 +112,7 @@ public class PushSettingsService {
             throw new PushException(ErrorMessage.PUSH_CATEGORY_INVALID);
         }
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserPushSettings settings = user.getPushSettings();
