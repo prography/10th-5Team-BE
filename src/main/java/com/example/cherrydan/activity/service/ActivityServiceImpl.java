@@ -33,11 +33,13 @@ public class ActivityServiceImpl implements ActivityService {
         // 사용자의 활동 알림 목록 조회 (페이지네이션)
         // - isVisibleToUser=true인 것만 조회 (삭제되지 않은 것)
         // - 읽음/안읽음 상관없이 모두 보여줌 (isRead 필드로 구분)
+        log.info("사용자 {}의 활동 알림 목록 조회 시작", userId);
         Page<CampaignStatus> activityStatusesPage = campaignStatusRepository
                 .findVisibleActivityByUserId(userId, pageable);
-        
+    
         return activityStatusesPage.map(status -> {
             if (status.isActivityEligible()) {
+                log.info("활동 알림 목록 조회 완료: userId={}, 활동수={}", userId, activityStatusesPage.getTotalElements());
                 return ActivityNotificationResponseDTO.fromEntity(status);
             } else {
                 return null; // 3일 이내 마감이 아닌 경우 null 반환
@@ -49,10 +51,11 @@ public class ActivityServiceImpl implements ActivityService {
     @Transactional
     public void markNotificationsAsRead(Long userId, List<Long> campaignStatusIds) {
         List<CampaignStatus> campaignStatuses = campaignStatusRepository.findAllById(campaignStatusIds);
-        
+        log.info("활동 알림 읽음 처리 시작: userId={}, 캠페인 상태 수={}", userId, campaignStatuses.size());
         // 모든 캠페인 상태가 해당 사용자의 것인지 확인
         for (CampaignStatus campaignStatus : campaignStatuses) {
             if (!campaignStatus.getUser().getId().equals(userId)) {
+                log.error("본인의 알림만 읽음 처리할 수 있습니다. userId={}, 캠페인 상태 수={}", userId, campaignStatuses.size());
                 throw new SecurityException("본인의 알림만 읽음 처리할 수 있습니다.");
             }
         }
