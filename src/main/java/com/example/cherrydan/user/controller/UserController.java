@@ -3,6 +3,7 @@ package com.example.cherrydan.user.controller;
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.PageResponse;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.UserDto;
@@ -11,6 +12,7 @@ import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.service.UserService;
 import com.example.cherrydan.user.service.UserKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -84,15 +86,34 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success("사용자 탈퇴가 완료되었습니다."));
     }
 
-    @Operation(summary = "내 키워드 목록 조회", security = { @SecurityRequirement(name = "bearerAuth") })
+    @Operation(
+        summary = "내 키워드 목록 조회", 
+        description = """
+            사용자가 등록한 키워드 목록을 조회합니다.
+            
+            **Request Body 예시:**
+            ```json
+            {
+              "page": 0,
+              "size": 20
+            }
+            ```
+            
+            **정렬**: 키워드 등록 시각 내림차순 (고정)
+            """,
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
     @GetMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<Page<UserKeywordResponseDTO>>> getMyKeywords(
-            @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable) {
+    public ResponseEntity<ApiResponse<PageResponse<UserKeywordResponseDTO>>> getMyKeywords(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @Parameter(description = "페이지네이션 정보")
+            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
+    ) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        Page<UserKeywordResponseDTO> dtos = userKeywordService.getKeywords(currentUser.getId(), pageable)
+        Page<UserKeywordResponseDTO> keywords = userKeywordService.getKeywords(currentUser.getId(), pageable)
             .map(UserKeywordResponseDTO::fromKeyword);
-        return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", dtos));
+        PageResponse<UserKeywordResponseDTO> response = PageResponse.from(keywords);
+        return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", response));
     }
 
     @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
