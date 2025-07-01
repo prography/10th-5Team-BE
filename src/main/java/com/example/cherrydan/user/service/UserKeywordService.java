@@ -325,7 +325,7 @@ public class UserKeywordService {
      * 특정 키워드로 맞춤형 캠페인 목록 조회
      */
     @Transactional(readOnly = true)
-    public CampaignListResponseDTO getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
         // 해당 유저가 등록한 키워드인지 검증
         if (!userKeywordRepository.existsByUserIdAndKeyword(userId, keyword)) {
             throw new IllegalArgumentException("등록되지 않은 키워드입니다.");
@@ -344,19 +344,7 @@ public class UserKeywordService {
         };
 
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        List<CampaignResponseDTO> content = campaigns.getContent().stream()
-                .map(CampaignResponseDTO::fromEntity)
-                .collect(Collectors.toList());
-
-        return CampaignListResponseDTO.builder()
-                .content(content)
-                .page(campaigns.getNumber())
-                .size(campaigns.getSize())
-                .totalElements(campaigns.getTotalElements())
-                .totalPages(campaigns.getTotalPages())
-                .hasNext(campaigns.hasNext())
-                .hasPrevious(campaigns.hasPrevious())
-                .build();
+        return campaigns.map(CampaignResponseDTO::fromEntity);
     }
 
     /**

@@ -1,14 +1,17 @@
 package com.example.cherrydan.notice.controller;
 
 import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.PageResponse;
 import com.example.cherrydan.notice.dto.NoticeResponseDTO;
 import com.example.cherrydan.notice.service.NoticeService;
 import com.example.cherrydan.notice.service.NoticeBannerService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,10 +26,39 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final NoticeBannerService noticeBannerService;
 
-    @Operation(summary = "공지사항 목록 조회")
+    @Operation(
+        summary = "공지사항 목록 조회",
+        description = """
+            활성 상태인 공지사항 목록을 조회합니다.
+            
+            **Request Body 예시:**
+            ```json
+            {
+              "page": 0,
+              "size": 20,
+              "sort": "updatedAt,desc"
+            }
+            ```
+            
+            **정렬 가능한 필드:**
+            - updatedAt: 수정 시각 (기본값, DESC)
+            
+            **정렬 형태 (둘 다 지원):**
+            - String 형태: "updatedAt,desc"
+            - Array 형태: ["updatedAt,desc"]
+            
+            **정렬 예시:**
+            - "updatedAt,desc" (최신 수정순, 기본값)
+            - "updatedAt,asc" (오래된 수정순)
+            """
+    )
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NoticeResponseDTO>>> getNotices(Pageable pageable) {
-        Page<NoticeResponseDTO> response = noticeService.getActiveNotices(pageable);
+    public ResponseEntity<ApiResponse<PageResponse<NoticeResponseDTO>>> getNotices(
+            @Parameter(description = "페이지네이션 정보") 
+            @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable
+    ) {
+        Page<NoticeResponseDTO> notices = noticeService.getActiveNotices(pageable);
+        PageResponse<NoticeResponseDTO> response = PageResponse.from(notices);
         return ResponseEntity.ok(ApiResponse.success("공지사항 목록 조회가 완료되었습니다.", response));
     }
 
