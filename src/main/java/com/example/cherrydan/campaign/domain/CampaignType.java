@@ -23,4 +23,4 @@ public enum CampaignType {
         }
         throw new IllegalArgumentException("Unknown code: " + code);
     }
-} 
+}

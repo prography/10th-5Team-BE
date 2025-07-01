@@ -4,8 +4,8 @@ import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
@@ -23,7 +23,7 @@ public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public CampaignListResponseDTO getCampaigns(CampaignType type, String region, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String region, String sort, Pageable pageable) {
         Page<Campaign> campaigns;
         
         if (type != null) {
@@ -36,7 +36,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public CampaignListResponseDTO getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable) {
         Page<Campaign> campaigns;
         
         switch (snsPlatformType) {
@@ -65,7 +65,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public CampaignListResponseDTO getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
         if (campaignPlatformType == CampaignPlatformType.ALL) {
             return convertToResponseDTO(campaignRepository.findAll(pageable));
         }
@@ -82,7 +82,7 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public CampaignListResponseDTO searchByKeyword(String keyword, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -100,12 +100,12 @@ public class CampaignServiceImpl implements CampaignService {
         return convertToResponseDTO(result);
     }
 
-    private CampaignListResponseDTO convertToResponseDTO(Page<Campaign> campaigns) {
+    private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns) {
         List<CampaignResponseDTO> content = campaigns.getContent().stream()
             .map(this::toDTO)
             .collect(Collectors.toList());
         
-        return CampaignListResponseDTO.builder()
+        return PageListResponseDTO.<CampaignResponseDTO>builder()
             .content(content)
             .page(campaigns.getNumber())
             .size(campaigns.getSize())

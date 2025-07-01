@@ -1,7 +1,6 @@
 package com.example.cherrydan.campaign.service;
 
 import com.example.cherrydan.campaign.domain.Campaign;
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.domain.RegionGroup;
@@ -26,6 +25,7 @@ import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.LocalCategory;
 import com.example.cherrydan.campaign.domain.ProductCategory;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public CampaignListResponseDTO searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, String applyStart, String applyEnd, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, String applyStart, String applyEnd, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -197,7 +197,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
         List<CampaignResponseDTO> content = campaigns.getContent().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
-        return CampaignListResponseDTO.builder()
+        return PageListResponseDTO.<CampaignResponseDTO>builder()
                 .content(content)
                 .page(campaigns.getNumber())
                 .size(campaigns.getSize())
@@ -209,6 +209,6 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     }
 
     private CampaignResponseDTO toDTO(Campaign campaign) {
-        return com.example.cherrydan.campaign.dto.CampaignResponseDTO.fromEntity(campaign);
+        return CampaignResponseDTO.fromEntity(campaign);
     }
 } 

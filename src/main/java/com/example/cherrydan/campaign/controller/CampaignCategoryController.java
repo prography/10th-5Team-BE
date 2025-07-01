@@ -1,16 +1,19 @@
 package com.example.cherrydan.campaign.controller;
 
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.service.CampaignCategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 
 @RestController
 @RequestMapping("/api/campaigns/categories")
@@ -31,7 +34,7 @@ public class CampaignCategoryController {
             + "정렬(sort): popular(인기순), latest(최신순), deadline(마감임박순), low_competition(경쟁률 낮은순)"
     )
     @GetMapping("/search")
-    public CampaignListResponseDTO searchByCategory(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> searchByCategory(
         @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> regionGroup,
         @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등) - 복수 선택 가능")
@@ -58,8 +61,8 @@ public class CampaignCategoryController {
         @RequestParam(required = false, defaultValue = "20") int size
     ) {
         Pageable pageable = createPageable(sort, page, size);
-
-        return campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform, applyStart, applyEnd, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform, applyStart, applyEnd, pageable);
+        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     private Pageable createPageable(String sort, int page, int size) {

@@ -1,11 +1,12 @@
 package com.example.cherrydan.campaign.service;
 
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
+import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface CampaignCategoryService {
-    CampaignListResponseDTO searchByCategory(
+    PageListResponseDTO<CampaignResponseDTO> searchByCategory(
         List<String> regionGroup,
         List<String> subRegion,
         List<String> local,
