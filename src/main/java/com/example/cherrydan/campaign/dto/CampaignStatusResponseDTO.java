@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
+import com.example.cherrydan.common.util.CloudfrontUtil;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class CampaignStatusResponseDTO {
     private String benefit;
     private String detailUrl;
     private String imageUrl;
+    private String snsPlatformImageUrl;
     private int applicantCount;
     private int recruitCount;
     private List<String> snsPlatforms;
@@ -78,6 +80,8 @@ public class CampaignStatusResponseDTO {
             default:
                 break;
         }
+
+        String snsPlatformImageUrl = CloudfrontUtil.getSnsPlatformImageUrl(status.getCampaign().getSourceSite());
         return CampaignStatusResponseDTO.builder()
                 .id(status.getId())
                 .campaignId(status.getCampaign().getId())
@@ -86,6 +90,7 @@ public class CampaignStatusResponseDTO {
                 .title(status.getCampaign().getTitle())
                 .detailUrl(status.getCampaign().getDetailUrl())
                 .imageUrl(status.getCampaign().getImageUrl())
+                .snsPlatformImageUrl(snsPlatformImageUrl)
                 .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
                 .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
                 .applicantCount(status.getCampaign().getApplicantCount())
