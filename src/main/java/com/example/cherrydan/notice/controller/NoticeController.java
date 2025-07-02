@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import com.example.cherrydan.notice.dto.NoticeBannerResponseDTO;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 
 @RestController
 @RequestMapping("/api/notices")
@@ -25,8 +26,9 @@ public class NoticeController {
 
     @Operation(summary = "공지사항 목록 조회")
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NoticeResponseDTO>>> getNotices(Pageable pageable) {
-        Page<NoticeResponseDTO> response = noticeService.getActiveNotices(pageable);
+    public ResponseEntity<ApiResponse<PageListResponseDTO<NoticeResponseDTO>>> getNotices(Pageable pageable) {
+        Page<NoticeResponseDTO> pageResult = noticeService.getActiveNotices(pageable);
+        PageListResponseDTO<NoticeResponseDTO> response = PageListResponseDTO.from(pageResult);
         return ResponseEntity.ok(ApiResponse.success("공지사항 목록 조회가 완료되었습니다.", response));
     }
 
