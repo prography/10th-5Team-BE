@@ -1,5 +1,8 @@
 package com.example.cherrydan.campaign.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum ProductCategory {
     FOOD(1, "식품", "food"),
     LIVING(2, "생활", "living"),
@@ -22,10 +25,6 @@ public enum ProductCategory {
         this.label = label;
         this.engLabel = engLabel;
     }
-
-    public int getCode() { return code; }
-    public String getLabel() { return label; }
-    public String getEngLabel() { return engLabel; }
 
     public static ProductCategory fromString(String value) {
         String trimmedValue = value.trim();

@@ -1,5 +1,8 @@
 package com.example.cherrydan.campaign.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum LocalCategory {
     RESTAURANT(1, "맛집", "restaurant"),
     BEAUTY(2, "뷰티", "beauty"),
@@ -18,10 +21,6 @@ public enum LocalCategory {
         this.label = label;
         this.engLabel = engLabel;
     }
-
-    public int getCode() { return code; }
-    public String getLabel() { return label; }
-    public String getEngLabel() { return engLabel; }
 
     public static LocalCategory fromString(String value) {
         String trimmedValue = value.trim();

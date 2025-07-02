@@ -1,7 +1,9 @@
 package com.example.cherrydan.campaign.domain;
 
 import java.util.*;
+import lombok.Getter;
 
+@Getter
 public enum RegionGroup {
     서울(1, "서울", "seoul", Arrays.asList(
         new SubRegion(1, "교대/사당", "gyodae_sadang"),
@@ -118,6 +120,7 @@ public enum RegionGroup {
     }
 
     // 하위 지역 클래스
+    @Getter
     public static class SubRegion {
         private final int code;
         private final String label;
@@ -127,12 +130,10 @@ public enum RegionGroup {
             this.label = label;
             this.codeName = codeName;
         }
-        public int getCode() { return code; }
-        public String getLabel() { return label; }
-        public String getCodeName() { return codeName; }
     }
 
     // 하위 지역 매칭용 클래스
+    @Getter
     public static class RegionGroupSubRegionMatch {
         private final RegionGroup regionGroup;
         private final SubRegion subRegion;
@@ -140,14 +141,6 @@ public enum RegionGroup {
         public RegionGroupSubRegionMatch(RegionGroup regionGroup, SubRegion subRegion) {
             this.regionGroup = regionGroup;
             this.subRegion = subRegion;
-        }
-
-        public RegionGroup getRegionGroup() {
-            return regionGroup;
-        }
-
-        public SubRegion getSubRegion() {
-            return subRegion;
         }
     }
 } 
