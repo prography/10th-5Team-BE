@@ -46,17 +46,6 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
     @Builder.Default
     private Boolean isRead = false; // 읽음 상태
 
-    /**
-     * 알림 단계 업데이트
-     */
-    public void updateAlertStage(int campaignCount) {
-        if (campaignCount >= 100) {
-            this.alertStage = 2; // 100개 알림 완료
-        } else if (campaignCount >= 10) {
-            this.alertStage = 1; // 10개 알림 완료
-        }
-    }
-
     public void markAsNotified() {
         this.isNotified = true;
     }
@@ -76,5 +65,16 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
         this.alertDate = alertDate;
         this.isNotified = false; // 알림 발송 상태 초기화
         updateAlertStage(campaignCount);
+    }
+
+    /**
+     * 알림 단계 업데이트
+     */
+    public void updateAlertStage(int campaignCount) {
+        if (campaignCount >= 100) {
+            this.alertStage = 2; // 100개 알림 완료
+        } else if (campaignCount >= 10) {
+            this.alertStage = 1; // 10개 알림 완료
+        }
     }
 } 
