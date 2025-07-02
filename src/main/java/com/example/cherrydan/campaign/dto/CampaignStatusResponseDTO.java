@@ -56,4 +56,43 @@ public class CampaignStatusResponseDTO {
         if (days < 0) return prefix + Math.abs(days) + "일 지남";
         return "오늘" + prefix.replace(" ", "");
     }
+
+    public static CampaignStatusResponseDTO fromEntity(com.example.cherrydan.campaign.domain.CampaignStatus status) {
+        String reviewerAnnouncementStatus = null;
+        switch (status.getStatus()) {
+            case APPLY:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getReviewerAnnouncement(), "apply");
+                break;
+            case SELECTED:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "selected");
+                break;
+            case REGISTERED:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "registered");
+                break;
+            case ENDED:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getResultAnnouncement(), "ended");
+                break;
+            default:
+                break;
+        }
+        return CampaignStatusResponseDTO.builder()
+                .id(status.getId())
+                .campaignId(status.getCampaign().getId())
+                .userId(status.getUser().getId())
+                .statusLabel(status.getStatus().getLabel())
+                .isActive(status.getIsActive())
+                .title(status.getCampaign().getTitle())
+                .detailUrl(status.getCampaign().getDetailUrl())
+                .imageUrl(status.getCampaign().getImageUrl())
+                .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
+                .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
+                .applicantCount(status.getCampaign().getApplicantCount())
+                .recruitCount(status.getCampaign().getRecruitCount())
+                .snsPlatforms(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getPlatforms(status.getCampaign()))
+                .campaignPlatform(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getCampaignPlatformLabel(status.getCampaign().getSourceSite()))
+                .benefit(status.getCampaign().getBenefit())
+                .contentSubmissionEnd(status.getCampaign().getContentSubmissionEnd())
+                .resultAnnouncement(status.getCampaign().getResultAnnouncement())
+                .build();
+    }
 } 

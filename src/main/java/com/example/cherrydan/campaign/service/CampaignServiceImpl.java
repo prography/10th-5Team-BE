@@ -100,7 +100,7 @@ public class CampaignServiceImpl implements CampaignService {
 
     private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns) {
         List<CampaignResponseDTO> content = campaigns.getContent().stream()
-            .map(this::toDTO)
+            .map(CampaignResponseDTO::fromEntity)
             .collect(Collectors.toList());
         
         return PageListResponseDTO.<CampaignResponseDTO>builder()
@@ -112,9 +112,5 @@ public class CampaignServiceImpl implements CampaignService {
             .hasNext(campaigns.hasNext())
             .hasPrevious(campaigns.hasPrevious())
             .build();
-    }
-
-    private CampaignResponseDTO toDTO(Campaign campaign) {
-        return CampaignResponseDTO.fromEntity(campaign);
     }
 } 

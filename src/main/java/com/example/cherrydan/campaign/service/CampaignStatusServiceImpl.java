@@ -56,7 +56,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                     .build();
         }
         CampaignStatus saved = campaignStatusRepository.save(status);
-        return toDTO(saved);
+        return CampaignStatusResponseDTO.fromEntity(saved);
     }
 
     @Override
@@ -75,7 +75,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
             status.setStatus(requestDTO.getStatus());
         }
         CampaignStatus saved = campaignStatusRepository.save(status);
-        return toDTO(saved);
+        return CampaignStatusResponseDTO.fromEntity(saved);
     }
 
     @Override
@@ -105,16 +105,16 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         for (CampaignStatus status : all) {
             switch (status.getStatus()) {
                 case APPLY:
-                    apply.add(toDTO(status));
+                    apply.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case SELECTED:
-                    selected.add(toDTO(status));
+                    selected.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case REGISTERED:
-                    registered.add(toDTO(status));
+                    registered.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case ENDED:
-                    ended.add(toDTO(status));
+                    ended.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 default:
                     break;
@@ -165,7 +165,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
         for (CampaignStatus status : all) {
             try {
-                CampaignStatusResponseDTO dto = toDTO(status);
+                CampaignStatusResponseDTO dto = CampaignStatusResponseDTO.fromEntity(status);
                 switch (status.getStatus()) {
                     case APPLY: apply.add(dto); break;
                     case SELECTED: selected.add(dto); break;
@@ -199,45 +199,6 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 .apply(filteredApply.stream().limit(4).toList())
                 .selected(filteredSelected.stream().limit(4).toList())
                 .registered(filteredRegistered.stream().limit(4).toList())
-                .build();
-    }
-
-    private CampaignStatusResponseDTO toDTO(CampaignStatus status) {
-        String reviewerAnnouncementStatus = null;
-        switch (status.getStatus()) {
-            case APPLY:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getReviewerAnnouncement(), "apply");
-                break;
-            case SELECTED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "selected");
-                break;
-            case REGISTERED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "registered");
-                break;
-            case ENDED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getResultAnnouncement(), "ended");
-                break;
-            default:
-                break;
-        }
-        return CampaignStatusResponseDTO.builder()
-                .id(status.getId())
-                .campaignId(status.getCampaign().getId())
-                .userId(status.getUser().getId())
-                .statusLabel(status.getStatus().getLabel())
-                .isActive(status.getIsActive())
-                .title(status.getCampaign().getTitle())
-                .detailUrl(status.getCampaign().getDetailUrl())
-                .imageUrl(status.getCampaign().getImageUrl())
-                .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
-                .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
-                .applicantCount(status.getCampaign().getApplicantCount())
-                .recruitCount(status.getCampaign().getRecruitCount())
-                .snsPlatforms(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getPlatforms(status.getCampaign()))
-                .campaignPlatform(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getCampaignPlatformLabel(status.getCampaign().getSourceSite()))
-                .benefit(status.getCampaign().getBenefit())
-                .contentSubmissionEnd(status.getCampaign().getContentSubmissionEnd())
-                .resultAnnouncement(status.getCampaign().getResultAnnouncement())
                 .build();
     }
 }
