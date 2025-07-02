@@ -26,13 +26,19 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
 
     @Transactional
-    public AccessTokenDTO refreshToken(RefreshTokenDTO refreshToken) {
+    public TokenDTO refreshToken(RefreshTokenDTO refreshToken) {
         // 토큰 검증 로직을 AuthService로 이동
         User user = validateAndGetUser(refreshToken.getRefreshToken());
 
-        String newAccessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        // 보안을 위해 Access Token과 Refresh Token을 모두 새로 발급
+        TokenDTO newTokens = tokenProvider.generateTokens(user.getId(), user.getEmail());
 
-        return new AccessTokenDTO(newAccessToken);
+        // 새로운 Refresh Token을 DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(user.getId(), newTokens.getRefreshToken());
+
+        log.info("토큰 갱신 완료: 사용자 ID = {}", user.getId());
+
+        return newTokens;
     }
 
     @Transactional
