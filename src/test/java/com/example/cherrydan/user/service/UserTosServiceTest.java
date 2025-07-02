@@ -27,8 +27,8 @@ class UserTosServiceTest {
 
     @Test
     void getUserTos_createsDefaultIfNotExists() {
-        User user = User.builder().id(1L).email("test@email.com").build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        User user = User.builder().id(1L).email("test@email.com").isActive(true).build();
+        when(userRepository.findActiveById(1L)).thenReturn(Optional.of(user));
 
         UserTosResponseDTO response = userTosService.getUserTos(1L);
 
@@ -37,16 +37,16 @@ class UserTosServiceTest {
         assertThat(response.getIsAgreed3rdParty()).isFalse();
         assertThat(response.getIsAgreedLocationInfo()).isFalse();
         assertThat(response.getIsAgreedAds()).isFalse();
-        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findActiveById(1L);
     }
 
     @Test
     void updateUserTos_updatesFields() {
-        User user = User.builder().id(1L).email("test@email.com").build();
+        User user = User.builder().id(1L).email("test@email.com").isActive(true).build();
         UserTos userTos = UserTos.builder().isAgreedServiceUsage(true).isAgreedPrivateInfo(true).build();
         user.setUserTos(userTos);
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(userRepository.findActiveById(1L)).thenReturn(Optional.of(user));
 
         UserTosRequestDTO request = new UserTosRequestDTO(false, false, true, true, true);
         UserTosResponseDTO response = userTosService.updateUserTos(1L, request);

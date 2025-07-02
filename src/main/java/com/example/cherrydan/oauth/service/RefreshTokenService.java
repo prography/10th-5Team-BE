@@ -37,15 +37,16 @@ public class RefreshTokenService {
     @Transactional(readOnly = true)
     public Optional<User> getUserByRefreshToken(String tokenValue) {
         return refreshTokenRepository.findByRefreshToken(tokenValue)
-                .map(RefreshToken::getUser);
+                .map(RefreshToken::getUser)
+                .filter(user -> user.getIsActive()); // 활성 사용자만 반환
     }
 
-    public void deleteRefreshToken(String tokenValue) {
+    public void deleteRefreshTokenByUserId(Long userId) {
         try {
-            refreshTokenRepository.deleteByRefreshToken(tokenValue);
-            log.info("Refresh Token 삭제 완료: 토큰 값 = {}", tokenValue);
+            refreshTokenRepository.deleteByUserId(userId);
+            log.info("사용자 ID {}의 Refresh Token 삭제 완료", userId);
         } catch (Exception e) {
-            log.error("Refresh Token 삭제 실패: {}", e.getMessage());
+            log.error("사용자 ID {}의 Refresh Token 삭제 실패: {}", userId, e.getMessage());
             throw new RefreshTokenException(ErrorMessage.REFRESH_TOKEN_DELETE_ERROR);
         }
     }

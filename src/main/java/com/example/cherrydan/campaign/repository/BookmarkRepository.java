@@ -12,6 +12,7 @@ import java.util.Optional;
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Optional<Bookmark> findByUserAndCampaign(User user, Campaign campaign);
     List<Bookmark> findAllByUserAndIsActiveTrue(User user);
+    Page<Bookmark> findAllByUserAndIsActiveTrue(User user, Pageable pageable);
     void deleteByUserAndCampaign(User user, Campaign campaign);
     Page<Bookmark> findByUserIdAndIsActiveTrue(Long userId, Pageable pageable);
 } 

@@ -32,9 +32,9 @@ public class Notice extends BaseTimeEntity {
     @Column(name = "category", nullable = false)
     private NoticeCategory category;
 
-    @Column(name = "is_pinned", nullable = false)
+    @Column(name = "is_hot", nullable = false)
     @Builder.Default
-    private Boolean isPinned = false;
+    private Boolean isHot = false;
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default

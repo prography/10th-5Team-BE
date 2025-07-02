@@ -12,9 +12,9 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface InquiryRepository extends JpaRepository<Inquiry, Long> {
 
-    @Query("SELECT i FROM Inquiry i WHERE i.user.id = :userId ORDER BY i.createdAt DESC")
+    @Query("SELECT i FROM Inquiry i WHERE i.user.id = :userId AND i.user.isActive = true ORDER BY i.createdAt DESC")
     Page<Inquiry> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId, Pageable pageable);
 
-    @Query("SELECT i FROM Inquiry i WHERE i.user.id = :userId AND i.status = :status ORDER BY i.createdAt DESC")
+    @Query("SELECT i FROM Inquiry i WHERE i.user.id = :userId AND i.status = :status AND i.user.isActive = true ORDER BY i.createdAt DESC")
     Page<Inquiry> findByUserIdAndStatusOrderByCreatedAtDesc(@Param("userId") Long userId, @Param("status") InquiryStatus status, Pageable pageable);
 }

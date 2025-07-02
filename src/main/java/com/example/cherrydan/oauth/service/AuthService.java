@@ -3,6 +3,7 @@ package com.example.cherrydan.oauth.service;
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
+
 import com.example.cherrydan.oauth.dto.AccessTokenDTO;
 import com.example.cherrydan.oauth.dto.RefreshTokenDTO;
 import com.example.cherrydan.oauth.dto.TokenDTO;
@@ -35,12 +36,12 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(RefreshTokenDTO refreshToken) {
-        if (refreshToken != null) {
-            refreshTokenService.deleteRefreshToken(refreshToken.getRefreshToken());
-            log.info("로그아웃 완료");
-        }
+    public void logout(Long userId) {
+        refreshTokenService.deleteRefreshTokenByUserId(userId);
+        log.info("사용자 {} 로그아웃 완료", userId);
     }
+
+
 
     // 공통 검증 로직
     private User validateAndGetUser(String refreshToken) {

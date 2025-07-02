@@ -12,5 +12,11 @@ import lombok.NoArgsConstructor;
 public class AppleLoginRequest {
     
     @Schema(description = "Apple Identity Token (JWT)", example = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9...", required = true)
-    private String identityToken;
+    private String accessToken;
+    
+    @Schema(description = "FCM 토큰", example = "fcm_token_here")
+    private String fcmToken;
+    
+    @Schema(description = "디바이스 타입", example = "ios")
+    private String deviceType;
 }

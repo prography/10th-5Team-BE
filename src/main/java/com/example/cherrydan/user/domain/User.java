@@ -34,14 +34,19 @@ public class User extends BaseTimeEntity {
     
     private String email;
     
+    @Column(name = "birth_year")
+    private Integer birthYear;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(length = 10)
+    private Gender gender;
+    
     @Column(name = "social_id")
     private String socialId;
     
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     private AuthProvider provider;
-    
-    private String uuid;
     
     @Column(name = "last_login")
     private String lastLogin;
@@ -68,6 +73,11 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     private List<UserKeyword> keywords = new ArrayList<>();
 
+    // 소프트 삭제를 위한 활성 상태 필드
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
+
     // OAuth 정보 업데이트 (기존 사용자)
     public void updateOAuth2Info(String name, String picture) {
         this.name = name;
@@ -76,5 +86,20 @@ public class User extends BaseTimeEntity {
 
     public String getMaskedEmail() {
         return MaskingUtil.maskEmail(this.email);
+    }
+
+    // 소프트 삭제
+    public void softDelete() {
+        this.isActive = false;
+    }
+
+    // 계정 복구
+    public void restore() {
+        this.isActive = true;
+    }
+
+    // 활성 상태 확인
+    public boolean isDeleted() {
+        return !this.isActive;
     }
 }

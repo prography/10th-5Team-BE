@@ -26,8 +26,8 @@ class PushSettingsServiceTest {
 
     @Test
     void createAndGetPushSettings() {
-        User user = User.builder().id(1L).email("push@email.com").build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        User user = User.builder().id(1L).email("push@email.com").isActive(true).build();
+        when(userRepository.findActiveById(1L)).thenReturn(Optional.of(user));
 
         PushSettingsResponseDTO response = pushSettingsService.getUserPushSettings(1L);
 
@@ -36,13 +36,13 @@ class PushSettingsServiceTest {
         assertThat(response.getServiceEnabled()).isTrue();
         assertThat(response.getMarketingEnabled()).isTrue();
         assertThat(response.getPushEnabled()).isTrue();
-        verify(userRepository, times(1)).findById(1L);
+        verify(userRepository, times(1)).findActiveById(1L);
     }
 
     @Test
     void updatePushSettings() {
-        User user = User.builder().id(1L).email("push@email.com").build();
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        User user = User.builder().id(1L).email("push@email.com").isActive(true).build();
+        when(userRepository.findActiveById(1L)).thenReturn(Optional.of(user));
 
         PushSettingsRequestDTO request = new PushSettingsRequestDTO(false, false, true, false, false);
         PushSettingsResponseDTO response = pushSettingsService.updatePushSettings(1L, request);
