@@ -17,9 +17,9 @@ public class CampaignStatusPopupResponseDTO {
     @Schema(description = "등록 상태 총 개수", example = "1")
     private long registeredTotal;
     @Schema(description = "신청 상태 리스트")
-    private List<CampaignStatusResponseDTO> apply;
+    private List<CampaignStatusPopupItemDTO> apply;
     @Schema(description = "선정 상태 리스트")
-    private List<CampaignStatusResponseDTO> selected;
+    private List<CampaignStatusPopupItemDTO> selected;
     @Schema(description = "등록 상태 리스트")
-    private List<CampaignStatusResponseDTO> registered;
+    private List<CampaignStatusPopupItemDTO> registered;
 }
