@@ -4,8 +4,8 @@ import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.oauth.dto.AccessTokenDTO;
 import com.example.cherrydan.oauth.dto.RefreshTokenDTO;
+import com.example.cherrydan.oauth.dto.TokenDTO;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
@@ -34,10 +34,17 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(
+            summary = "토큰 갱신", 
+            description = """
+                    리프레쉬 토큰을 사용하여 새로운 액세스 토큰과 리프레쉬 토큰을 발급받습니다.
+                    보안을 위해 리프레쉬 토큰도 함께 갱신됩니다.
+                    """
+    )
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AccessTokenDTO>> refresh(@RequestBody RefreshTokenDTO refreshToken) {
-        AccessTokenDTO newAccessToken = authService.refreshToken(refreshToken);
-        return ResponseEntity.ok(ApiResponse.success("토큰 갱신이 완료되었습니다.", newAccessToken));
+    public ResponseEntity<ApiResponse<TokenDTO>> refresh(@RequestBody RefreshTokenDTO refreshToken) {
+        TokenDTO newTokens = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(ApiResponse.success("토큰 갱신이 완료되었습니다.", newTokens));
     }
 
     @Operation(summary = "로그아웃 처리", description = "현재 로그인한 사용자의 리프레쉬 토큰을 삭제합니다")
