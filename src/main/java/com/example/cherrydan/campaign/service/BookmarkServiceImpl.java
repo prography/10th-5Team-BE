@@ -16,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -60,13 +62,11 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<BookmarkResponseDTO> getBookmarks(Long userId) {
+    public Page<BookmarkResponseDTO> getBookmarks(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        return bookmarkRepository.findAllByUserAndIsActiveTrue(user).stream()
-                .map(BookmarkResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+            .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrue(userId, pageable);
+        return bookmarks.map(BookmarkResponseDTO::fromEntity);
     }
 
     @Override
