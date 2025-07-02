@@ -14,6 +14,8 @@ public class CampaignStatusListResponseDTO {
     private List<CampaignStatusResponseDTO> apply;
     @Schema(description = "선정 상태 리스트")
     private List<CampaignStatusResponseDTO> selected;
+    @Schema(description = "미선정 상태 리스트")
+    private List<CampaignStatusResponseDTO> notSelected;
     @Schema(description = "등록 상태 리스트")
     private List<CampaignStatusResponseDTO> registered;
     @Schema(description = "종료 상태 리스트")

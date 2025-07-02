@@ -19,7 +19,6 @@ public class CampaignStatusResponseDTO {
     private Long userId;
     private String reviewerAnnouncementStatus;
     private String statusLabel;
-    private Boolean isActive;
     private String title;
     private String benefit;
     private String detailUrl;
@@ -46,6 +45,7 @@ public class CampaignStatusResponseDTO {
                 prefix = "발표 ";
                 break;
             case "selected":
+            case "not_selected":
                 prefix = "방문 마감 ";
                 break;
             case "registered":
@@ -65,6 +65,9 @@ public class CampaignStatusResponseDTO {
                 break;
             case SELECTED:
                 reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "selected");
+                break; 
+            case NOT_SELECTED:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "not_selected");
                 break;
             case REGISTERED:
                 reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "registered");
@@ -80,7 +83,6 @@ public class CampaignStatusResponseDTO {
                 .campaignId(status.getCampaign().getId())
                 .userId(status.getUser().getId())
                 .statusLabel(status.getStatus().getLabel())
-                .isActive(status.getIsActive())
                 .title(status.getCampaign().getTitle())
                 .detailUrl(status.getCampaign().getDetailUrl())
                 .imageUrl(status.getCampaign().getImageUrl())
