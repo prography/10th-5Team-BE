@@ -1,7 +1,7 @@
 package com.example.cherrydan.notice.controller;
 
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.notice.dto.NoticeResponseDTO;
 import com.example.cherrydan.notice.service.NoticeService;
 import com.example.cherrydan.notice.service.NoticeBannerService;
@@ -53,12 +53,12 @@ public class NoticeController {
             """
     )
     @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<NoticeResponseDTO>>> getNotices(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<NoticeResponseDTO>>> getNotices(
             @Parameter(description = "페이지네이션 정보") 
             @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable
     ) {
         Page<NoticeResponseDTO> notices = noticeService.getActiveNotices(pageable);
-        PageResponse<NoticeResponseDTO> response = PageResponse.from(notices);
+        PageListResponseDTO<NoticeResponseDTO> response = PageListResponseDTO.from(notices);
         return ResponseEntity.ok(ApiResponse.success("공지사항 목록 조회가 완료되었습니다.", response));
     }
 

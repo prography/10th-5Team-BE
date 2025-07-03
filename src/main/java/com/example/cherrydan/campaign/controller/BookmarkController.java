@@ -3,7 +3,7 @@ package com.example.cherrydan.campaign.controller;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -58,12 +58,12 @@ public class BookmarkController {
             """
     )
     @GetMapping("/bookmarks")
-    public ApiResponse<PageResponse<BookmarkResponseDTO>> getBookmarks(
+    public ApiResponse<PageListResponseDTO<BookmarkResponseDTO>> getBookmarks(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
         Page<BookmarkResponseDTO> bookmarks = bookmarkService.getBookmarks(currentUser.getId(), pageable);
-        PageResponse<BookmarkResponseDTO> response = PageResponse.from(bookmarks);
+        PageListResponseDTO<BookmarkResponseDTO> response = PageListResponseDTO.from(bookmarks);
         return ApiResponse.success("북마크 목록 조회 성공", response);
     }
 

@@ -3,7 +3,7 @@ package com.example.cherrydan.activity.controller;
 import com.example.cherrydan.activity.dto.ActivityNotificationResponseDTO;
 import com.example.cherrydan.activity.service.ActivityService;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -52,12 +52,12 @@ public class ActivityController {
             """
     )
     @GetMapping("/notifications")
-    public ApiResponse<PageResponse<ActivityNotificationResponseDTO>> getActivityNotifications(
+    public ApiResponse<PageListResponseDTO<ActivityNotificationResponseDTO>> getActivityNotifications(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @PageableDefault(size = 20, sort = "activityNotifiedAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ActivityNotificationResponseDTO> notifications = activityService.getActivityNotifications(currentUser.getId(), pageable);
-        PageResponse<ActivityNotificationResponseDTO> response = PageResponse.from(notifications);
+        PageListResponseDTO<ActivityNotificationResponseDTO> response = PageListResponseDTO.from(notifications);
         return ApiResponse.success("활동 알림 목록 조회 성공", response);
     }
     

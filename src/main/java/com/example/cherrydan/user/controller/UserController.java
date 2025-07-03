@@ -3,7 +3,7 @@ package com.example.cherrydan.user.controller;
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.UserDto;
@@ -104,7 +104,7 @@ public class UserController {
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @GetMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<PageResponse<UserKeywordResponseDTO>>> getMyKeywords(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<UserKeywordResponseDTO>>> getMyKeywords(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @Parameter(description = "페이지네이션 정보")
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
@@ -112,7 +112,7 @@ public class UserController {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         Page<UserKeywordResponseDTO> keywords = userKeywordService.getKeywords(currentUser.getId(), pageable)
             .map(UserKeywordResponseDTO::fromKeyword);
-        PageResponse<UserKeywordResponseDTO> response = PageResponse.from(keywords);
+        PageListResponseDTO<UserKeywordResponseDTO> response = PageListResponseDTO.from(keywords);
         return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", response));
     }
 
