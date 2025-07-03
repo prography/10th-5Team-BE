@@ -4,6 +4,7 @@ import com.example.cherrydan.notice.domain.Notice;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -13,7 +14,7 @@ public class NoticeResponseDTO {
     private Long id;
     private String title;
     private String content;
-    private String imageUrl;
+    private List<String> imageUrls;
     private String category;
     private Boolean isHot;
     private Integer viewCount;
@@ -26,7 +27,7 @@ public class NoticeResponseDTO {
                 .id(notice.getId())
                 .title(notice.getTitle())
                 .content(notice.getContent())
-                .imageUrl(notice.getImageUrl())
+                .imageUrls(notice.getImageUrls())
                 .category(notice.getCategory().getDescription())
                 .isHot(notice.getIsHot())
                 .viewCount(notice.getViewCount())
