@@ -1,6 +1,5 @@
 package com.example.cherrydan.user.controller;
 
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.common.response.PageResponse;

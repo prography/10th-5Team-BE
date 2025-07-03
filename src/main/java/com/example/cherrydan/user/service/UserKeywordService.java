@@ -9,7 +9,6 @@ import com.example.cherrydan.user.repository.UserKeywordRepository;
 import com.example.cherrydan.user.repository.UserRepository;
 import com.example.cherrydan.user.repository.KeywordCampaignAlertRepository;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.fcm.service.NotificationService;
 import com.example.cherrydan.fcm.dto.NotificationRequest;
 import lombok.RequiredArgsConstructor;
