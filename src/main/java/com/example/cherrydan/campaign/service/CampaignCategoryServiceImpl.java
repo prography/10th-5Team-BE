@@ -193,7 +193,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
 
-        Page<Campaign> campaigns = campaignRepository.findActiveCampaigns(pageable);
+        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         List<CampaignResponseDTO> content = campaigns.getContent().stream()
                 .map(CampaignResponseDTO::fromEntity)
                 .collect(Collectors.toList());

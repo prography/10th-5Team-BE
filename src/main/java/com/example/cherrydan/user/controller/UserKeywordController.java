@@ -34,25 +34,19 @@ public class UserKeywordController {
         description = """
             사용자의 키워드 알림 히스토리를 조회합니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 20,
-              "sort": "alertDate,desc"
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20&sort=alertDate,desc
+            - ?page=1&size=10&sort=alertDate,asc
             
             **정렬 가능한 필드:**
             - alertDate: 알림 발송 날짜 (기본값, DESC)
             
-            **정렬 형태 (둘 다 지원):**
-            - String 형태: "alertDate,desc"
-            - Array 형태: ["alertDate,desc"]
+            **여러 정렬 조건 (쿼리 파라미터):**
+            - ?sort=alertDate,desc&sort=id,asc (복수 정렬)
+            - ?sort=alertDate,desc (단일 정렬, 기본값)
+            - ?sort=alertDate,asc (오래된 순)
             
-            **정렬 예시:**
-            - "alertDate,desc" (최신순, 기본값)
-            - "alertDate,asc" (오래된 순)
+            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
     @GetMapping("/alerts")
@@ -71,15 +65,13 @@ public class UserKeywordController {
         description = """
             특정 키워드로 매칭된 캠페인 목록을 조회합니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 20
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20&keyword=키워드
+            - ?page=1&size=10&keyword=캠페인
             
             **정렬**: 캠페인 생성 시각 내림차순 (고정)
+            
+            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
     @GetMapping("/campaigns/personalized/keyword")

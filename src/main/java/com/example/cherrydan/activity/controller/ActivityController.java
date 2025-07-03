@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -30,31 +31,25 @@ public class ActivityController {
         description = """
             사용자의 활동 알림 목록을 조회합니다. 캠페인 타입에 따라 알림 타입이 구분됩니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 10,
-              "sort": "activityNotifiedAt,desc"
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20&sort=activityNotifiedAt,desc
+            - ?page=1&size=10&sort=activityNotifiedAt,asc
             
             **정렬 가능한 필드:**
             - activityNotifiedAt: 활동 알림 생성 시각 (기본값, DESC)
             
-            **정렬 형태 (둘 다 지원):**
-            - String 형태: "activityNotifiedAt,desc"
-            - Array 형태: ["activityNotifiedAt,desc"]
+            **여러 정렬 조건 (쿼리 파라미터):**
+            - ?sort=activityNotifiedAt,desc&sort=id,asc (복수 정렬)
+            - ?sort=activityNotifiedAt,desc (단일 정렬, 기본값)
+            - ?sort=activityNotifiedAt,asc (오래된 순)
             
-            **정렬 예시:**
-            - "activityNotifiedAt,desc" (최신순, 기본값)
-            - "activityNotifiedAt,asc" (오래된 순)
+            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
     @GetMapping("/notifications")
     public ApiResponse<PageListResponseDTO<ActivityNotificationResponseDTO>> getActivityNotifications(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PageableDefault(size = 20, sort = "activityNotifiedAt", direction = org.springframework.data.domain.Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 20, sort = "activityNotifiedAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<ActivityNotificationResponseDTO> notifications = activityService.getActivityNotifications(currentUser.getId(), pageable);
         PageListResponseDTO<ActivityNotificationResponseDTO> response = PageListResponseDTO.from(notifications);

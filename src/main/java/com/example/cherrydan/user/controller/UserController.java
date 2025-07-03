@@ -91,15 +91,12 @@ public class UserController {
         description = """
             사용자가 등록한 키워드 목록을 조회합니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 20
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20
+            - ?page=1&size=10
             
             **정렬**: 키워드 등록 시각 내림차순 (고정)
+
             """,
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
