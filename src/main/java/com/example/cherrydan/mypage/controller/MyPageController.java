@@ -104,25 +104,19 @@ public class MyPageController {
         description = """
             사용자가 등록한 문의 목록을 조회합니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 20,
-              "sort": "updatedAt,desc"
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20&sort=updatedAt,desc
+            - ?page=1&size=10&sort=updatedAt,asc
             
             **정렬 가능한 필드:**
             - updatedAt: 수정 시각 (기본값, DESC)
             
-            **정렬 형태 (둘 다 지원):**
-            - String 형태: "updatedAt,desc"
-            - Array 형태: ["updatedAt,desc"]
+            **여러 정렬 조건 (쿼리 파라미터):**
+            - ?sort=updatedAt,desc&sort=id,asc (복수 정렬)
+            - ?sort=updatedAt,desc (단일 정렬, 기본값)
+            - ?sort=updatedAt,asc (오래된 순)
             
-            **정렬 예시:**
-            - "updatedAt,desc" (최신 수정순, 기본값)
-            - "updatedAt,asc" (오래된 수정순)
+            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
     @GetMapping("/inquiries")

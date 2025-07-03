@@ -53,15 +53,13 @@ public class BookmarkController {
         description = """
             내가 북마크(찜)한 캠페인 목록을 조회합니다.
             
-            **Request Body 예시:**
-            ```json
-            {
-              "page": 0,
-              "size": 20
-            }
-            ```
+            **쿼리 파라미터 예시:**
+            - ?page=0&size=20
+            - ?page=1&size=10
             
             **정렬**: 북마크 생성 시각 내림차순 (고정)
+            
+            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
     @GetMapping("/bookmarks")
