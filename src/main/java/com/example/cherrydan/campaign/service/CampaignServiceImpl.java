@@ -23,7 +23,7 @@ public class CampaignServiceImpl implements CampaignService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String region, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String sort, Pageable pageable) {
         Page<Campaign> campaigns;
         
         if (type != null) {

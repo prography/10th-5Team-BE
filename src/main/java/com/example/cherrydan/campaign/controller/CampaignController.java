@@ -31,8 +31,6 @@ public class CampaignController {
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsByType(
         @Parameter(description = "캠페인 타입 (all, product, region, reporter, etc)", example = "all")
         @RequestParam(required = false, defaultValue = "all") String type,
-        @Parameter(description = "지역명 (선택)")
-        @RequestParam(required = false) String region,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
         @RequestParam(required = false, defaultValue = "popular") String sort,
         @Parameter(description = "페이지 번호", example = "0")
@@ -48,7 +46,7 @@ public class CampaignController {
         } catch (IllegalArgumentException e) {
             campaignType = null;
         }
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(campaignType, region, sort, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(campaignType, sort, pageable);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
