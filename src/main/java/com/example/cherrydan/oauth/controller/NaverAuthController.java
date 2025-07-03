@@ -99,7 +99,7 @@ public class NaverAuthController {
         
         // 5. Refresh Token을 DB에 저장
         refreshTokenService.saveOrUpdateRefreshToken(user.getId(), tokenDTO.getRefreshToken());
-
+        
         log.info("Naver 모바일 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
         
         return ResponseEntity.ok(ApiResponse.success(new LoginResponse(tokenDTO, user.getId())));

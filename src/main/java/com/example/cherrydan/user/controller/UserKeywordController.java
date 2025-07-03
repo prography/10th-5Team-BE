@@ -1,9 +1,8 @@
 package com.example.cherrydan.user.controller;
 
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
@@ -57,12 +56,12 @@ public class UserKeywordController {
             """
     )
     @GetMapping("/alerts")
-    public ApiResponse<PageResponse<KeywordCampaignAlertResponseDTO>> getUserKeywordAlerts(
+    public ApiResponse<PageListResponseDTO<KeywordCampaignAlertResponseDTO>> getUserKeywordAlerts(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @PageableDefault(size = 20, sort = "alertDate") Pageable pageable
     ) {
         Page<KeywordCampaignAlertResponseDTO> alerts = userKeywordService.getUserKeywordAlerts(currentUser.getId(), pageable);
-        PageResponse<KeywordCampaignAlertResponseDTO> response = PageResponse.from(alerts);
+        PageListResponseDTO<KeywordCampaignAlertResponseDTO> response = PageListResponseDTO.from(alerts);
         return ApiResponse.success("키워드 알림 목록 조회 성공", response);
     }
     
@@ -84,13 +83,13 @@ public class UserKeywordController {
             """
     )
     @GetMapping("/campaigns/personalized/keyword")
-    public ApiResponse<PageResponse<CampaignResponseDTO>> getPersonalizedCampaignsByKeyword(
+    public ApiResponse<PageListResponseDTO<CampaignResponseDTO>> getPersonalizedCampaignsByKeyword(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @RequestParam String keyword,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(currentUser.getId(), keyword, pageable);
-        PageResponse<CampaignResponseDTO> response = PageResponse.from(campaigns);
+        PageListResponseDTO<CampaignResponseDTO> response = PageListResponseDTO.from(campaigns);
         return ApiResponse.success("맞춤형 캠페인 조회 성공", response);
     }
 

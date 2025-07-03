@@ -127,11 +127,13 @@ public class MyPageController {
     )
     @GetMapping("/inquiries")
     public ResponseEntity<ApiResponse<PageListResponseDTO<InquiryResponseDTO>>> getMyInquiries(
-            @AuthenticationPrincipal UserDetailsImpl currentUser,
-            Pageable pageable) {
-        Page<InquiryResponseDTO> pageResult = inquiryService.getUserInquiries(currentUser.getId(), pageable);
-        PageListResponseDTO<InquiryResponseDTO> result = PageListResponseDTO.from(pageResult);
-        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", result));
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @Parameter(description = "페이지네이션 정보")
+            @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable
+    ) {
+        Page<InquiryResponseDTO> inquiries = inquiryService.getUserInquiries(currentUser.getId(), pageable);
+        PageListResponseDTO<InquiryResponseDTO> response = PageListResponseDTO.from(inquiries);
+        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", response));
     }
 
     @Operation(summary = "1:1 문의 등록")
