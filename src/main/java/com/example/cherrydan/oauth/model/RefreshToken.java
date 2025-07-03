@@ -9,6 +9,7 @@ import lombok.*;
 @Entity
 @Table(name = "auth_token")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -17,11 +17,13 @@ import com.example.cherrydan.user.service.UserTosService;
 import com.example.cherrydan.version.dto.AppVersionResponseDTO;
 import com.example.cherrydan.version.service.AppVersionService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -78,7 +80,7 @@ public class MyPageController {
     @PatchMapping("/push-settings/toggle")
     public ResponseEntity<ApiResponse<PushSettingsResponseDTO>> togglePushEnabled(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @RequestParam boolean enabled) {
+            @RequestParam("enabled") boolean enabled) {
         PushSettingsResponseDTO response = pushSettingsService.togglePushEnabled(currentUser.getId(), enabled);
         return ResponseEntity.ok(ApiResponse.success("푸시 알림 전체 설정이 변경되었습니다.", response));
     }
@@ -92,19 +94,46 @@ public class MyPageController {
 
     @Operation(summary = "내 문의 상세 조회")
     @GetMapping("/inquiries/{id}")
-    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<InquiryResponseDTO>> getMyInquiryDetail(@PathVariable("id") Long id) {
         InquiryResponseDTO response = inquiryService.getInquiryDetail(id);
         return ResponseEntity.ok(ApiResponse.success("문의 상세 조회가 완료되었습니다.", response));
     }
 
-    @Operation(summary = "내 문의 목록 조회")
+    @Operation(
+        summary = "내 문의 목록 조회",
+        description = """
+            사용자가 등록한 문의 목록을 조회합니다.
+            
+            **Request Body 예시:**
+            ```json
+            {
+              "page": 0,
+              "size": 20,
+              "sort": "updatedAt,desc"
+            }
+            ```
+            
+            **정렬 가능한 필드:**
+            - updatedAt: 수정 시각 (기본값, DESC)
+            
+            **정렬 형태 (둘 다 지원):**
+            - String 형태: "updatedAt,desc"
+            - Array 형태: ["updatedAt,desc"]
+            
+            **정렬 예시:**
+            - "updatedAt,desc" (최신 수정순, 기본값)
+            - "updatedAt,asc" (오래된 수정순)
+            """
+    )
     @GetMapping("/inquiries")
     public ResponseEntity<ApiResponse<PageListResponseDTO<InquiryResponseDTO>>> getMyInquiries(
-            @AuthenticationPrincipal UserDetailsImpl currentUser,
-            Pageable pageable) {
-        Page<InquiryResponseDTO> pageResult = inquiryService.getUserInquiries(currentUser.getId(), pageable);
-        PageListResponseDTO<InquiryResponseDTO> result = PageListResponseDTO.from(pageResult);
-        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", result));
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
+            @Parameter(description = "페이지네이션 정보")
+            @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable
+    ) {
+        Page<InquiryResponseDTO> inquiries = inquiryService.getUserInquiries(currentUser.getId(), pageable);
+        PageListResponseDTO<InquiryResponseDTO> response = PageListResponseDTO.from(inquiries);
+        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", response));
     }
 
     @Operation(summary = "1:1 문의 등록")

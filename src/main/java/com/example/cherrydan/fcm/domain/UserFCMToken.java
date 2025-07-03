@@ -41,12 +41,6 @@ public class UserFCMToken extends BaseTimeEntity {
     private String fcmToken;
 
     /**
-     * 고유 식별자 (UUID)
-     */
-    @Column(name = "uuid", nullable = false, unique = true, length = 36)
-    private String uuid;
-
-    /**
      * 디바이스 모델명 (예: iPhone 14 Pro, Galaxy S23)
      */
     @Column(name = "device_model", length = 100)

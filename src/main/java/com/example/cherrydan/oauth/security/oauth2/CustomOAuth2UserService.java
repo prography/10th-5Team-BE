@@ -2,6 +2,8 @@ package com.example.cherrydan.oauth.security.oauth2;
 
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.fcm.dto.FCMTokenRequest;
+import com.example.cherrydan.fcm.service.FCMTokenService;
 import com.example.cherrydan.oauth.model.AuthProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
@@ -32,6 +34,7 @@ import java.util.Optional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final FCMTokenService fcmTokenService;
 
     /**
      * OAuth2 사용자 정보 로드
@@ -74,13 +77,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * Apple 사용자 정보 처리 (Apple용 별도 메서드)
      * Process Apple user information manually (not through OAuth2 flow)
      */
-    public User processAppleUser(OAuth2UserInfo appleUserInfo) {
+    public User processAppleUser(OAuth2UserInfo appleUserInfo, String fcmToken, String deviceType) {
         try {
             // 이메일 확인 (Validate email)
             validateEmail(appleUserInfo);
 
             // 사용자 조회 또는 생성 (Find or create user)
-            return findOrCreateUser(appleUserInfo, "apple");
+            User user = findOrCreateUser(appleUserInfo, "apple");
+            
+            // FCM 토큰 등록 (선택적)
+            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+            
+            return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -92,14 +100,59 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     /**
      * Google 사용자 정보 처리 (ID Token 기반)
      */
-    public User processGoogleUser(OAuth2UserInfo googleUserInfo) {
+    public User processGoogleUser(OAuth2UserInfo googleUserInfo, String fcmToken, String deviceType) {
         try {
             validateEmail(googleUserInfo);
-            return findOrCreateUser(googleUserInfo, "google");
+            User user = findOrCreateUser(googleUserInfo, "google");
+            
+            // FCM 토큰 등록 (선택적)
+            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+            
+            return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
             throw ex;
         } catch (Exception ex) {
             log.error("Google 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Kakao 사용자 정보 처리 (액세스 토큰 기반)
+     */
+    public User processKakaoUser(OAuth2UserInfo kakaoUserInfo, String fcmToken, String deviceType) {
+        try {
+            validateEmail(kakaoUserInfo);
+            User user = findOrCreateUser(kakaoUserInfo, "kakao");
+            
+            // FCM 토큰 등록 (선택적)
+            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+            
+            return user;
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Kakao 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Naver 사용자 정보 처리 (액세스 토큰 기반)
+     */
+    public User processNaverUser(OAuth2UserInfo naverUserInfo, String fcmToken, String deviceType) {
+        try {
+            validateEmail(naverUserInfo);
+            User user = findOrCreateUser(naverUserInfo, "naver");
+            
+            // FCM 토큰 등록 (선택적)
+            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+            
+            return user;
+        } catch (OAuth2AuthenticationProcessingException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            log.error("Naver 사용자 처리 중 오류 발생: {}", ex.getMessage());
             throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
         }
     }
@@ -121,12 +174,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private User findOrCreateUser(OAuth2UserInfo oAuth2UserInfo, String registrationId) {
         AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
         
-        // 먼저 이메일로 사용자 조회
+        // 삭제된 사용자 포함하여 이메일로 사용자 조회
         Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());
 
         // 이메일로 사용자를 찾았으면
         if (userOptional.isPresent()) {
             User existingUser = userOptional.get();
+            
+            // 소프트 삭제된 사용자라면 로그인 거부
+            if (existingUser.isDeleted()) {
+                throw new OAuth2AuthenticationProcessingException(
+                        "탈퇴한 계정입니다. 계정 복구를 원하시면 고객센터에 문의해 주세요."
+                );
+            }
             
             // 같은 제공자가 아니면 오류 발생
             if (existingUser.getProvider() != null && !existingUser.getProvider().equals(provider)) {
@@ -171,5 +231,25 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         log.info("기존 OAuth2 사용자 정보 업데이트: {}", existingUser.getEmail());
         return userRepository.save(existingUser);
+    }
+
+    /**
+     * FCM 토큰 등록 (선택적)
+     * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
+     */
+    private void registerFCMTokenIfPresent(Long userId, String fcmToken, String deviceType) {
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+            try {
+                FCMTokenRequest fcmRequest = FCMTokenRequest.builder()
+                        .userId(userId)
+                        .fcmToken(fcmToken)
+                        .deviceType(deviceType)
+                        .build();
+                fcmTokenService.registerOrUpdateToken(fcmRequest);
+                log.info("FCM 토큰 등록 성공: userId={}, deviceType={}", userId, deviceType);
+            } catch (Exception e) {
+                log.warn("FCM 토큰 등록 실패 (로그인은 성공): userId={}, error={}", userId, e.getMessage());
+            }
+        }
     }
 }

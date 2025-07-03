@@ -3,6 +3,7 @@ package com.example.cherrydan.oauth.service;
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
+
 import com.example.cherrydan.oauth.dto.AccessTokenDTO;
 import com.example.cherrydan.oauth.dto.RefreshTokenDTO;
 import com.example.cherrydan.oauth.dto.TokenDTO;
@@ -25,22 +26,28 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
 
     @Transactional
-    public AccessTokenDTO refreshToken(RefreshTokenDTO refreshToken) {
+    public TokenDTO refreshToken(RefreshTokenDTO refreshToken) {
         // 토큰 검증 로직을 AuthService로 이동
         User user = validateAndGetUser(refreshToken.getRefreshToken());
 
-        String newAccessToken = tokenProvider.generateAccessToken(user.getId(), user.getEmail());
+        // 보안을 위해 Access Token과 Refresh Token을 모두 새로 발급
+        TokenDTO newTokens = tokenProvider.generateTokens(user.getId(), user.getEmail());
 
-        return new AccessTokenDTO(newAccessToken);
+        // 새로운 Refresh Token을 DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(user.getId(), newTokens.getRefreshToken());
+
+        log.info("토큰 갱신 완료: 사용자 ID = {}", user.getId());
+
+        return newTokens;
     }
 
     @Transactional
-    public void logout(RefreshTokenDTO refreshToken) {
-        if (refreshToken != null) {
-            refreshTokenService.deleteRefreshToken(refreshToken.getRefreshToken());
-            log.info("로그아웃 완료");
-        }
+    public void logout(Long userId) {
+        refreshTokenService.deleteRefreshTokenByUserId(userId);
+        log.info("사용자 {} 로그아웃 완료", userId);
     }
+
+
 
     // 공통 검증 로직
     private User validateAndGetUser(String refreshToken) {

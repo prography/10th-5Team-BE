@@ -12,6 +12,8 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -34,7 +36,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void addBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -56,7 +58,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void cancelBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -94,7 +96,7 @@ public class BookmarkServiceImpl implements BookmarkService {
     @Override
     @Transactional
     public void deleteBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));

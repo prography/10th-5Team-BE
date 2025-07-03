@@ -25,7 +25,7 @@ public class UserTosService {
     public UserTosResponseDTO getUserTos(Long userId) {
         log.info("이용약관 동의 설정 조회 시작 - userId: {}", userId);
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserTos userTos = getOrCreateUserTos(user);
@@ -44,7 +44,7 @@ public class UserTosService {
             throw new UserException(ErrorMessage.INVALID_REQUEST);
         }
         
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         UserTos userTos = getOrCreateUserTos(user);

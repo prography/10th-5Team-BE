@@ -15,8 +15,9 @@ public class NoticeResponseDTO {
     private String content;
     private String imageUrl;
     private String category;
-    private Boolean isPinned;
+    private Boolean isHot;
     private Integer viewCount;
+    private Integer empathyCount;
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
 
@@ -27,8 +28,9 @@ public class NoticeResponseDTO {
                 .content(notice.getContent())
                 .imageUrl(notice.getImageUrl())
                 .category(notice.getCategory().getDescription())
-                .isPinned(notice.getIsPinned())
+                .isHot(notice.getIsHot())
                 .viewCount(notice.getViewCount())
+                .empathyCount(notice.getEmpathyCount())
                 .publishedAt(notice.getPublishedAt())
                 .createdAt(notice.getCreatedAt())
                 .build();

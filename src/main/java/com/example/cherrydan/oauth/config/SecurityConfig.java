@@ -38,14 +38,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 공개 경로
                         .requestMatchers("/", "/login", "/login.html", "/error", "/favicon.ico").permitAll()
-                        .requestMatchers("/index.html", "/oauth-test.html").permitAll()
+                        .requestMatchers("/index.html","/test.html").permitAll()
                         .requestMatchers("/api/auth/refresh", "/api/auth/logout", "/api/auth/me").permitAll()
-                        .requestMatchers("/api/test/public").permitAll()
+                        .requestMatchers("/api/test/**").permitAll() // 테스트용 엔드포인트 전체 허용
                         .requestMatchers("/admin/cleanup-tokens").permitAll() // 임시 관리자 엔드포인트
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // Apple 테스트 경로 허용
-                        .requestMatchers("/api/auth/apple/**").permitAll()
+                        .requestMatchers("/api/auth/apple/**","/api/auth/naver/**","/api/auth/kakao/**","/api/auth/google/**").permitAll()
                         .requestMatchers("/apple-login-test.html").permitAll()
                         // OAuth2 관련 경로
                         .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()

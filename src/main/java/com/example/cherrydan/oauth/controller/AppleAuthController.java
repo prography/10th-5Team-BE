@@ -3,15 +3,17 @@ package com.example.cherrydan.oauth.controller;
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.response.ApiResponse;
+
 import com.example.cherrydan.oauth.dto.AppleLoginRequest;
 import com.example.cherrydan.oauth.dto.LoginResponse;
 import com.example.cherrydan.oauth.dto.TokenDTO;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.oauth2.CustomOAuth2UserService;
 import com.example.cherrydan.oauth.security.oauth2.user.AppleOAuth2UserInfo;
+
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
 import com.example.cherrydan.oauth.service.AppleIdentityTokenService;
-import com.example.cherrydan.oauth.service.AuthService;
+import com.example.cherrydan.oauth.service.RefreshTokenService;
 import com.example.cherrydan.user.domain.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -33,6 +35,7 @@ public class AppleAuthController {
     private final AppleIdentityTokenService appleIdentityTokenService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/login")
     @Operation(summary = "Apple 로그인", description = "iOS에서 받은 Identity Token으로 Apple 로그인 처리")
@@ -41,17 +44,20 @@ public class AppleAuthController {
         validateAppleLoginRequest(request);
         
         // 2. Apple Identity Token 검증
-        Map<String, Object> userInfo = appleIdentityTokenService.verifyIdentityToken(request.getIdentityToken());
+        Map<String, Object> userInfo = appleIdentityTokenService.verifyIdentityToken(request.getAccessToken());
         
         // 3. OAuth2UserInfo 객체 생성 (JWT 정보 + iOS 정보 결합)
         OAuth2UserInfo oAuth2UserInfo = new AppleOAuth2UserInfo(userInfo);
         
         // 4. 사용자 조회 또는 생성 (CustomOAuth2UserService 사용)
-        User user = customOAuth2UserService.processAppleUser(oAuth2UserInfo);
+        User user = customOAuth2UserService.processAppleUser(oAuth2UserInfo, request.getFcmToken(), request.getDeviceType());
         
         // 5. Access Token과 Refresh Token 생성
         TokenDTO tokenDTO = jwtTokenProvider.generateTokens(user.getId(), user.getEmail());
         
+        // 6. Refresh Token을 DB에 저장
+        refreshTokenService.saveOrUpdateRefreshToken(user.getId(), tokenDTO.getRefreshToken());
+
         log.info("Apple 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
 
         return ResponseEntity.ok(ApiResponse.success(new LoginResponse(tokenDTO,user.getId())));
@@ -65,12 +71,12 @@ public class AppleAuthController {
             throw new AuthException(ErrorMessage.INVALID_REQUEST);
         }
         
-        if (!StringUtils.hasText(request.getIdentityToken())) {
+        if (!StringUtils.hasText(request.getAccessToken())) {
             throw new AuthException(ErrorMessage.APPLE_USER_INFO_MISSING);
         }
         
         // JWT 형식 기본 검증 (3개 파트로 구성되어야 함)
-        String[] tokenParts = request.getIdentityToken().split("\\.");
+        String[] tokenParts = request.getAccessToken().split("\\.");
         if (tokenParts.length != 3) {
             throw new AuthException(ErrorMessage.APPLE_IDENTITY_TOKEN_INVALID);
         }

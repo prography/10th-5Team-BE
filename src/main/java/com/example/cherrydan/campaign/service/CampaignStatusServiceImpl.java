@@ -36,7 +36,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     @Override
     @Transactional
     public CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO) {
-        User user = userRepository.findById(requestDTO.getUserId())
+        User user = userRepository.findActiveById(requestDTO.getUserId())
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(requestDTO.getCampaignId())
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -63,7 +63,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     @Override
     @Transactional
     public CampaignStatusResponseDTO updateStatus(CampaignStatusRequestDTO requestDTO) {
-        User user = userRepository.findById(requestDTO.getUserId())
+        User user = userRepository.findActiveById(requestDTO.getUserId())
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(requestDTO.getCampaignId())
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -82,7 +82,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     @Override
     @Transactional
     public void deleteStatus(Long campaignId, Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -96,7 +96,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     @Override
     @Transactional(readOnly = true)
     public CampaignStatusListResponseDTO getStatusListWithCountByUser(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         List<CampaignStatusResponseDTO> apply = new ArrayList<>();
         List<CampaignStatusResponseDTO> selected = new ArrayList<>();
@@ -164,7 +164,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     @Override
     @Transactional(readOnly = true)
     public CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         List<CampaignStatusPopupItemDTO> apply = new ArrayList<>();
         List<CampaignStatusPopupItemDTO> selected = new ArrayList<>();

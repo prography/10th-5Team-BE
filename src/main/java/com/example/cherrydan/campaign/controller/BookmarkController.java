@@ -2,8 +2,13 @@ package com.example.cherrydan.campaign.controller;
 
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
+import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -27,25 +32,38 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 추가", description = "캠페인에 북마크(찜)를 추가합니다.")
     @PostMapping("/{campaignId}/bookmark")
-    public ResponseEntity<ApiResponse<Void>> addBookmark(
+    public void addBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.addBookmark(currentUser.getId(), campaignId);
-        return ResponseEntity.ok(ApiResponse.success());
     }
 
     @Operation(summary = "북마크 취소", description = "캠페인 북마크(찜)를 취소합니다. (is_active=0)")
     @PatchMapping("/{campaignId}/bookmark")
-    public ResponseEntity<ApiResponse<Void>> cancelBookmark(
+    public void cancelBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.cancelBookmark(currentUser.getId(), campaignId);
-        return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @Operation(summary = "내 북마크 목록 조회", description = "내가 북마크(찜)한 캠페인 목록을 조회합니다.")
+    @Operation(
+        summary = "내 북마크 목록 조회", 
+        description = """
+            내가 북마크(찜)한 캠페인 목록을 조회합니다.
+            
+            **Request Body 예시:**
+            ```json
+            {
+              "page": 0,
+              "size": 20
+            }
+            ```
+            
+            **정렬**: 북마크 생성 시각 내림차순 (고정)
+            """
+    )
     @GetMapping("/bookmarks")
     public ResponseEntity<ApiResponse<BookmarkSplitResponseDTO>> getBookmarks(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
@@ -57,11 +75,10 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
     @DeleteMapping("/{campaignId}/bookmark")
-    public ResponseEntity<ApiResponse<Void>> deleteBookmark(
+    public void deleteBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.deleteBookmark(currentUser.getId(), campaignId);
-        return ResponseEntity.ok(ApiResponse.success());
     }
 } 
