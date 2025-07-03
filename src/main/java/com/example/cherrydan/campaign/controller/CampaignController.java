@@ -3,7 +3,9 @@ package com.example.cherrydan.campaign.controller;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
-import com.example.cherrydan.campaign.dto.CampaignListResponseDTO;
+import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.service.CampaignService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -13,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +28,7 @@ public class CampaignController {
 
     @Operation(summary = "캠페인 타입별 조회", description = "캠페인 타입(ALL, PRODUCT, REGION, REPORTER, ETC)별로 캠페인 목록을 조회합니다.")
     @GetMapping("/types")
-    public CampaignListResponseDTO getCampaignsByType(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsByType(
         @Parameter(description = "캠페인 타입 (all, product, region, reporter, etc)", example = "all")
         @RequestParam(required = false, defaultValue = "all") String type,
         @Parameter(description = "지역명 (선택)")
@@ -45,12 +48,13 @@ public class CampaignController {
         } catch (IllegalArgumentException e) {
             campaignType = null;
         }
-        return campaignService.getCampaigns(campaignType, region, sort, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(campaignType, region, sort, pageable);
+        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     @Operation(summary = "캠페인 플랫폼별 조회", description = "캠페인 플랫폼(cherivu, revu, reviewnote 등)별로 캠페인 목록을 조회합니다.")
     @GetMapping("/campaign-platforms")
-    public CampaignListResponseDTO getCampaignsByCampaignPlatform(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsByCampaignPlatform(
         @Parameter(description = "캠페인 플랫폼 코드 (all, chvu, revu, reviewnote, dailyview, fourblog, popomon, dinnerqueen, seoulouba, cometoplay, gangnam)", example = "fourblog")
         @RequestParam(required = false, defaultValue = "all") String platform,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
@@ -69,12 +73,13 @@ public class CampaignController {
                 platformType = CampaignPlatformType.ALL;
             }
         }
-        return campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable);
+        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     @Operation(summary = "SNS 플랫폼별 조회", description = "SNS 플랫폼(blog, insta, youtube, tiktok, etc)별로 캠페인 목록을 조회합니다.")
     @GetMapping("/sns-platforms")
-    public CampaignListResponseDTO getCampaignsBySnsPlatform(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsBySnsPlatform(
         @Parameter(description = "SNS 플랫폼 코드 (all, blog, insta, youtube, tiktok, etc)", example = "blog")
         @RequestParam(required = false, defaultValue = "all") String platform,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
@@ -93,7 +98,8 @@ public class CampaignController {
                 snsPlatformType = SnsPlatformType.ALL;
             }
         }
-        return campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable);
+        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     @Operation(
@@ -101,7 +107,7 @@ public class CampaignController {
         description = "title에 키워드가 포함된 캠페인(지역/제품 타입, is_active=1)만 검색합니다."
     )
     @GetMapping("/search")
-    public CampaignListResponseDTO searchCampaignsByKeyword(
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> searchCampaignsByKeyword(
         @Parameter(description = "검색 키워드 (title에 포함)")
         @RequestParam String keyword,
         @Parameter(description = "페이지 번호", example = "0")
@@ -110,7 +116,8 @@ public class CampaignController {
         @RequestParam(defaultValue = "20") int size
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        return campaignService.searchByKeyword(keyword, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.searchByKeyword(keyword, pageable);
+        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     private Pageable createPageable(String sort, int page, int size) {

@@ -7,8 +7,10 @@ import lombok.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
+import com.example.cherrydan.campaign.domain.Campaign;
 
 @Getter
 @Builder
@@ -67,13 +69,13 @@ public class CampaignResponseDTO {
         if (code == null) return null;
         String trimmedCode = code.trim();
         try {
-            return com.example.cherrydan.campaign.domain.CampaignPlatformType.fromCode(trimmedCode).getLabel();
+            return CampaignPlatformType.fromCode(trimmedCode).getLabel();
         } catch (IllegalArgumentException e) {
             return trimmedCode;
         }
     }
 
-    public static CampaignResponseDTO fromEntity(com.example.cherrydan.campaign.domain.Campaign campaign) {
+    public static CampaignResponseDTO fromEntity(Campaign campaign) {
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
             .title(campaign.getTitle())

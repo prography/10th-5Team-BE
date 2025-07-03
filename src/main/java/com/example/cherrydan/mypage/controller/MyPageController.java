@@ -1,7 +1,7 @@
 package com.example.cherrydan.mypage.controller;
 
 import com.example.cherrydan.common.response.ApiResponse;
-import com.example.cherrydan.common.response.PageResponse;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.inquiry.dto.InquiryRequestDTO;
 import com.example.cherrydan.inquiry.dto.InquiryResponseDTO;
 import com.example.cherrydan.inquiry.service.InquiryService;
@@ -126,14 +126,12 @@ public class MyPageController {
             """
     )
     @GetMapping("/inquiries")
-    public ResponseEntity<ApiResponse<PageResponse<InquiryResponseDTO>>> getMyInquiries(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @Parameter(description = "페이지네이션 정보")
-            @PageableDefault(size = 20, sort = "updatedAt") Pageable pageable
-    ) {
-        Page<InquiryResponseDTO> inquiries = inquiryService.getUserInquiries(currentUser.getId(), pageable);
-        PageResponse<InquiryResponseDTO> response = PageResponse.from(inquiries);
-        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", response));
+    public ResponseEntity<ApiResponse<PageListResponseDTO<InquiryResponseDTO>>> getMyInquiries(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            Pageable pageable) {
+        Page<InquiryResponseDTO> pageResult = inquiryService.getUserInquiries(currentUser.getId(), pageable);
+        PageListResponseDTO<InquiryResponseDTO> result = PageListResponseDTO.from(pageResult);
+        return ResponseEntity.ok(ApiResponse.success("문의 목록 조회가 완료되었습니다.", result));
     }
 
     @Operation(summary = "1:1 문의 등록")
