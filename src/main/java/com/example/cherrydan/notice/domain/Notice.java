@@ -6,6 +6,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "notices")
@@ -25,8 +27,11 @@ public class Notice extends BaseTimeEntity {
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "image_url", length = 255)
-    private String imageUrl;
+    @ElementCollection
+    @CollectionTable(name = "notice_images", joinColumns = @JoinColumn(name = "notice_id"))
+    @Column(name = "image_url")
+    @Builder.Default
+    private List<String> imageUrls = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "category", nullable = false)
@@ -47,9 +52,6 @@ public class Notice extends BaseTimeEntity {
     @Column(name = "empathy_count", nullable = false)
     @Builder.Default
     private Integer empathyCount = 0;
-
-    @Enumerated(EnumType.STRING)
-    private NoticeCategory noticeCategory;
 
     @Column(name = "published_at")
     private LocalDateTime publishedAt;
