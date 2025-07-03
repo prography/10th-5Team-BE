@@ -15,6 +15,13 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import com.example.cherrydan.common.response.ApiResponse;
+import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
 
 @Tag(name = "Bookmark", description = "캠페인 북마크(찜) 관련 API")
 @RestController
@@ -58,13 +65,12 @@ public class BookmarkController {
             """
     )
     @GetMapping("/bookmarks")
-    public ApiResponse<PageListResponseDTO<BookmarkResponseDTO>> getBookmarks(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
+    public ResponseEntity<ApiResponse<BookmarkSplitResponseDTO>> getBookmarks(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            Pageable pageable
     ) {
-        Page<BookmarkResponseDTO> bookmarks = bookmarkService.getBookmarks(currentUser.getId(), pageable);
-        PageListResponseDTO<BookmarkResponseDTO> response = PageListResponseDTO.from(bookmarks);
-        return ApiResponse.success("북마크 목록 조회 성공", response);
+        BookmarkSplitResponseDTO result = bookmarkService.getBookmarks(currentUser.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success("북마크 목록 조회 성공", result));
     }
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")

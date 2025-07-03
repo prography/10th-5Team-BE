@@ -11,6 +11,7 @@ import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.Campaign;
+import com.example.cherrydan.common.util.CloudfrontUtil;
 
 @Getter
 @Builder
@@ -32,6 +33,7 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean clip;
     @JsonIgnore private Boolean tiktok;
     @JsonIgnore private Boolean etc;
+    private String snsPlatformImageUrl;
     private CampaignType campaignType;
     private String address;
     private Float competitionRate;
@@ -76,6 +78,7 @@ public class CampaignResponseDTO {
     }
 
     public static CampaignResponseDTO fromEntity(Campaign campaign) {
+        String snsPlatformImageUrl = CloudfrontUtil.getSnsPlatformImageUrl(campaign.getSourceSite());
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
             .title(campaign.getTitle())
@@ -94,6 +97,7 @@ public class CampaignResponseDTO {
             .clip(campaign.getClip())
             .tiktok(campaign.getTiktok())
             .etc(campaign.getEtc())
+            .snsPlatformImageUrl(snsPlatformImageUrl)
             .campaignType(campaign.getCampaignType())
             .address(campaign.getAddress())
             .competitionRate(campaign.getCompetitionRate())

@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
+import com.example.cherrydan.common.util.CloudfrontUtil;
 
 @Getter
 @Builder
@@ -19,6 +21,7 @@ public class BookmarkResponseDTO {
     private String campaignTitle;
     private String campaignDetailUrl;
     private String campaignImageUrl;
+    private String snsPlatformImageUrl;
     private String benefit;
     private Integer applicantCount;
     private Integer recruitCount;
@@ -28,12 +31,14 @@ public class BookmarkResponseDTO {
 
     public static BookmarkResponseDTO fromEntity(Bookmark bookmark) {
         Campaign campaign = bookmark.getCampaign();
+        String snsPlatformImageUrl = CloudfrontUtil.getSnsPlatformImageUrl(campaign.getSourceSite());
         return BookmarkResponseDTO.builder()
                 .id(bookmark.getId())
                 .campaignId(campaign.getId())
                 .campaignTitle(campaign.getTitle())
                 .campaignDetailUrl(campaign.getDetailUrl())
                 .campaignImageUrl(campaign.getImageUrl())
+                .snsPlatformImageUrl(snsPlatformImageUrl)
                 .benefit(campaign.getBenefit())
                 .applicantCount(campaign.getApplicantCount())
                 .recruitCount(campaign.getRecruitCount())

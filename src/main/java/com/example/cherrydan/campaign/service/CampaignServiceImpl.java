@@ -27,9 +27,9 @@ public class CampaignServiceImpl implements CampaignService {
         Page<Campaign> campaigns;
         
         if (type != null) {
-            campaigns = campaignRepository.findByCampaignType(type, pageable);
+            campaigns = campaignRepository.findActiveByCampaignType(type, pageable);
         } else {
-            campaigns = campaignRepository.findAll(pageable);
+            campaigns = campaignRepository.findActiveCampaigns(pageable);
         }
         
         return convertToResponseDTO(campaigns);
@@ -41,23 +41,23 @@ public class CampaignServiceImpl implements CampaignService {
         
         switch (snsPlatformType) {
             case BLOG:
-                campaigns = campaignRepository.findByBlogTrue(pageable);
+                campaigns = campaignRepository.findActiveByBlogTrue(pageable);
                 break;
             case INSTAGRAM:
-                campaigns = campaignRepository.findByInstagramTrue(pageable);
+                campaigns = campaignRepository.findActiveByInstagramTrue(pageable);
                 break;
             case YOUTUBE:
-                campaigns = campaignRepository.findByYoutubeTrue(pageable);
+                campaigns = campaignRepository.findActiveByYoutubeTrue(pageable);
                 break;
             case TIKTOK:
-                campaigns = campaignRepository.findByTiktokTrue(pageable);
+                campaigns = campaignRepository.findActiveByTiktokTrue(pageable);
                 break;
             case ETC:
-                campaigns = campaignRepository.findByEtcTrue(pageable);
+                campaigns = campaignRepository.findActiveByEtcTrue(pageable);
                 break;
             case ALL:
             default:
-                campaigns = campaignRepository.findAll(pageable);
+                campaigns = campaignRepository.findActiveCampaigns(pageable);
                 break;
         }
         
@@ -67,15 +67,13 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
         if (campaignPlatformType == CampaignPlatformType.ALL) {
-            return convertToResponseDTO(campaignRepository.findAll(pageable));
+            return convertToResponseDTO(campaignRepository.findActiveCampaigns(pageable));
         }
         
-        Specification<Campaign> spec = (root, query, cb) -> {
-            return cb.and(
+        Specification<Campaign> spec = (root, query, cb) -> cb.and(
                 cb.isTrue(root.get("isActive")),
                 cb.equal(root.get("sourceSite"), campaignPlatformType.getSourceSiteCode())
             );
-        };
         
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(campaigns);
@@ -102,7 +100,7 @@ public class CampaignServiceImpl implements CampaignService {
 
     private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns) {
         List<CampaignResponseDTO> content = campaigns.getContent().stream()
-            .map(this::toDTO)
+            .map(CampaignResponseDTO::fromEntity)
             .collect(Collectors.toList());
         
         return PageListResponseDTO.<CampaignResponseDTO>builder()
@@ -114,9 +112,5 @@ public class CampaignServiceImpl implements CampaignService {
             .hasNext(campaigns.hasNext())
             .hasPrevious(campaigns.hasPrevious())
             .build();
-    }
-
-    private CampaignResponseDTO toDTO(Campaign campaign) {
-        return CampaignResponseDTO.fromEntity(campaign);
     }
 } 

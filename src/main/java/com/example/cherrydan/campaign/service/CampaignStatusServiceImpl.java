@@ -8,6 +8,7 @@ import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusPopupItemDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
@@ -56,7 +57,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                     .build();
         }
         CampaignStatus saved = campaignStatusRepository.save(status);
-        return toDTO(saved);
+        return CampaignStatusResponseDTO.fromEntity(saved);
     }
 
     @Override
@@ -75,7 +76,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
             status.setStatus(requestDTO.getStatus());
         }
         CampaignStatus saved = campaignStatusRepository.save(status);
-        return toDTO(saved);
+        return CampaignStatusResponseDTO.fromEntity(saved);
     }
 
     @Override
@@ -99,22 +100,26 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         List<CampaignStatusResponseDTO> apply = new ArrayList<>();
         List<CampaignStatusResponseDTO> selected = new ArrayList<>();
+        List<CampaignStatusResponseDTO> notSelected = new ArrayList<>();
         List<CampaignStatusResponseDTO> registered = new ArrayList<>();
         List<CampaignStatusResponseDTO> ended = new ArrayList<>();
         List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
         for (CampaignStatus status : all) {
             switch (status.getStatus()) {
                 case APPLY:
-                    apply.add(toDTO(status));
+                    apply.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case SELECTED:
-                    selected.add(toDTO(status));
+                    selected.add(CampaignStatusResponseDTO.fromEntity(status));
+                    break;
+                case NOT_SELECTED:
+                    notSelected.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case REGISTERED:
-                    registered.add(toDTO(status));
+                    registered.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 case ENDED:
-                    ended.add(toDTO(status));
+                    ended.add(CampaignStatusResponseDTO.fromEntity(status));
                     break;
                 default:
                     break;
@@ -143,11 +148,13 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         Map<String, Long> count = new HashMap<>();
         count.put("apply", (long) apply.size());
         count.put("selected", (long) selected.size());
+        count.put("notSelected", (long) notSelected.size());
         count.put("registered", (long) registered.size());
         count.put("ended", (long) ended.size());
         return CampaignStatusListResponseDTO.builder()
                 .apply(apply)
                 .selected(selected)
+                .notSelected(notSelected)
                 .registered(registered)
                 .ended(ended)
                 .count(count)
@@ -159,13 +166,13 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     public CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        List<CampaignStatusResponseDTO> apply = new ArrayList<>();
-        List<CampaignStatusResponseDTO> selected = new ArrayList<>();
-        List<CampaignStatusResponseDTO> registered = new ArrayList<>();
+        List<CampaignStatusPopupItemDTO> apply = new ArrayList<>();
+        List<CampaignStatusPopupItemDTO> selected = new ArrayList<>();
+        List<CampaignStatusPopupItemDTO> registered = new ArrayList<>();
         List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
         for (CampaignStatus status : all) {
             try {
-                CampaignStatusResponseDTO dto = toDTO(status);
+                CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromEntity(status);
                 switch (status.getStatus()) {
                     case APPLY: apply.add(dto); break;
                     case SELECTED: selected.add(dto); break;
@@ -177,20 +184,17 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
             }
         }
         LocalDate today = LocalDate.now();
-        // 신청: reviewerAnnouncement 마감일이 지난 것만 오래된 순
-        List<CampaignStatusResponseDTO> filteredApply = apply.stream()
-            .filter(dto -> dto.getReviewerAnnouncement() != null && dto.getReviewerAnnouncement().isBefore(today))
-            .sorted(Comparator.comparing(CampaignStatusResponseDTO::getReviewerAnnouncement))
+        List<CampaignStatusPopupItemDTO> filteredApply = apply.stream()
+            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
+            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
             .toList();
-        // 선정: contentSubmissionEnd 마감일이 지난 것만 오래된 순
-        List<CampaignStatusResponseDTO> filteredSelected = selected.stream()
-            .filter(dto -> dto.getContentSubmissionEnd() != null && dto.getContentSubmissionEnd().isBefore(today))
-            .sorted(Comparator.comparing(CampaignStatusResponseDTO::getContentSubmissionEnd))
+        List<CampaignStatusPopupItemDTO> filteredSelected = selected.stream()
+            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
+            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
             .toList();
-        // 등록: contentSubmissionEnd 마감일이 지난 것만 오래된 순
-        List<CampaignStatusResponseDTO> filteredRegistered = registered.stream()
-            .filter(dto -> dto.getContentSubmissionEnd() != null && dto.getContentSubmissionEnd().isBefore(today))
-            .sorted(Comparator.comparing(CampaignStatusResponseDTO::getContentSubmissionEnd))
+        List<CampaignStatusPopupItemDTO> filteredRegistered = registered.stream()
+            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
+            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
             .toList();
         return CampaignStatusPopupResponseDTO.builder()
                 .applyTotal(filteredApply.size())
@@ -199,45 +203,6 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 .apply(filteredApply.stream().limit(4).toList())
                 .selected(filteredSelected.stream().limit(4).toList())
                 .registered(filteredRegistered.stream().limit(4).toList())
-                .build();
-    }
-
-    private CampaignStatusResponseDTO toDTO(CampaignStatus status) {
-        String reviewerAnnouncementStatus = null;
-        switch (status.getStatus()) {
-            case APPLY:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getReviewerAnnouncement(), "apply");
-                break;
-            case SELECTED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "selected");
-                break;
-            case REGISTERED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "registered");
-                break;
-            case ENDED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getResultAnnouncement(), "ended");
-                break;
-            default:
-                break;
-        }
-        return CampaignStatusResponseDTO.builder()
-                .id(status.getId())
-                .campaignId(status.getCampaign().getId())
-                .userId(status.getUser().getId())
-                .statusLabel(status.getStatus().getLabel())
-                .isActive(status.getIsActive())
-                .title(status.getCampaign().getTitle())
-                .detailUrl(status.getCampaign().getDetailUrl())
-                .imageUrl(status.getCampaign().getImageUrl())
-                .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
-                .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
-                .applicantCount(status.getCampaign().getApplicantCount())
-                .recruitCount(status.getCampaign().getRecruitCount())
-                .snsPlatforms(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getPlatforms(status.getCampaign()))
-                .campaignPlatform(com.example.cherrydan.campaign.dto.BookmarkResponseDTO.getCampaignPlatformLabel(status.getCampaign().getSourceSite()))
-                .benefit(status.getCampaign().getBenefit())
-                .contentSubmissionEnd(status.getCampaign().getContentSubmissionEnd())
-                .resultAnnouncement(status.getCampaign().getResultAnnouncement())
                 .build();
     }
 }

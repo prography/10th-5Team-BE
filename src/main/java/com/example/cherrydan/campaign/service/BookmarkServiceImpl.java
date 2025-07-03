@@ -3,6 +3,7 @@ package com.example.cherrydan.campaign.service;
 import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
+import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.user.domain.User;
@@ -18,6 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import org.springframework.data.domain.PageImpl;
+import com.example.cherrydan.common.response.PageListResponseDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -62,12 +69,28 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<BookmarkResponseDTO> getBookmarks(Long userId, Pageable pageable) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        return bookmarkRepository.findAllByUserAndIsActiveTrue(user, pageable)
-                .map(BookmarkResponseDTO::fromEntity);
+    public BookmarkSplitResponseDTO getBookmarks(Long userId, Pageable pageable) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrue(userId, pageable);
+        LocalDate today = LocalDate.now();
+        List<BookmarkResponseDTO> open = new ArrayList<>();
+        List<BookmarkResponseDTO> closed = new ArrayList<>();
+        for (Bookmark bookmark : bookmarks) {
+            BookmarkResponseDTO dto = BookmarkResponseDTO.fromEntity(bookmark);
+            LocalDate reviewerAnnouncement = bookmark.getCampaign().getReviewerAnnouncement();
+            if (reviewerAnnouncement != null && !reviewerAnnouncement.isBefore(today)) {
+                open.add(dto);
+            } else {
+                closed.add(dto);
+            }
+        }
+        Page<BookmarkResponseDTO> openPage = new PageImpl<>(open, pageable, open.size());
+        Page<BookmarkResponseDTO> closedPage = new PageImpl<>(closed, pageable, closed.size());
+        return BookmarkSplitResponseDTO.builder()
+            .open(PageListResponseDTO.from(openPage))
+            .closed(PageListResponseDTO.from(closedPage))
+            .build();
     }
 
     @Override
