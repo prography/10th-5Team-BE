@@ -66,8 +66,8 @@ public class InquiryService {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
-        // 카테고리 파싱
-        InquiryCategory category = InquiryCategory.fromString(requestDTO.getCategory());
+        // 카테고리 변환
+        InquiryCategory category = InquiryCategory.from(requestDTO.getCategory());
 
         try {
             Inquiry inquiry = Inquiry.builder()

@@ -1,6 +1,5 @@
 package com.example.cherrydan.user.dto;
 
-import com.example.cherrydan.user.domain.Gender;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.UserTos;
 import lombok.Getter;
@@ -11,7 +10,7 @@ public class UserDto {
     private String name;
     private String nickname;
     private Integer birthYear;
-    private Gender gender;
+    private String gender;
     
     // UserTos 정보 (배열 형태)
     private Boolean[] tosAgreements;
@@ -21,7 +20,7 @@ public class UserDto {
         this.name = user.getName();
         this.nickname = user.getNickname();
         this.birthYear = user.getBirthYear();
-        this.gender = user.getGender();
+        this.gender = user.getGender().name();
         
         // UserTos 정보 설정 (배열 형태)
         UserTos userTos = user.getUserTos();
