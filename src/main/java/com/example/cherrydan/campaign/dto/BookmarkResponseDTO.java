@@ -21,30 +21,30 @@ public class BookmarkResponseDTO {
     private String campaignTitle;
     private String campaignDetailUrl;
     private String campaignImageUrl;
-    private String snsPlatformImageUrl;
+    private String campaignPlatformImageUrl;
     private String benefit;
     private Integer applicantCount;
     private Integer recruitCount;
     private List<String> snsPlatforms;
     private String reviewerAnnouncementStatus;
-    private String campaignPlatform;
+    private String campaignSite;
 
     public static BookmarkResponseDTO fromEntity(Bookmark bookmark) {
         Campaign campaign = bookmark.getCampaign();
-        String snsPlatformImageUrl = CloudfrontUtil.getSnsPlatformImageUrl(campaign.getSourceSite());
+        String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
         return BookmarkResponseDTO.builder()
                 .id(bookmark.getId())
                 .campaignId(campaign.getId())
                 .campaignTitle(campaign.getTitle())
                 .campaignDetailUrl(campaign.getDetailUrl())
                 .campaignImageUrl(campaign.getImageUrl())
-                .snsPlatformImageUrl(snsPlatformImageUrl)
+                .campaignPlatformImageUrl(campaignPlatformImageUrl)
                 .benefit(campaign.getBenefit())
                 .applicantCount(campaign.getApplicantCount())
                 .recruitCount(campaign.getRecruitCount())
                 .snsPlatforms(getPlatforms(campaign))
                 .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
-                .campaignPlatform(getCampaignPlatformLabel(campaign.getSourceSite()))
+                .campaignSite(getCampaignSiteLabel(campaign.getSourceSite()))
                 .build();
     }
 
@@ -74,7 +74,7 @@ public class BookmarkResponseDTO {
         }
     }
 
-    public static String getCampaignPlatformLabel(String code) {
+    public static String getCampaignSiteLabel(String code) {
         if (code == null) return null;
         try {
             return CampaignPlatformType.fromCode(code).getLabel();

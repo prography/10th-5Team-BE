@@ -23,6 +23,7 @@ public class CampaignResponseDTO {
     private String reviewerAnnouncementStatus;
     private Integer applicantCount;
     private Integer recruitCount;
+    @JsonProperty("campaignSite")
     private String sourceSite;
     private String imageUrl;
     @JsonIgnore private Boolean youtube;
@@ -33,15 +34,12 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean clip;
     @JsonIgnore private Boolean tiktok;
     @JsonIgnore private Boolean etc;
-    private String snsPlatformImageUrl;
+    private String campaignPlatformImageUrl;
     private CampaignType campaignType;
-    private String address;
     private Float competitionRate;
-    private Integer localCategory;
-    private Integer productCategory;
 
-    @JsonProperty("platforms")
-    public List<String> getPlatforms() {
+    @JsonProperty("snsPlatforms")
+    public List<String> getSnsPlatforms() {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(youtube)) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
         if (Boolean.TRUE.equals(shorts)) platforms.add("쇼츠");
@@ -78,7 +76,7 @@ public class CampaignResponseDTO {
     }
 
     public static CampaignResponseDTO fromEntity(Campaign campaign) {
-        String snsPlatformImageUrl = CloudfrontUtil.getSnsPlatformImageUrl(campaign.getSourceSite());
+        String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
             .title(campaign.getTitle())
@@ -97,12 +95,9 @@ public class CampaignResponseDTO {
             .clip(campaign.getClip())
             .tiktok(campaign.getTiktok())
             .etc(campaign.getEtc())
-            .snsPlatformImageUrl(snsPlatformImageUrl)
+            .campaignPlatformImageUrl(campaignPlatformImageUrl)
             .campaignType(campaign.getCampaignType())
-            .address(campaign.getAddress())
             .competitionRate(campaign.getCompetitionRate())
-            .localCategory(campaign.getLocalCategory())
-            .productCategory(campaign.getProductCategory())
             .build();
     }
 } 

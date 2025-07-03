@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 public interface CampaignService {
     PageListResponseDTO<CampaignResponseDTO> getCampaigns(
         CampaignType type,
-        String region,
         String sort,
         Pageable pageable
     );
