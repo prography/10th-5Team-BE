@@ -114,3 +114,6 @@ sns:
 
 fcm:
   service-account-key-path: ${FCM_SERVICE_ACCOUNT_KEY_PATH}
+
+cdn:
+  base-url: ${CLOUDFRONT_URL:https://cdn.cherrydan.com/}
