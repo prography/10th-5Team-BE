@@ -14,7 +14,7 @@ import java.util.List;
 
 @Tag(name = "Campaign API", description = "캠페인(체험단) 관련 API")
 @RestController
-@RequestMapping("/api/campaign/site")
+@RequestMapping("/api/campaigns/site")
 @RequiredArgsConstructor
 public class CampaignSiteController {
     private final CampaignSiteService campaignSiteService;
