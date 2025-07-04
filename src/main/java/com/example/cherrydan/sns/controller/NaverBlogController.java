@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.repository.UserRepository;
 import com.example.cherrydan.user.domain.User;
+import com.example.cherrydan.common.exception.UserException;
 
 @Tag(name = "SNS", description = "SNS 연동 관련 API")
 @RestController
@@ -31,10 +32,8 @@ public class NaverBlogController {
         @AuthenticationPrincipal UserDetailsImpl currentUser,
         @RequestBody NaverBlogVerifyRequest request
     ) {
-        User user = userRepository.findById(currentUser.getId()).orElse(null);
-        if (user == null) {
-            return ResponseEntity.status(401).body(ApiResponse.error(ErrorMessage.USER_NOT_FOUND.getMessage()));
-        }
+        User user = userRepository.findById(currentUser.getId())
+            .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
         try {
             String result = naverBlogService.verifyAndSave(
@@ -50,7 +49,10 @@ public class NaverBlogController {
                     ErrorMessage.NAVER_BLOG_INVALID_DESCRIPTION.getMessage()
                 ));
             }
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+        catch (Exception e) {
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }

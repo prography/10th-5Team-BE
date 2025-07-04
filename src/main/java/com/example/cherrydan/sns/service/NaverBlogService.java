@@ -13,6 +13,7 @@ import java.net.URL;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import lombok.extern.slf4j.Slf4j;
 import com.example.cherrydan.user.repository.UserRepository;
+import com.example.cherrydan.common.exception.SnsException;
 import java.util.Optional;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class NaverBlogService {
                 if (existing.isPresent()) {
                     SnsConnection connection = existing.get();
                     connection.setSnsUrl(blogUrl);
+                    connection.setIsActive(true);
                     snsConnectionRepository.save(connection);
                 } else {
                     SnsConnection connection = SnsConnection.builder()
@@ -50,7 +52,7 @@ public class NaverBlogService {
             throw e;
         } catch (Exception e) {
             log.error("NaverBlogService.verifyAndSave error for blogUrl={} userId={}", blogUrl, user.getId(), e);
-            throw new RuntimeException(ErrorMessage.NAVER_BLOG_INVALID_URL.getMessage());
+            throw new SnsException(ErrorMessage.NAVER_BLOG_INVALID_URL);
         }
         return null;
     }
