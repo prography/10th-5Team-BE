@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.example.cherrydan.common.util.CloudfrontUtil;
 
 @Service
 @RequiredArgsConstructor
@@ -21,10 +22,13 @@ public class CampaignSiteServiceImpl implements CampaignSiteService {
     @Override
     public List<CampaignSiteResponseDTO> getAllSites() {
         return campaignSiteRepository.findAllByIsActiveTrueOrderByPriorityAsc().stream()
-                .map(site -> CampaignSiteResponseDTO.builder()
+            .map(site -> {
+                String cdnUrl = CloudfrontUtil.getCampaignPlatformImageUrl(site.getSiteNameEn());
+                return CampaignSiteResponseDTO.builder()
                         .siteNameKr(site.getSiteNameKr())
-                        .cdnUrl(cdnBaseUrl.endsWith("/") ? cdnBaseUrl + site.getSiteNameEn() + ".png" : cdnBaseUrl + "/" + site.getSiteNameEn() + ".png")
-                        .build())
-                .collect(Collectors.toList());
+                        .cdnUrl(cdnUrl)
+                        .build();
+            })
+            .collect(Collectors.toList());
     }
 } 
