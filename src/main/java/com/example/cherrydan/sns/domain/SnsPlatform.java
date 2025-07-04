@@ -8,7 +8,8 @@ import lombok.RequiredArgsConstructor;
 public enum SnsPlatform {
     INSTAGRAM("인스타그램", "instagram"),
     YOUTUBE("유튜브", "youtube"),
-    TIKTOK("틱톡", "tiktok");
+    TIKTOK("틱톡", "tiktok"),
+    NAVER("네이버", "naver");
 
     private final String displayName;
     private final String platformCode;

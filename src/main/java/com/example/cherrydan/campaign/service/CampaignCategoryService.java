@@ -13,7 +13,7 @@ public interface CampaignCategoryService {
         List<String> product,
         String reporter,
         List<String> snsPlatform,
-        List<String> experiencePlatform,
+        List<String> campaignPlatform,
         String applyStart,
         String applyEnd,
         Pageable pageable

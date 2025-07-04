@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/campaigns/types").permitAll()
                         .requestMatchers("/api/campaigns/sns-platforms").permitAll()
                         .requestMatchers("/api/campaigns/campaign-platforms").permitAll()
+                        .requestMatchers("/api/campaign/site").permitAll()
                         // 공지사항/홈 광고 배너 관련 경로
                         .requestMatchers("/api/notices/**").permitAll()
                         // 나머지는 인증 필요

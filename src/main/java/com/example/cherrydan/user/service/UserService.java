@@ -5,6 +5,7 @@ import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
+import com.example.cherrydan.user.domain.Gender;
 import com.example.cherrydan.user.dto.UserUpdateRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,8 @@ public class UserService {
         if (request.getBirthYear() != null) {
             user.setBirthYear(request.getBirthYear());
         }
-        if (request.getGender() != null) {
-            user.setGender(request.getGender());
+        if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+            user.setGender(Gender.from(request.getGender()));
         }
         return userRepository.save(user);
     }

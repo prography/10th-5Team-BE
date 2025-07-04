@@ -13,5 +13,5 @@ import lombok.NoArgsConstructor;
 public class UserUpdateRequestDTO {
     private String nickname;
     private Integer birthYear;
-    private Gender gender;
+    private String gender;
 } 

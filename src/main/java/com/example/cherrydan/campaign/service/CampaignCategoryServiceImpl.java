@@ -34,7 +34,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     private final CampaignRepository campaignRepository;
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> experiencePlatform, String applyStart, String applyEnd, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> searchByCategory(List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> campaignPlatform, String applyStart, String applyEnd, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -158,16 +158,16 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
                 }
             }
 
-            // 체험단 플랫폼 조건 처리 (복수 선택 가능)
-            if (experiencePlatform != null && !experiencePlatform.isEmpty()) {
-                List<Predicate> experiencePlatformPredicates = new ArrayList<>();
-                for (String experiencePlatformItem : experiencePlatform) {
-                    if (experiencePlatformItem != null && !experiencePlatformItem.trim().isEmpty()) {
-                        experiencePlatformPredicates.add(cb.equal(root.get("sourceSite"), experiencePlatformItem.trim()));
+            // 캠페인 플랫폼 조건 처리 (복수 선택 가능)
+            if (campaignPlatform != null && !campaignPlatform.isEmpty()) {
+                List<Predicate> campaignPlatformPredicates = new ArrayList<>();
+                for (String campaignPlatformItem : campaignPlatform) {
+                    if (campaignPlatformItem != null && !campaignPlatformItem.trim().isEmpty()) {
+                        campaignPlatformPredicates.add(cb.equal(root.get("sourceSite"), campaignPlatformItem.trim()));
                     }
                 }
-                if (!experiencePlatformPredicates.isEmpty()) {
-                    predicates.add(cb.or(experiencePlatformPredicates.toArray(new Predicate[0])));
+                if (!campaignPlatformPredicates.isEmpty()) {
+                    predicates.add(cb.or(campaignPlatformPredicates.toArray(new Predicate[0])));
                 }
             }
 

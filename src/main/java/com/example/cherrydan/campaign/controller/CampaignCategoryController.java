@@ -18,7 +18,7 @@ import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 @RestController
 @RequestMapping("/api/campaigns/categories")
 @RequiredArgsConstructor
-@Tag(name = "Campaign Category API", description = "카테고리별 캠페인 검색 API")
+@Tag(name = "Campaign API", description = "캠페인(체험단) 관련 API")
 public class CampaignCategoryController {
 
     private final CampaignCategoryService campaignCategoryService;
@@ -29,8 +29,8 @@ public class CampaignCategoryController {
      */
     @Operation(
         summary = "카테고리별 캠페인 검색",
-        description = "여러 카테고리(지역, 제품, 기자단, SNS, 체험단 플랫폼 등) 조건으로 캠페인 목록을 검색합니다.\n\n"
-            + "regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform 중 원하는 조건만 조합해서 검색할 수 있습니다.\n"
+        description = "여러 카테고리(지역, 제품, 기자단, SNS, 캠페인 플랫폼 등) 조건으로 캠페인 목록을 검색합니다.\n\n"
+            + "regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform 중 원하는 조건만 조합해서 검색할 수 있습니다.\n"
             + "정렬(sort): popular(인기순), latest(최신순), deadline(마감임박순), low_competition(경쟁률 낮은순)"
     )
     @GetMapping("/search")
@@ -47,8 +47,8 @@ public class CampaignCategoryController {
         @RequestParam(required = false) String reporter,
         @Parameter(description = "SNS 플랫폼 (예: blog, youtube, insta, tiktok, etc) - 복수 선택 가능")
         @RequestParam(required = false) List<String> snsPlatform,
-        @Parameter(description = "체험단 플랫폼 (예: chvu, revu 등) - 복수 선택 가능")
-        @RequestParam(required = false) List<String> experiencePlatform,
+        @Parameter(description = "캠페인 플랫폼 (예: chvu, revu 등) - 복수 선택 가능")
+        @RequestParam(required = false) List<String> campaignPlatform,
         @Parameter(description = "마감일 시작일 (예: 2025-06-01)", example = "2025-06-01")
         @RequestParam(required = false) String applyStart,
         @Parameter(description = "마감일 종료일 (예: 2025-06-30)", example = "2025-06-30")
@@ -61,7 +61,7 @@ public class CampaignCategoryController {
         @RequestParam(required = false, defaultValue = "20") int size
     ) {
         Pageable pageable = createPageable(sort, page, size);
-        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, experiencePlatform, applyStart, applyEnd, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform, applyStart, applyEnd, pageable);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
