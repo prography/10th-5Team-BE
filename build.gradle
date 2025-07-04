@@ -55,6 +55,8 @@ dependencies {
     
     // Jsoup for web scraping
     implementation 'org.jsoup:jsoup:1.17.2'
+
+    implementation 'com.rometools:rome:2.1.0'
 }
 
 tasks.named('test') {
