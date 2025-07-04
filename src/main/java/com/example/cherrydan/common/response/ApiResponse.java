@@ -41,6 +41,13 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> serverError(String message) {
         return new ApiResponse<>(500, message, null);
     }
+
+    /**
+     * 공통 오류 응답
+     */
+    public static <T> ApiResponse<T> error(String message) {
+        return new ApiResponse<>(400, message, null);
+    }
     
     /**
      * 인증 오류 응답

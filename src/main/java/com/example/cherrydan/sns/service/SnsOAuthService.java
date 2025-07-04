@@ -82,22 +82,16 @@ public class SnsOAuthService {
     /**
      * 사용자의 SNS 연동 목록을 조회합니다.
      * @param user 사용자
-     * @param pageable 페이지네이션 정보
      * @return 연동 목록
      */
-    @Transactional(readOnly = true)
-    public Page<SnsConnectionResponse> getUserSnsConnections(User user, Pageable pageable) {
-        // 활성 사용자인지 확인
+    public List<SnsConnectionResponse> getUserSnsConnections(User user) {
         if (!user.getIsActive()) {
             throw new SnsException(ErrorMessage.USER_NOT_FOUND);
         }
-        
-        Page<SnsConnection> connectionsPage = snsConnectionRepository.findAllByUserAndIsActiveTrue(user, pageable);
-        
-        return connectionsPage.map(connection -> {
-            // 연결된 플랫폼은 실제 연결 정보 반환
-            return SnsConnectionResponse.from(connection);
-        });
+        return snsConnectionRepository.findByUser(user)
+                .stream()
+                .map(SnsConnectionResponse::from)
+                .collect(Collectors.toList());
     }
     
     /**

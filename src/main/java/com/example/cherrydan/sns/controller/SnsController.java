@@ -55,12 +55,10 @@ public class SnsController {
 
     @Operation(summary = "사용자 SNS 연동 목록 조회")
     @GetMapping("/connections")
-    public ApiResponse<Page<SnsConnectionResponse>> getConnections(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
+    public ApiResponse<List<SnsConnectionResponse>> getConnections(
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
         User user = userService.getUserById(userDetails.getId());
-        
-        Page<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user, pageable);
+        List<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user);
         return ApiResponse.success("SNS 연동 목록 조회 성공", response);
     }
 
