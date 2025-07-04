@@ -18,7 +18,7 @@ import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 @RestController
 @RequestMapping("/api/campaigns/categories")
 @RequiredArgsConstructor
-@Tag(name = "Campaign Category API", description = "카테고리별 캠페인 검색 API")
+@Tag(name = "Campaign API", description = "캠페인(체험단) 관련 API")
 public class CampaignCategoryController {
 
     private final CampaignCategoryService campaignCategoryService;
