@@ -18,9 +18,9 @@ public class UserDto {
     public UserDto(User user) {
         this.email = user.getEmail();
         this.name = user.getName();
-        this.nickname = user.getNickname();
-        this.birthYear = user.getBirthYear();
-        this.gender = user.getGender().name();
+        this.nickname = user.getNickname() != null ? user.getNickname() : null;
+        this.birthYear = user.getBirthYear() != null ? user.getBirthYear() : null;
+        this.gender = user.getGender() != null ? user.getGender().name() : null;
         
         // UserTos 정보 설정 (배열 형태)
         UserTos userTos = user.getUserTos();
