@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface CampaignCategoryService {
     PageListResponseDTO<CampaignResponseDTO> searchByCategory(
+        String title,
         List<String> regionGroup,
         List<String> subRegion,
         List<String> local,

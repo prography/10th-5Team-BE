@@ -29,12 +29,14 @@ public class CampaignCategoryController {
      */
     @Operation(
         summary = "카테고리별 캠페인 검색",
-        description = "여러 카테고리(지역, 제품, 기자단, SNS, 캠페인 플랫폼 등) 조건으로 캠페인 목록을 검색합니다.\n\n"
-            + "regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform 중 원하는 조건만 조합해서 검색할 수 있습니다.\n"
+        description = "여러 카테고리(제목, 지역, 제품, 기자단, SNS, 캠페인 플랫폼 등) 조건으로 캠페인 목록을 검색합니다.\n\n"
+            + "title, regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform 중 원하는 조건만 조합해서 검색할 수 있습니다.\n"
             + "정렬(sort): popular(인기순), latest(최신순), deadline(마감임박순), low_competition(경쟁률 낮은순)"
     )
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> searchByCategory(
+        @Parameter(description = "제목 (예: 캠페인 제목)")
+        @RequestParam(required = false) String title,
         @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> regionGroup,
         @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등) - 복수 선택 가능")
@@ -61,7 +63,7 @@ public class CampaignCategoryController {
         @RequestParam(required = false, defaultValue = "20") int size
     ) {
         Pageable pageable = createPageable(sort, page, size);
-        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform, applyStart, applyEnd, pageable);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(title, regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform, applyStart, applyEnd, pageable);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
