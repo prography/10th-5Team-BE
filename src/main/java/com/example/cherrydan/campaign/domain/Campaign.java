@@ -9,7 +9,15 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "campaigns")
+@Table(name = "campaigns",
+    indexes = {
+        @Index(name = "campaigns_is_active_apply_end_IDX", columnList = "is_active, apply_end"),
+        @Index(name = "campaigns_is_active_apply_start_IDX", columnList = "is_active, apply_start"),
+        @Index(name = "campaigns_is_active_campaign_type_competition_rate_IDX", columnList = "is_active, campaign_type, competition_rate"),
+        @Index(name = "campaigns_is_active_competition_rate_IDX", columnList = "is_active, competition_rate"),
+        @Index(name = "campaigns_is_active_source_site_competition_rate_IDX", columnList = "is_active, source_site, competition_rate")
+    }
+)
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -118,6 +126,6 @@ public class Campaign extends BaseTimeEntity {
     @Column(name = "region_detail")
     private Integer regionDetail;
 
-    @Column(name = "has_error")
-    private Boolean hasError;
+    @Column(name = "status")
+    private Integer status;
 }
