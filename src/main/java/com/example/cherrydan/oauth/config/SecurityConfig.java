@@ -51,9 +51,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
                         // 캠페인 관련 경로
                         .requestMatchers("/api/campaigns/**").permitAll()
-                        .requestMatchers("/api/campaigns/site").permitAll()
                         // 공지사항/홈 광고 배너 관련 경로
-                        .requestMatchers("/api/notices/**").permitAll()
+                        .requestMatchers("/api/noticeboard/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
                 )
