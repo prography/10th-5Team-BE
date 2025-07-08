@@ -126,6 +126,6 @@ public class Campaign extends BaseTimeEntity {
     @Column(name = "region_detail")
     private Integer regionDetail;
 
-    @Column(name = "has_error")
-    private Boolean hasError;
+    @Column(name = "status")
+    private Integer status;
 }
