@@ -390,7 +390,7 @@ public class UserKeywordService {
         };
 
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        return campaigns.map(CampaignResponseDTO::fromEntity);
+        return campaigns.map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false));
     }
 
     /**
