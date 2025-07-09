@@ -3,6 +3,7 @@ package com.example.cherrydan.oauth.security.jwt;
 import com.example.cherrydan.oauth.dto.TokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -86,14 +87,24 @@ public class JwtTokenProvider {
         return getClaimsFromToken(token).get("type", String.class);
     }
 
-    // 토큰 유효성 검증
-    public boolean validateToken(String token) {
+    // 토큰 유효성 검증 + 예외 처리
+    public void validateToken(String token) {
         try {
             getClaimsFromToken(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-            return false;
+        } catch (ExpiredJwtException e) {
+            log.warn("토큰이 만료되었습니다: {}", e.getMessage());
+            throw e;
+        } catch (UnsupportedJwtException e) {
+            log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 형식의 JWT 토큰입니다: {}", e.getMessage());
+            throw e;
+        } catch (SignatureException e) {
+            log.error("JWT 서명이 유효하지 않습니다: {}", e.getMessage());
+            throw e;
+        } catch (IllegalArgumentException e) {
+            log.error("JWT 토큰이 비어있습니다: {}", e.getMessage());
+            throw e;
         }
     }
 
