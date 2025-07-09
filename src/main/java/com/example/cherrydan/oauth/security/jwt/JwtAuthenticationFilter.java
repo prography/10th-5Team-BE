@@ -36,7 +36,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             String jwt = getJwtFromRequest(request);
 
-            if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
+            if (StringUtils.hasText(jwt)) {
+                tokenProvider.validateToken(jwt); // 유효성 검증 (실패 시 예외 발생)
+
                 // Access Token인지 확인
                 if (tokenProvider.isAccessToken(jwt)) {
                     Long userId = tokenProvider.getUserIdFromToken(jwt);
@@ -53,12 +55,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                             null  // attributes
                     );
 
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            userDetails, null, userDetails.getAuthorities());
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.info("사용자 인증 설정 완료: userId = {}, email = {}", userId, email);
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        log.info("사용자 인증 설정 완료: userId = {}, email = {}", userId, email);
                 }
             }
         } catch (Exception ex) {
