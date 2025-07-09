@@ -17,6 +17,7 @@ public interface CampaignCategoryService {
         List<String> campaignPlatform,
         String applyStart,
         String applyEnd,
-        Pageable pageable
+        Pageable pageable,
+        Long userId
     );
 } 

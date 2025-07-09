@@ -7,23 +7,28 @@ import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
+import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import java.util.Collections;
+import com.example.cherrydan.campaign.dto.CampaignResponseMapper;
 
 @Service
 @RequiredArgsConstructor
 public class CampaignServiceImpl implements CampaignService {
 
     private final CampaignRepository campaignRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String sort, Pageable pageable, Long userId) {
         Page<Campaign> campaigns;
         
         if (type != null) {
@@ -32,11 +37,11 @@ public class CampaignServiceImpl implements CampaignService {
             campaigns = campaignRepository.findActiveCampaigns(pageable);
         }
         
-        return convertToResponseDTO(campaigns);
+        return convertToResponseDTO(campaigns, userId);
     }
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable, Long userId) {
         Page<Campaign> campaigns;
         
         switch (snsPlatformType) {
@@ -61,13 +66,13 @@ public class CampaignServiceImpl implements CampaignService {
                 break;
         }
         
-        return convertToResponseDTO(campaigns);
+        return convertToResponseDTO(campaigns, userId);
     }
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable, Long userId) {
         if (campaignPlatformType == CampaignPlatformType.ALL) {
-            return convertToResponseDTO(campaignRepository.findActiveCampaigns(pageable));
+            return convertToResponseDTO(campaignRepository.findActiveCampaigns(pageable), userId);
         }
         
         Specification<Campaign> spec = (root, query, cb) -> cb.and(
@@ -76,11 +81,11 @@ public class CampaignServiceImpl implements CampaignService {
             );
         
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        return convertToResponseDTO(campaigns);
+        return convertToResponseDTO(campaigns, userId);
     }
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable, Long userId) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -95,14 +100,12 @@ public class CampaignServiceImpl implements CampaignService {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
         Page<Campaign> result = campaignRepository.findAll(spec, pageable);
-        return convertToResponseDTO(result);
+        return convertToResponseDTO(result, userId);
     }
 
-    private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns) {
-        List<CampaignResponseDTO> content = campaigns.getContent().stream()
-            .map(CampaignResponseDTO::fromEntity)
-            .collect(Collectors.toList());
-        
+    private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns, Long userId) {
+        final Set<Long> bookmarkedCampaignIds = CampaignResponseMapper.getBookmarkedCampaignIds(bookmarkRepository, userId);
+        List<CampaignResponseDTO> content = CampaignResponseMapper.toResponseDTOList(campaigns.getContent(), bookmarkedCampaignIds);
         return PageListResponseDTO.<CampaignResponseDTO>builder()
             .content(content)
             .page(campaigns.getNumber())

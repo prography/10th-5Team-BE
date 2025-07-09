@@ -11,16 +11,18 @@ public interface CampaignService {
     PageListResponseDTO<CampaignResponseDTO> getCampaigns(
         CampaignType type,
         String sort,
-        Pageable pageable
+        Pageable pageable,
+        Long userId
     );
     
     PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(
         SnsPlatformType snsPlatformType,
         String sort,
-        Pageable pageable
+        Pageable pageable,
+        Long userId
     );
     
-    PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable);
+    PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable, Long userId);
 
-    PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable);
+    PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable, Long userId);
 } 
