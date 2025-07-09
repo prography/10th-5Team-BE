@@ -14,6 +14,8 @@ import java.util.List;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 
 @RestController
 @RequestMapping("/api/campaigns/categories")
@@ -60,10 +62,12 @@ public class CampaignCategoryController {
         @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(required = false, defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20")
-        @RequestParam(required = false, defaultValue = "20") int size
+        @RequestParam(required = false, defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
-        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(title, regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform, applyStart, applyEnd, pageable);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignCategoryService.searchByCategory(title, regionGroup, subRegion, local, product, reporter, snsPlatform, campaignPlatform, applyStart, applyEnd, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 

@@ -15,4 +15,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Page<Bookmark> findAllByUserAndIsActiveTrue(User user, Pageable pageable);
     Page<Bookmark> findByUserIdAndIsActiveTrue(Long userId, Pageable pageable);
     void deleteByUserAndCampaign(User user, Campaign campaign);
+    boolean existsByUserIdAndCampaignIdAndIsActiveTrue(Long userId, Long campaignId);
+    List<Bookmark> findAllByUserIdAndIsActiveTrue(Long userId);
 } 

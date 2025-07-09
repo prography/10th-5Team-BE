@@ -34,6 +34,7 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean clip;
     @JsonIgnore private Boolean tiktok;
     @JsonIgnore private Boolean etc;
+    private Boolean isBookmarked;
     private String campaignPlatformImageUrl;
     private CampaignType campaignType;
     private Float competitionRate;
@@ -75,7 +76,7 @@ public class CampaignResponseDTO {
         }
     }
 
-    public static CampaignResponseDTO fromEntity(Campaign campaign) {
+    public static CampaignResponseDTO fromEntityWithBookmark(Campaign campaign, boolean isBookmarked) {
         String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
@@ -98,6 +99,7 @@ public class CampaignResponseDTO {
             .campaignPlatformImageUrl(campaignPlatformImageUrl)
             .campaignType(campaign.getCampaignType())
             .competitionRate(campaign.getCompetitionRate())
+            .isBookmarked(isBookmarked)
             .build();
     }
 } 

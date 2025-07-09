@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 
 @RestController
 @RequestMapping("/api/campaigns")
@@ -36,7 +38,8 @@ public class CampaignController {
         @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(required = false, defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20")
-        @RequestParam(required = false, defaultValue = "20") int size
+        @RequestParam(required = false, defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
         CampaignType campaignType = null;
@@ -46,7 +49,8 @@ public class CampaignController {
         } catch (IllegalArgumentException e) {
             campaignType = null;
         }
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(campaignType, sort, pageable);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(campaignType, sort, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
@@ -60,7 +64,8 @@ public class CampaignController {
         @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(required = false, defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20")
-        @RequestParam(required = false, defaultValue = "20") int size
+        @RequestParam(required = false, defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
         CampaignPlatformType platformType = CampaignPlatformType.ALL;
@@ -71,7 +76,8 @@ public class CampaignController {
                 platformType = CampaignPlatformType.ALL;
             }
         }
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
@@ -85,7 +91,8 @@ public class CampaignController {
         @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(required = false, defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20")
-        @RequestParam(required = false, defaultValue = "20") int size
+        @RequestParam(required = false, defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
         SnsPlatformType snsPlatformType = SnsPlatformType.ALL;
@@ -96,7 +103,8 @@ public class CampaignController {
                 snsPlatformType = SnsPlatformType.ALL;
             }
         }
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
@@ -111,10 +119,12 @@ public class CampaignController {
         @Parameter(description = "페이지 번호", example = "0")
         @RequestParam(defaultValue = "0") int page,
         @Parameter(description = "페이지 크기", example = "20")
-        @RequestParam(defaultValue = "20") int size
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = PageRequest.of(page, size);
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.searchByKeyword(keyword, pageable);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.searchByKeyword(keyword, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 

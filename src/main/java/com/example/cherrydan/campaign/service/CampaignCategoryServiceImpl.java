@@ -26,15 +26,22 @@ import com.example.cherrydan.campaign.domain.LocalCategory;
 import com.example.cherrydan.campaign.domain.ProductCategory;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignResponseMapper;
+import com.example.cherrydan.campaign.repository.BookmarkRepository;
+import com.example.cherrydan.campaign.domain.Bookmark;
+
+import java.util.Collections;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class CampaignCategoryServiceImpl implements CampaignCategoryService {
 
     private final CampaignRepository campaignRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> searchByCategory(String title, List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> campaignPlatform, String applyStart, String applyEnd, Pageable pageable) {
+    public PageListResponseDTO<CampaignResponseDTO> searchByCategory(String title, List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> campaignPlatform, String applyStart, String applyEnd, Pageable pageable, Long userId) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.isTrue(root.get("isActive")));
@@ -199,9 +206,8 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
         };
 
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        List<CampaignResponseDTO> content = campaigns.getContent().stream()
-                .map(CampaignResponseDTO::fromEntity)
-                .collect(Collectors.toList());
+        final Set<Long> bookmarkedCampaignIds = CampaignResponseMapper.getBookmarkedCampaignIds(bookmarkRepository, userId);
+        List<CampaignResponseDTO> content = CampaignResponseMapper.toResponseDTOList(campaigns.getContent(), bookmarkedCampaignIds);
         return PageListResponseDTO.<CampaignResponseDTO>builder()
                 .content(content)
                 .page(campaigns.getNumber())
