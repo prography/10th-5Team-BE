@@ -1,6 +1,7 @@
 package com.example.cherrydan.common.exception;
 
 import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -195,6 +196,12 @@ public class GlobalExceptionHandler {
         logger.error("Runtime Exception: {}", ex.getMessage(), ex);
         return ResponseEntity.internalServerError()
                 .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."));
+    }
+    @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException ex) {
+        logger.error("OAuth2AuthenticationProcessingException: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
     }
     
     /**
