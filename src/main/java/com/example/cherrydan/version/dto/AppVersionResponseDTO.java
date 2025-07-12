@@ -10,17 +10,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class AppVersionResponseDTO {
-    private Long id;
-    private String version;
-    private String description;
-    private LocalDateTime createdAt;
+    private String minSupportedVersion;
+    private String latestVersion;
 
     public static AppVersionResponseDTO from(AppVersion appVersion) {
         return AppVersionResponseDTO.builder()
-                .id(appVersion.getId())
-                .version(appVersion.getVersion())
-                .description(appVersion.getDescription())
-                .createdAt(appVersion.getCreatedAt())
+                .minSupportedVersion(appVersion.getMinSupportedVersion())
+                .latestVersion(appVersion.getLatestVersion())
                 .build();
     }
 }

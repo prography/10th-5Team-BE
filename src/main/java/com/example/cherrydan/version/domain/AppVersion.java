@@ -16,8 +16,14 @@ public class AppVersion extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "version", nullable = false, length = 30)
-    private String version;
+    @Column(name = "min_supported_version", nullable = false, length = 30)
+    private String minSupportedVersion;
+
+    @Column(name = "latest_version", nullable = false, length = 30)
+    private String latestVersion;
+
+    @Column(name = "platform", length = 20)
+    private String platform;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
