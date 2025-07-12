@@ -2,6 +2,7 @@ package com.example.cherrydan.user.service;
 
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
+import com.example.cherrydan.fcm.dto.NotificationResultDto;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.UserKeyword;
 import com.example.cherrydan.user.domain.KeywordCampaignAlert;
@@ -28,6 +29,7 @@ import org.springframework.data.domain.Page;
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.dto.KeywordCampaignAlertResponseDTO;
 import java.util.HashMap;
+import com.example.cherrydan.campaign.service.CampaignServiceImpl;
 
 @Slf4j
 @Service
@@ -38,6 +40,7 @@ public class UserKeywordService {
     private final KeywordCampaignAlertRepository keywordAlertRepository;
     private final CampaignRepository campaignRepository;
     private final NotificationService notificationService;
+    private final CampaignServiceImpl campaignService;
 
     @Transactional
     public void addKeyword(Long userId, String keyword) {
@@ -100,7 +103,7 @@ public class UserKeywordService {
             List<UserKeyword> userKeywords = entry.getValue();
             
             // 해당 키워드의 캠페인 수를 한 번만 조회
-            long campaignCount = getCampaignCountByKeyword(keyword);
+            long campaignCount = campaignService.getCampaignCountByKeyword(keyword);
             
             // 해당 키워드를 등록한 모든 사용자에게 알림 처리
             for (UserKeyword userKeyword : userKeywords) {
@@ -145,34 +148,6 @@ public class UserKeywordService {
         
         // 3. 알림 엔티티 생성
         return createKeywordAlertEntity(userKeyword, keyword, campaignCount, today);
-    }
-
-    /**
-     * 키워드로 매칭되는 활성 캠페인 수 조회
-     */
-    private long getCampaignCountByKeyword(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return 0;
-        }
-        
-        String trimmedKeyword = keyword.trim();
-        
-        Specification<Campaign> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
-            
-            String likeKeyword = "%" + trimmedKeyword + "%";
-            
-            predicates.add(cb.or(
-                    cb.like(root.get("title"), likeKeyword),
-                    cb.like(root.get("address"), likeKeyword),
-                    cb.like(root.get("benefit"), likeKeyword)
-            ));
-            
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        
-        return campaignRepository.count(spec);
     }
 
     /**
@@ -285,6 +260,7 @@ public class UserKeywordService {
         
         int totalSentUsers = 0;
         
+        
         // 범위별로 배치 발송 (최대 2번의 API 호출)
         for (Map.Entry<String, List<Long>> rangeEntry : rangeGroups.entrySet()) {
             String range = rangeEntry.getKey();
@@ -310,10 +286,10 @@ public class UserKeywordService {
                         .build();
                 
                 // 범위별 배치 발송
-                notificationService.sendNotificationToUsers(userIds, notificationRequest);
-                totalSentUsers += userIds.size();
+                NotificationResultDto result = notificationService.sendNotificationToUsers(userIds, notificationRequest);
+                totalSentUsers += result.getSuccessCount();
                 
-                log.info("키워드 알림 범위별 배치 발송 완료: 범위={}, 사용자수={}", range, userIds.size());
+                log.info("키워드 알림 범위별 배치 발송 완료: 범위={}, 사용자수={}", range, result.getSuccessCount());
                 
             } catch (Exception e) {
                 log.error("키워드 알림 범위별 배치 발송 실패: 범위={}, 오류={}", range, e.getMessage());
@@ -376,21 +352,7 @@ public class UserKeywordService {
         if (!userKeywordRepository.existsByUserIdAndKeyword(userId, keyword)) {
             throw new IllegalArgumentException("등록되지 않은 키워드입니다.");
         }
-
-        Specification<Campaign> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
-            String likeKeyword = "%" + keyword.trim() + "%";
-            predicates.add(cb.or(
-                cb.like(root.get("title"), likeKeyword),
-                cb.like(root.get("address"), likeKeyword),
-                cb.like(root.get("benefit"), likeKeyword)
-            ));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        return campaigns.map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false));
+        return campaignService.getPersonalizedCampaignsByKeyword(userId, keyword, pageable);
     }
 
     /**

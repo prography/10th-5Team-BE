@@ -12,6 +12,7 @@ import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -53,10 +54,7 @@ public class NotificationService {
                     .collect(Collectors.toList());
             
             return sendMulticastNotification(tokenStrings, request, tokens);
-            
-        } catch (NotificationException e) {
-            throw e;
-        } catch (Exception e) {
+        }catch (Exception e) {
             log.error("사용자 {}에게 알림 전송 실패: {}", userId, e.getMessage());
             throw new NotificationException(ErrorMessage.NOTIFICATION_SEND_FAILED);
         }
@@ -65,6 +63,7 @@ public class NotificationService {
     /**
      * 여러 사용자에게 알림 전송
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
     public NotificationResultDto sendNotificationToUsers(List<Long> userIds, NotificationRequest request) {
         try {
             List<UserFCMToken> tokens = tokenRepository.findActiveTokensByUserIds(userIds);
