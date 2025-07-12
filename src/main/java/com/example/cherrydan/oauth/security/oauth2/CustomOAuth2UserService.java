@@ -11,7 +11,10 @@ import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
 import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfoFactory;
 import com.example.cherrydan.user.domain.Role;
 import com.example.cherrydan.user.domain.User;
+import com.example.cherrydan.user.domain.UserLoginHistory;
 import com.example.cherrydan.user.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.annotation.Propagation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -21,7 +24,10 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import com.example.cherrydan.user.repository.UserLoginHistoryRepository;
 
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -31,9 +37,11 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final UserLoginHistoryRepository userLoginHistoryRepository;
     private final FCMTokenService fcmTokenService;
 
     /**
@@ -69,6 +77,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 사용자 조회 또는 생성 (Find or create user)
         User user = findOrCreateUser(oAuth2UserInfo, registrationId);
 
+        saveLoginHistory(user.getId());
+
         // UserDetails 객체 생성 및 반환 (Build and return UserDetails)
         return UserDetailsImpl.build(user, oAuth2User.getAttributes());
     }
@@ -85,6 +95,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             // 사용자 조회 또는 생성 (Find or create user)
             User user = findOrCreateUser(appleUserInfo, "apple");
             
+            // 로그인 기록 저장 (Save login history)
+            saveLoginHistory(user.getId());
+
             // FCM 토큰 등록 (선택적)
             registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
             
@@ -107,6 +120,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             // FCM 토큰 등록 (선택적)
             registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+
+            saveLoginHistory(user.getId());
             
             return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
@@ -127,6 +142,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             // FCM 토큰 등록 (선택적)
             registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+
+            saveLoginHistory(user.getId());
             
             return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
@@ -147,6 +164,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             // FCM 토큰 등록 (선택적)
             registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+
+            saveLoginHistory(user.getId());
             
             return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
@@ -164,6 +183,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private void validateEmail(OAuth2UserInfo oAuth2UserInfo) {
         if (!StringUtils.hasText(oAuth2UserInfo.getEmail())) {
             throw new OAuth2AuthenticationProcessingException("OAuth2 제공자로부터 이메일을 찾을 수 없습니다");
+        }
+    }
+
+    private void saveLoginHistory(Long id) {
+        try{
+            UserLoginHistory loginHistory = UserLoginHistory.builder()
+                    .userId(id)
+                    .loginDate(LocalDateTime.now())
+                    .build();
+            userLoginHistoryRepository.save(loginHistory);
+        } catch (Exception e) {
+            log.error("로그인 히스토리 저장 중 에러 발생: {}", e.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -237,7 +269,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * FCM 토큰 등록 (선택적)
      * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
      */
-    private void registerFCMTokenIfPresent(Long userId, String fcmToken, String deviceType) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
+    protected void registerFCMTokenIfPresent(Long userId, String fcmToken, String deviceType) {
         if (fcmToken != null && !fcmToken.trim().isEmpty()) {
             try {
                 FCMTokenRequest fcmRequest = FCMTokenRequest.builder()

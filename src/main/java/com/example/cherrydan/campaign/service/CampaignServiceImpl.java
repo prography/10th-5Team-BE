@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
+import com.example.cherrydan.common.aop.PerformanceMonitor;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
@@ -19,6 +20,9 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import java.util.Collections;
 import com.example.cherrydan.campaign.dto.CampaignResponseMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -101,6 +105,48 @@ public class CampaignServiceImpl implements CampaignService {
         };
         Page<Campaign> result = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(result, userId);
+    }
+
+    /**
+     * 특정 키워드로 맞춤형 캠페인 목록 조회
+     */
+    @Override
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+            String likeKeyword = "%" + keyword.trim() + "%";
+            predicates.add(cb.or(
+                cb.like(root.get("title"), likeKeyword),
+                cb.like(root.get("address"), likeKeyword),
+                cb.like(root.get("benefit"), likeKeyword)
+            ));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
+        return campaigns.map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false));
+    }
+
+    @Override
+    @PerformanceMonitor
+    public long getCampaignCountByKeyword(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return 0;
+        }
+        String trimmedKeyword = keyword.trim();
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+            String likeKeyword = "%" + trimmedKeyword + "%";
+            predicates.add(cb.or(
+                    cb.like(root.get("title"), likeKeyword),
+                    cb.like(root.get("address"), likeKeyword),
+                    cb.like(root.get("benefit"), likeKeyword)
+            ));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        return campaignRepository.count(spec);
     }
 
     private PageListResponseDTO<CampaignResponseDTO> convertToResponseDTO(Page<Campaign> campaigns, Long userId) {
