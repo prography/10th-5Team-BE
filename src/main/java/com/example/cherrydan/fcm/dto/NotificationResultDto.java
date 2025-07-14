@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,6 +45,11 @@ public class NotificationResultDto {
     private LocalDateTime completedAt;
     
     /**
+     * 성공한 사용자 ID 목록
+     */
+    private List<Long> successfulUserIds;
+    
+    /**
      * 추가 정보 (필요시 사용)
      */
     private Map<String, Object> additionalInfo;
@@ -71,6 +77,20 @@ public class NotificationResultDto {
                 .totalCount(successCount + failureCount)
                 .details(details)
                 .completedAt(LocalDateTime.now())
+                .build();
+    }
+    
+    /**
+     * 다중 사용자 전송 결과 생성 (성공한 사용자 ID 포함)
+     */
+    public static NotificationResultDto multipleResult(int successCount, int failureCount, String details, List<Long> successfulUserIds) {
+        return NotificationResultDto.builder()
+                .successCount(successCount)
+                .failureCount(failureCount)
+                .totalCount(successCount + failureCount)
+                .details(details)
+                .completedAt(LocalDateTime.now())
+                .successfulUserIds(successfulUserIds)
                 .build();
     }
     

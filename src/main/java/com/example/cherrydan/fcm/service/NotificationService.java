@@ -152,6 +152,7 @@ public class NotificationService {
             int totalSuccess = 0;
             int totalFailure = 0;
             List<String> invalidTokens = new ArrayList<>();
+            List<String> successfulTokens = new ArrayList<>();
             
             for (List<String> chunk : tokenChunks) {
                 MulticastMessage message = MulticastMessage.builder()
@@ -162,21 +163,24 @@ public class NotificationService {
                         .setApnsConfig(buildApnsConfig(request))
                         .build();
                 
-                BatchResponse batchResponse = FirebaseMessaging.getInstance().sendMulticast(message);
+                BatchResponse batchResponse = FirebaseMessaging.getInstance().sendEachForMulticast(message);
                 totalSuccess += batchResponse.getSuccessCount();
                 totalFailure += batchResponse.getFailureCount();
                 
-                processFailedTokens(batchResponse, chunk, invalidTokens);
+                processBatchResponse(batchResponse, chunk, invalidTokens, successfulTokens);
             }
             
             updateSuccessfulTokensLastUsed(tokenEntities, invalidTokens);
             deactivateInvalidTokens(invalidTokens);
             
-            log.info("알림 전송 완료 - 성공: {}, 실패: {}, 무효 토큰: {}", 
-                    totalSuccess, totalFailure, invalidTokens.size());
+            // 성공한 토큰을 통해 성공한 사용자 ID 추출
+            List<Long> successfulUserIds = extractSuccessfulUserIds(successfulTokens, tokenEntities);
+            
+            log.info("알림 전송 완료 - 성공: {}, 실패: {}, 무효 토큰: {}, 성공한 사용자: {}", 
+                    totalSuccess, totalFailure, invalidTokens.size(), successfulUserIds.size());
             
             return NotificationResultDto.multipleResult(totalSuccess, totalFailure, 
-                    String.format("성공: %d, 실패: %d", totalSuccess, totalFailure));
+                    String.format("성공: %d, 실패: %d", totalSuccess, totalFailure), successfulUserIds);
             
         } catch (FirebaseMessagingException e) {
             log.error("다중 알림 전송 실패: {}", e.getMessage());
@@ -229,16 +233,19 @@ public class NotificationService {
         }
         return AndroidConfig.Priority.NORMAL;
     }
-    
+
     /**
-     * 실패한 토큰들 처리
+     * 배치 응답 처리 (성공/실패 토큰 분류)
      */
-    private void processFailedTokens(BatchResponse batchResponse, List<String> tokens, List<String> invalidTokens) {
+    private void processBatchResponse(BatchResponse batchResponse, List<String> tokens, List<String> invalidTokens, List<String> successfulTokens) {
         List<SendResponse> responses = batchResponse.getResponses();
         for (int i = 0; i < responses.size(); i++) {
             SendResponse response = responses.get(i);
-            if (!response.isSuccessful()) {
-                String token = tokens.get(i);
+            String token = tokens.get(i);
+            
+            if (response.isSuccessful()) {
+                successfulTokens.add(token);
+            } else {
                 FirebaseMessagingException exception = response.getException();
                 
                 if (isInvalidTokenError(exception)) {
@@ -249,6 +256,17 @@ public class NotificationService {
                 }
             }
         }
+    }
+    
+    /**
+     * 성공한 토큰을 통해 성공한 사용자 ID 추출
+     */
+    private List<Long> extractSuccessfulUserIds(List<String> successfulTokens, List<UserFCMToken> tokenEntities) {
+        return tokenEntities.stream()
+                .filter(tokenEntity -> successfulTokens.contains(tokenEntity.getFcmToken()))
+                .map(UserFCMToken::getUserId)
+                .distinct() // 한 사용자가 여러 토큰을 가질 수 있으므로 중복 제거
+                .collect(Collectors.toList());
     }
     
     /**
