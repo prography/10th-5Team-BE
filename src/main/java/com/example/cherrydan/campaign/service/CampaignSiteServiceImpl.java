@@ -26,6 +26,7 @@ public class CampaignSiteServiceImpl implements CampaignSiteService {
                 String cdnUrl = CloudfrontUtil.getCampaignPlatformImageUrl(site.getSiteNameEn());
                 return CampaignSiteResponseDTO.builder()
                         .siteNameKr(site.getSiteNameKr())
+                        .siteNameEn(site.getSiteNameEn())
                         .cdnUrl(cdnUrl)
                         .build();
             })

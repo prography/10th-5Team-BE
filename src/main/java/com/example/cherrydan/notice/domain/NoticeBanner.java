@@ -24,6 +24,7 @@ public class NoticeBanner extends BaseTimeEntity {
     private Long id;
 
     private String title;
+    private String subTitle;
     private String imageUrl;
     private String bannerType; // NOTICE, EVENT, AD 등
     private String linkType;   // INTERNAL, EXTERNAL

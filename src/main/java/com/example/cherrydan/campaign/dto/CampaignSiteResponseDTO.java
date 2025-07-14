@@ -11,5 +11,6 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CampaignSiteResponseDTO {
     private String siteNameKr;
+    private String siteNameEn;
     private String cdnUrl;
 } 
