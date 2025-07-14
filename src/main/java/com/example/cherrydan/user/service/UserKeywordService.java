@@ -246,9 +246,6 @@ public class UserKeywordService {
                     rangeGroups.get("10+").add(userId);
                 }
                 
-                // 발송 완료 후 업데이트할 알림들 준비
-                allAlertsToUpdate.addAll(userAlerts);
-                
                 log.info("키워드 알림 발송 대상 추가: 사용자={}, 키워드수={}, 최대캠페인수={}, 그룹={}", 
                         userId, userAlerts.size(), maxCampaignCount, 
                         maxCampaignCount >= 100 ? "100+" : "10+");
@@ -259,7 +256,6 @@ public class UserKeywordService {
         }
         
         int totalSentUsers = 0;
-        
         
         // 범위별로 배치 발송 (최대 2번의 API 호출)
         for (Map.Entry<String, List<Long>> rangeEntry : rangeGroups.entrySet()) {
@@ -287,9 +283,21 @@ public class UserKeywordService {
                 
                 // 범위별 배치 발송
                 NotificationResultDto result = notificationService.sendNotificationToUsers(userIds, notificationRequest);
-                totalSentUsers += result.getSuccessCount();
                 
-                log.info("키워드 알림 범위별 배치 발송 완료: 범위={}, 사용자수={}", range, result.getSuccessCount());
+                // 성공한 사용자 ID 목록을 받아서 해당 사용자들의 알림만 추가
+                List<Long> successfulUserIds = result.getSuccessfulUserIds();
+                if (successfulUserIds != null && !successfulUserIds.isEmpty()) {
+                    for (Long userId : successfulUserIds) {
+                        List<KeywordCampaignAlert> userAlerts = groupedByUser.get(userId);
+                        if (userAlerts != null) {
+                            allAlertsToUpdate.addAll(userAlerts);
+                        }
+                    }
+                    totalSentUsers += successfulUserIds.size();
+                }
+                
+                log.info("키워드 알림 범위별 배치 발송 완료: 범위={}, 전체사용자수={}, 성공사용자수={}", 
+                        range, userIds.size(), successfulUserIds != null ? successfulUserIds.size() : 0);
                 
             } catch (Exception e) {
                 log.error("키워드 알림 범위별 배치 발송 실패: 범위={}, 오류={}", range, e.getMessage());
@@ -297,12 +305,14 @@ public class UserKeywordService {
             }
         }
         
-        // 발송 성공 시 알림 상태 업데이트
+        // 성공한 사용자의 알림만 상태 업데이트
         if (totalSentUsers > 0) {
             try {
                 allAlertsToUpdate.forEach(KeywordCampaignAlert::markAsNotified);
                 keywordAlertRepository.saveAll(allAlertsToUpdate);
-                log.info("알림 상태 벌크 업데이트 완료: {}개", allAlertsToUpdate.size());
+                
+                log.info("알림 상태 벌크 업데이트 완료: 성공한 사용자 알림 {}개", allAlertsToUpdate.size());
+                
             } catch (Exception e) {
                 log.error("알림 상태 업데이트 실패: {}", e.getMessage());
             }
