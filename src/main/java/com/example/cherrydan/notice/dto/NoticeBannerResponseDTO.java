@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class NoticeBannerResponseDTO {
     private Long id;
     private String title;
+    private String subTitle;
     private String imageUrl;
     private String bannerType; // NOTICE, EVENT, AD 등
     private String linkType;   // INTERNAL, EXTERNAL

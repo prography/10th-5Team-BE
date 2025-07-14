@@ -19,6 +19,7 @@ public class NoticeBannerServiceImpl implements NoticeBannerService {
         return banners.stream().map(banner -> NoticeBannerResponseDTO.builder()
                 .id(banner.getId())
                 .title(banner.getTitle())
+                .subTitle(banner.getSubTitle())
                 .imageUrl(banner.getImageUrl())
                 .bannerType(banner.getBannerType())
                 .linkType(banner.getLinkType())

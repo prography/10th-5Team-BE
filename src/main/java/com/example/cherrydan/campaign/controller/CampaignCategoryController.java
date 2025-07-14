@@ -39,19 +39,19 @@ public class CampaignCategoryController {
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> searchByCategory(
         @Parameter(description = "제목 (예: 캠페인 제목)")
         @RequestParam(required = false) String title,
-        @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon 등) - 복수 선택 가능")
+        @Parameter(description = "지역 그룹 (예: all, seoul, gyeonggi_incheon 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> regionGroup,
         @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> subRegion,
-        @Parameter(description = "로컬 카테고리 (예: restaurant, beauty 등) - 복수 선택 가능")
+        @Parameter(description = "로컬 카테고리 (예: all, restaurant, beauty 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> local,
-        @Parameter(description = "제품 카테고리 (예: food, beauty 등) - 복수 선택 가능")
+        @Parameter(description = "제품 카테고리 (예: all, food, beauty 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> product,
-        @Parameter(description = "기자단 여부 (예: reporter)")
+        @Parameter(description = "기자단 여부 (예: all)")
         @RequestParam(required = false) String reporter,
-        @Parameter(description = "SNS 플랫폼 (예: blog, youtube, insta, tiktok, etc) - 복수 선택 가능")
+        @Parameter(description = "SNS 플랫폼 (예: all, blog, youtube, insta, tiktok, etc) - 복수 선택 가능")
         @RequestParam(required = false) List<String> snsPlatform,
-        @Parameter(description = "캠페인 플랫폼 (예: chvu, revu 등) - 복수 선택 가능")
+        @Parameter(description = "캠페인 플랫폼 (예: all, chvu, revu 등) - 복수 선택 가능")
         @RequestParam(required = false) List<String> campaignPlatform,
         @Parameter(description = "마감일 시작일 (예: 2025-06-01)", example = "2025-06-01")
         @RequestParam(required = false) String applyStart,
