@@ -52,7 +52,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
             }
 
             // regionGroup 조건 처리 (복수 선택 가능)
-            if (regionGroup != null && !regionGroup.isEmpty()) {
+            if (regionGroup != null && !regionGroup.isEmpty() && !regionGroup.contains("all")) {
                 List<Predicate> regionGroupPredicates = new ArrayList<>();
                 for (String regionGroupItem : regionGroup) {
                     if (regionGroupItem != null && !regionGroupItem.isEmpty()) {
@@ -92,50 +92,60 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
 
             // 지역 카테고리 조건 처리 (복수 선택 가능)
             if (local != null && !local.isEmpty()) {
-                List<Predicate> localPredicates = new ArrayList<>();
-                for (String localItem : local) {
-                    if (localItem != null && !localItem.isEmpty() && !localItem.equalsIgnoreCase("all")) {
-                        try {
-                            int code = LocalCategory.fromString(localItem).getCode();
-                            localPredicates.add(cb.and(
-                                cb.equal(root.get("campaignType"), CampaignType.REGION),
-                                cb.equal(root.get("localCategory"), code)
-                            ));
-                        } catch (IllegalArgumentException e) {
-                            throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND);
+                if (local.size() == 1 && local.get(0).equalsIgnoreCase("all")) {
+                    // all만 있으면 campaign_type=1만 추가
+                    typePredicates.add(cb.equal(root.get("campaignType"), CampaignType.REGION));
+                } else {
+                    List<Predicate> localPredicates = new ArrayList<>();
+                    for (String localItem : local) {
+                        if (localItem != null && !localItem.isEmpty() && !localItem.equalsIgnoreCase("all")) {
+                            try {
+                                int code = LocalCategory.fromString(localItem).getCode();
+                                localPredicates.add(cb.and(
+                                    cb.equal(root.get("campaignType"), CampaignType.REGION),
+                                    cb.equal(root.get("localCategory"), code)
+                                ));
+                            } catch (IllegalArgumentException e) {
+                                throw new CampaignException(ErrorMessage.CAMPAIGN_REGION_DETAIL_NOT_FOUND);
+                            }
                         }
                     }
-                }
-                if (!localPredicates.isEmpty()) {
-                    typePredicates.add(cb.or(localPredicates.toArray(new Predicate[0])));
+                    if (!localPredicates.isEmpty()) {
+                        typePredicates.add(cb.or(localPredicates.toArray(new Predicate[0])));
+                    }
                 }
             }
 
             // 제품 카테고리 조건 처리 (복수 선택 가능)
             if (product != null && !product.isEmpty()) {
-                List<Predicate> productPredicates = new ArrayList<>();
-                for (String productItem : product) {
-                    if (productItem != null && !productItem.isEmpty() && !productItem.equalsIgnoreCase("all")) {
-                        try {
-                            int code = ProductCategory.fromString(productItem).getCode();
-                            productPredicates.add(cb.and(
-                                cb.equal(root.get("campaignType"), CampaignType.PRODUCT),
-                                cb.equal(root.get("productCategory"), code)
-                            ));
-                        } catch (IllegalArgumentException e) {
-                            throw new CampaignException(ErrorMessage.CAMPAIGN_PRODUCT_CATEGORY_NOT_FOUND);
+                if (product.size() == 1 && product.get(0).equalsIgnoreCase("all")) {
+                    // all만 있으면 campaign_type=2만 추가
+                    typePredicates.add(cb.equal(root.get("campaignType"), CampaignType.PRODUCT));
+                } else {
+                    List<Predicate> productPredicates = new ArrayList<>();
+                    for (String productItem : product) {
+                        if (productItem != null && !productItem.isEmpty() && !productItem.equalsIgnoreCase("all")) {
+                            try {
+                                int code = ProductCategory.fromString(productItem).getCode();
+                                productPredicates.add(cb.and(
+                                    cb.equal(root.get("campaignType"), CampaignType.PRODUCT),
+                                    cb.equal(root.get("productCategory"), code)
+                                ));
+                            } catch (IllegalArgumentException e) {
+                                throw new CampaignException(ErrorMessage.CAMPAIGN_PRODUCT_CATEGORY_NOT_FOUND);
+                            }
                         }
                     }
-                }
-                if (!productPredicates.isEmpty()) {
-                    typePredicates.add(cb.or(productPredicates.toArray(new Predicate[0])));
+                    if (!productPredicates.isEmpty()) {
+                        typePredicates.add(cb.or(productPredicates.toArray(new Predicate[0])));
+                    }
                 }
             }
 
             // 기자단 카테고리 조건 처리
-            if (reporter != null && !reporter.isEmpty()) {
+            if (reporter != null && reporter.equalsIgnoreCase("all")) {
                 typePredicates.add(cb.equal(root.get("campaignType"), CampaignType.REPORTER));
-            }
+            }            
 
             // typePredicates가 비어있지 않으면 OR로 묶어서 predicates에 추가
             if (!typePredicates.isEmpty()) {
@@ -143,7 +153,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
             }
 
             // SNS 플랫폼 조건 처리 (복수 선택 가능)
-            if (snsPlatform != null && !snsPlatform.isEmpty()) {
+            if (snsPlatform != null && !snsPlatform.isEmpty() && !snsPlatform.contains("all")) {
                 List<Predicate> snsPlatformPredicates = new ArrayList<>();
                 for (String snsPlatformItem : snsPlatform) {
                     if (snsPlatformItem != null && !snsPlatformItem.trim().isEmpty() && !snsPlatformItem.trim().equalsIgnoreCase("all")) {
@@ -171,7 +181,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
             }
 
             // 캠페인 플랫폼 조건 처리 (복수 선택 가능)
-            if (campaignPlatform != null && !campaignPlatform.isEmpty()) {
+            if (campaignPlatform != null && !campaignPlatform.isEmpty() && !campaignPlatform.contains("all")) {
                 List<Predicate> campaignPlatformPredicates = new ArrayList<>();
                 for (String campaignPlatformItem : campaignPlatform) {
                     if (campaignPlatformItem != null && !campaignPlatformItem.trim().isEmpty()) {
