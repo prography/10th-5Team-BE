@@ -25,8 +25,6 @@ public class AppVersionService {
         AppVersion latestVersion = appVersionRepository.findLatestVersion()
                 .orElseThrow(() -> new AppVersionException(ErrorMessage.APP_VERSION_NOT_FOUND));
 
-        log.info("최신 버전 조회 완료: version={}", latestVersion.getVersion());
-
         return AppVersionResponseDTO.from(latestVersion);
     }
 
