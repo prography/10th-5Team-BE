@@ -128,12 +128,6 @@ public class CampaignController {
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
-    @GetMapping("/count")
-    public ResponseEntity<ApiResponse<Long>> getCampaignCountByKeyword(@RequestParam("keyword") String keyword) {
-        long count = campaignService.getCampaignCountByKeyword(keyword);
-        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", count));
-    }
-
     private Pageable createPageable(String sort, int page, int size) {
         switch (sort) {
             case "popular":
