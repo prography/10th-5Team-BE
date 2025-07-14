@@ -54,8 +54,10 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  expiration: 3600000
-  refresh-token-expiration: 604800000
+  access-token:
+    validity-in-minutes: 1
+  refresh-token:
+    validity-in-days: 14
 
 server:
   port: ${SERVER_PORT:8080}

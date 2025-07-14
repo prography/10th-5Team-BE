@@ -24,7 +24,7 @@ public class JwtTokenProvider {
 
     public JwtTokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.access-token.validity-in-minutes:60}") long accessTokenValidityInMinutes,
+            @Value("${jwt.access-token.validity-in-minutes:1}") long accessTokenValidityInMinutes,
             @Value("${jwt.refresh-token.validity-in-days:14}") long refreshTokenValidityInDays) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessTokenValidityInMinutes = accessTokenValidityInMinutes;
@@ -48,12 +48,11 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiration = now.plus(accessTokenValidityInMinutes, ChronoUnit.MINUTES);
 
-        return Jwts.builder()
-                .setSubject(userId.toString())
+        return Jwts.builder().subject(userId.toString())
                 .claim("email", email)
                 .claim("type", "access")
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
                 .signWith(secretKey)
                 .compact();
     }
@@ -63,11 +62,10 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiration = now.plus(refreshTokenValidityInDays, ChronoUnit.DAYS);
 
-        return Jwts.builder()
-                .setSubject(userId.toString())
+        return Jwts.builder().subject(userId.toString())
                 .claim("type", "refresh")
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
                 .signWith(secretKey)
                 .compact();
     }
@@ -122,8 +120,6 @@ public class JwtTokenProvider {
     private Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .build().parseSignedClaims(token).getPayload();
     }
 }
