@@ -14,7 +14,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.cherrydan.user.repository.UserLoginHistoryRepository;
+import com.example.cherrydan.user.domain.UserLoginHistory;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class AuthService {
 
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenProvider tokenProvider;
+    private final UserLoginHistoryRepository userLoginHistoryRepository;
 
     @Transactional
     public TokenDTO refreshToken(RefreshTokenDTO refreshToken) {
@@ -32,6 +36,8 @@ public class AuthService {
 
         // 보안을 위해 Access Token과 Refresh Token을 모두 새로 발급
         TokenDTO newTokens = tokenProvider.generateTokens(user.getId(), user.getEmail());
+
+        saveLoginHistory(user.getId());
 
         // 새로운 Refresh Token을 DB에 저장
         refreshTokenService.saveOrUpdateRefreshToken(user.getId(), newTokens.getRefreshToken());
@@ -61,6 +67,19 @@ public class AuthService {
 
         return refreshTokenService.getUserByRefreshToken(refreshToken)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+    }
+
+    private void saveLoginHistory(Long id) {
+        try{
+            UserLoginHistory loginHistory = UserLoginHistory.builder()
+                    .userId(id)
+                    .loginDate(LocalDateTime.now())
+                    .build();
+            userLoginHistoryRepository.save(loginHistory);
+        } catch (Exception e) {
+            log.error("로그인 히스토리 저장 중 에러 발생: {}", e.getMessage());
+            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
+        }
     }
 }
 
