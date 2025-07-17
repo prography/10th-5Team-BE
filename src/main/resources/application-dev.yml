@@ -1,20 +1,24 @@
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: dev
 
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    # url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/cherrydan-dev?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update # 프로덕션에서는 스키마를 자동으로 변경하지 않도록 validate 사용
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+    
   security:
     oauth2:
       client:
@@ -54,10 +58,8 @@ spring:
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token:
-    validity-in-minutes: 60
-  refresh-token:
-    validity-in-days: 14
+  expiration: 3600000
+  refresh-token-expiration: 604800000
 
 server:
   port: ${SERVER_PORT:8080}
@@ -74,6 +76,7 @@ logging:
     org.apache.catalina.connector: WARN
     org.apache.coyote: WARN
     org.springframework.web.context.request.async: WARN
+    org.hibernate.orm.jdbc.bind: TRACE 
   file:
     name: /var/log/cherrydan/application.log
 
@@ -119,9 +122,3 @@ fcm:
 
 cdn:
   base-url: ${CLOUDFRONT_URL:https://cdn.cherrydan.com/}
-
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
