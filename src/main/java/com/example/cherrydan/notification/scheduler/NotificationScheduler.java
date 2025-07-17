@@ -56,9 +56,9 @@ public class NotificationScheduler {
     }
 
     /**
-     * 매일 새벽 5시에 실행 - 키워드 맞춤 알림 대상 업데이트 (배치 처리)
+     * 매일 새벽 7시에 실행 - 키워드 맞춤 알림 대상 업데이트 (배치 처리)
      */
-    @Scheduled(cron = "0 0 5 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 7 * * ?", zone = "Asia/Seoul")
     public void updateKeywordCampaignAlerts() {
         log.info("=== 새벽 키워드 알림 업데이트 작업 시작 ===");
         
