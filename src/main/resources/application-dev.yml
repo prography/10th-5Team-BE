@@ -1,7 +1,7 @@
 spring:
   config:
     activate:
-      on-profile: prod
+      on-profile: dev
 
   datasource:
     url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
@@ -10,11 +10,14 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update # 프로덕션에서는 스키마를 자동으로 변경하지 않도록 validate 사용
-    show-sql: false
+      ddl-auto: update
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+    
   security:
     oauth2:
       client:
@@ -67,13 +70,14 @@ server:
 
 logging:
   level:
-    com.example.cherrydan: INFO # 프로덕션에서는 INFO 레벨로 로깅
+    com.example.cherrydan: INFO
     org.hibernate.SQL: off
     org.springframework.web: INFO
     # Broken pipe 에러 로그 줄이기
     org.apache.catalina.connector: WARN
     org.apache.coyote: WARN
     org.springframework.web.context.request.async: WARN
+    org.hibernate.orm.jdbc.bind: TRACE 
   file:
     name: /var/log/cherrydan/application.log
 
@@ -95,21 +99,21 @@ sns:
       instagram:
         client-id: ${INSTAGRAM_CLIENT_ID}
         client-secret: ${INSTAGRAM_CLIENT_SECRET}
-        redirect-uri: ${INSTAGRAM_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        redirect-uri: ${INSTAGRAM_REDIRECT_URI}
         auth-url: https://api.instagram.com/oauth/authorize
         token-url: https://api.instagram.com/oauth/access_token
         scope: user_profile,user_media
       youtube:
         client-id: ${YOUTUBE_CLIENT_ID}
         client-secret: ${YOUTUBE_CLIENT_SECRET}
-        redirect-uri: ${YOUTUBE_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        redirect-uri: ${YOUTUBE_REDIRECT_URI}
         auth-url: https://accounts.google.com/o/oauth2/v2/auth
         token-url: https://oauth2.googleapis.com/token
         scope: https://www.googleapis.com/auth/youtube.readonly
       tiktok:
         client-id: ${TIKTOK_CLIENT_ID}
         client-secret: ${TIKTOK_CLIENT_SECRET}
-        redirect-uri: ${TIKTOK_REDIRECT_URI} # 프로덕션용 리디렉션 URI
+        redirect-uri: ${TIKTOK_REDIRECT_URI}
         auth-url: https://www.tiktok.com/v2/auth/authorize
         token-url: https://open.tiktokapis.com/v2/oauth/token
         scope: user.info.basic
@@ -119,9 +123,3 @@ fcm:
 
 cdn:
   base-url: ${CLOUDFRONT_URL:https://cdn.cherrydan.com/}
-
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    enabled: false
