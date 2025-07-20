@@ -120,21 +120,24 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable, Long userId) {
-        Specification<Campaign> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
-            predicates.add(cb.or(
-                cb.equal(root.get("campaignType"), CampaignType.REGION),
-                cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
-            ));
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String likeKeyword = keyword.trim() + "%";
-                predicates.add(cb.like(root.get("title"), likeKeyword));
-            }
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        Page<Campaign> result = campaignRepository.findAll(spec, pageable);
-        return convertToResponseDTO(result, userId);
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String fullTextKeyword = "+" + keyword.trim() + "*";
+            List<Campaign> fullTextResult = campaignRepository.searchByTitleFullText(fullTextKeyword);
+            Page<Campaign> page = new org.springframework.data.domain.PageImpl<>(fullTextResult);
+            return convertToResponseDTO(page, userId);
+        } else {
+            Specification<Campaign> spec = (root, query, cb) -> {
+                List<Predicate> predicates = new ArrayList<>();
+                predicates.add(cb.isTrue(root.get("isActive")));
+                predicates.add(cb.or(
+                    cb.equal(root.get("campaignType"), CampaignType.REGION),
+                    cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
+                ));
+                return cb.and(predicates.toArray(new Predicate[0]));
+            };
+            Page<Campaign> result = campaignRepository.findAll(spec, pageable);
+            return convertToResponseDTO(result, userId);
+        }
     }
 
     /**
