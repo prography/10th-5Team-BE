@@ -7,6 +7,8 @@ import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.example.cherrydan.campaign.domain.RegionGroup;
+import java.util.List;
 
 public interface CampaignService {
     PageListResponseDTO<CampaignResponseDTO> getCampaigns(
@@ -30,4 +32,20 @@ public interface CampaignService {
     Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable);
 
     long getCampaignCountByKeyword(String keyword);
+
+    PageListResponseDTO<CampaignResponseDTO> getCampaignsByLocal(
+        List<String> regionGroup,
+        List<String> subRegion,
+        List<String> localCategory,
+        String sort,
+        Pageable pageable,
+        Long userId
+    );
+
+    PageListResponseDTO<CampaignResponseDTO> getCampaignsByProduct(
+        List<String> productCategory,
+        String sort,
+        Pageable pageable,
+        Long userId
+    );
 } 

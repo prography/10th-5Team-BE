@@ -15,7 +15,8 @@ import java.time.LocalDate;
         @Index(name = "campaigns_is_active_apply_start_IDX", columnList = "is_active, apply_start"),
         @Index(name = "campaigns_is_active_campaign_type_competition_rate_IDX", columnList = "is_active, campaign_type, competition_rate"),
         @Index(name = "campaigns_is_active_competition_rate_IDX", columnList = "is_active, competition_rate"),
-        @Index(name = "campaigns_is_active_source_site_competition_rate_IDX", columnList = "is_active, source_site, competition_rate")
+        @Index(name = "campaigns_is_active_source_site_competition_rate_IDX", columnList = "is_active, source_site, competition_rate"),
+        @Index(name = "campaigns_is_active_campaign_type_title_IDX", columnList = "is_active, campaign_type, title"),
     }
 )
 @Getter
