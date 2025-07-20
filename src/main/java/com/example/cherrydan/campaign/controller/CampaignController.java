@@ -75,8 +75,6 @@ public class CampaignController {
     ) {
         Pageable pageable = createPageable(sort, page, size);
         Long userId = (currentUser != null) ? currentUser.getId() : null;
-        // String -> Enum 변환
-        System.out.println("regionGroup: " + regionGroup);
         PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByLocal(regionGroup, subRegion, localCategory, sort, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("지역 캠페인 목록 조회가 완료되었습니다.", result));
     }
@@ -205,7 +203,7 @@ public class CampaignController {
 
     @Operation(
         summary = "키워드 기반 캠페인 검색",
-        description = "title에 키워드가 포함된 캠페인(지역/제품 타입, is_active=1)만 검색합니다."
+        description = "title에 키워드가 포함된 캠페인(지역/제품 타입)만 검색합니다."
     )
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> searchCampaignsByKeyword(
