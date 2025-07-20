@@ -37,6 +37,6 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true")
     Page<Campaign> findActiveCampaigns(Pageable pageable);
 
-    @Query(value = "SELECT * FROM campaigns WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) LIMIT 20", nativeQuery = true)
+    @Query(value = "SELECT * FROM campaigns WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) and is_active = 1 GROUP BY title ORDER BY competition_rate LIMIT 20", nativeQuery = true)
     List<Campaign> searchByTitleFullText(@Param("keyword") String keyword);
 } 
