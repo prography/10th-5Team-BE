@@ -19,6 +19,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
+import com.example.cherrydan.campaign.domain.CampaignType;
+import com.example.cherrydan.campaign.domain.RegionGroup;
+import java.util.stream.Collectors;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/campaigns")
@@ -28,7 +33,97 @@ public class CampaignController {
 
     private final CampaignService campaignService;
 
-    @Operation(summary = "캠페인 타입별 조회", description = "캠페인 타입(ALL, PRODUCT, REGION, REPORTER, ETC)별로 캠페인 목록을 조회합니다.")
+    /**
+     * 전체 캠페인 목록 조회 API
+     */
+    @Operation(summary = "전체 캠페인 목록 조회", description = "전체 캠페인 목록을 조회합니다.")
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getAllCampaigns(
+        @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
+        @RequestParam(defaultValue = "popular") String sort,
+        @Parameter(description = "페이지 번호", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Pageable pageable = createPageable(sort, page, size);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(null, sort, pageable, userId);
+        return ResponseEntity.ok(ApiResponse.success("전체 캠페인 목록 조회가 완료되었습니다.", result));
+    }
+
+    /**
+     * 지역 캠페인 목록 조회 API
+     */
+    @Operation(summary = "지역 캠페인 목록 조회", description = "지역 캠페인 목록을 조회합니다.")
+    @GetMapping("/local")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getLocalCampaigns(
+        @Parameter(description = "지역 그룹 (예: seoul, gyeonggi_incheon, jeju 등)", example = "seoul")
+        @RequestParam(required = false) List<String> regionGroup,
+        @Parameter(description = "하위 지역 (예: gangnam_nonhyeon 등)")
+        @RequestParam(required = false) List<String> subRegion,
+        @Parameter(description = "로컬 카테고리 (예: restaurant, beauty, accommodation 등)", example = "restaurant")
+        @RequestParam(required = false) List<String> localCategory,
+        @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
+        @RequestParam(defaultValue = "popular") String sort,
+        @Parameter(description = "페이지 번호", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Pageable pageable = createPageable(sort, page, size);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        // String -> Enum 변환
+        System.out.println("regionGroup: " + regionGroup);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByLocal(regionGroup, subRegion, localCategory, sort, pageable, userId);
+        return ResponseEntity.ok(ApiResponse.success("지역 캠페인 목록 조회가 완료되었습니다.", result));
+    }
+
+    /**
+     * 제품 캠페인 목록 조회 API
+     */
+    @Operation(summary = "제품 캠페인 목록 조회", description = "제품 캠페인 목록을 조회합니다.")
+    @GetMapping("/product")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getProductCampaigns(
+        @Parameter(description = "제품 카테고리 (예: food, beauty, etc)", example = "food")
+        @RequestParam(required = false) List<String> productCategory,
+        @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
+        @RequestParam(defaultValue = "popular") String sort,
+        @Parameter(description = "페이지 번호", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Pageable pageable = createPageable(sort, page, size);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByProduct(productCategory, sort, pageable, userId);
+        return ResponseEntity.ok(ApiResponse.success("제품 캠페인 목록 조회가 완료되었습니다.", result));
+    }
+
+    /**
+     * 기자단 캠페인 목록 조회 API
+     */
+    @Operation(summary = "기자단 캠페인 목록 조회", description = "기자단 캠페인 목록을 조회합니다.")
+    @GetMapping("/reporter")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getReporterCampaigns(
+        @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
+        @RequestParam(defaultValue = "popular") String sort,
+        @Parameter(description = "페이지 번호", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "페이지 크기", example = "20")
+        @RequestParam(defaultValue = "20") int size,
+        @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Pageable pageable = createPageable(sort, page, size);
+        Long userId = (currentUser != null) ? currentUser.getId() : null;
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaigns(CampaignType.REPORTER, sort, pageable, userId);
+        return ResponseEntity.ok(ApiResponse.success("기자단 캠페인 목록 조회가 완료되었습니다.", result));
+    }
+
+    @Operation(summary = "캠페인 타입별 조회 (Fade out 예정)", description = "캠페인 타입(ALL, PRODUCT, REGION, REPORTER, ETC)별로 캠페인 목록을 조회합니다.")
     @GetMapping("/types")
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsByType(
         @Parameter(description = "캠페인 타입 (all, product, region, reporter, etc)", example = "all")

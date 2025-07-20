@@ -16,7 +16,6 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true AND c.campaignType = :campaignType")
     Page<Campaign> findActiveByCampaignType(CampaignType campaignType, Pageable pageable);
     
-    // SNS 플랫폼별 조회 메서드들 (정적 방식 유지 - 성능 최적화)
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true AND (c.blog = true OR c.clip = true)")
     Page<Campaign> findActiveByBlogTrue(Pageable pageable);
     
