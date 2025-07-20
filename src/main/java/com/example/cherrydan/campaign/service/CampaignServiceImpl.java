@@ -50,45 +50,70 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(SnsPlatformType snsPlatformType, String sort, Pageable pageable, Long userId) {
-        Page<Campaign> campaigns;
-        
-        switch (snsPlatformType) {
-            case BLOG:
-                campaigns = campaignRepository.findActiveByBlogTrue(pageable);
-                break;
-            case INSTAGRAM:
-                campaigns = campaignRepository.findActiveByInstagramTrue(pageable);
-                break;
-            case YOUTUBE:
-                campaigns = campaignRepository.findActiveByYoutubeTrue(pageable);
-                break;
-            case TIKTOK:
-                campaigns = campaignRepository.findActiveByTiktokTrue(pageable);
-                break;
-            case ETC:
-                campaigns = campaignRepository.findActiveByEtcTrue(pageable);
-                break;
-            case ALL:
-            default:
-                campaigns = campaignRepository.findActiveCampaigns(pageable);
-                break;
-        }
-        
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(
+        List<String> snsPlatform,
+        String sort,
+        Pageable pageable,
+        Long userId
+    ) {
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+
+            if (snsPlatform != null && !snsPlatform.isEmpty() && !snsPlatform.contains("all")) {
+                List<Predicate> snsPlatformPredicates = new ArrayList<>();
+                for (String snsPlatformItem : snsPlatform) {
+                    if (snsPlatformItem != null && !snsPlatformItem.trim().isEmpty() && !snsPlatformItem.trim().equalsIgnoreCase("all")) {
+                        try {
+                            SnsPlatformType snsPlatformType = SnsPlatformType.fromCode(snsPlatformItem);
+                            String[] relatedFields = snsPlatformType.getRelatedFields();
+                            if (relatedFields.length == 1) {
+                                snsPlatformPredicates.add(cb.isTrue(root.get(relatedFields[0])));
+                            } else if (relatedFields.length > 1) {
+                                List<Predicate> platformPredicates = new ArrayList<>();
+                                for (String field : relatedFields) {
+                                    platformPredicates.add(cb.isTrue(root.get(field)));
+                                }
+                                snsPlatformPredicates.add(cb.or(platformPredicates.toArray(new Predicate[0])));
+                            }
+                        } catch (IllegalArgumentException e) {
+                            throw new CampaignException(ErrorMessage.CAMPAIGN_SNS_NOT_FOUND);
+                        }
+                    }
+                }
+                if (!snsPlatformPredicates.isEmpty()) {
+                    predicates.add(cb.or(snsPlatformPredicates.toArray(new Predicate[0])));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(campaigns, userId);
     }
 
     @Override
-    public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable, Long userId) {
-        if (campaignPlatformType == CampaignPlatformType.ALL) {
-            return convertToResponseDTO(campaignRepository.findActiveCampaigns(pageable), userId);
-        }
-        
-        Specification<Campaign> spec = (root, query, cb) -> cb.and(
-                cb.isTrue(root.get("isActive")),
-                cb.equal(root.get("sourceSite"), campaignPlatformType.getSourceSiteCode())
-            );
-        
+    public PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(
+        List<String> platform,
+        String sort,
+        Pageable pageable,
+        Long userId
+    ) {
+        Specification<Campaign> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isTrue(root.get("isActive")));
+            if (platform != null && !platform.isEmpty() && !platform.contains("all")) {
+                List<Predicate> platformPredicates = new ArrayList<>();
+                for (String platformItem : platform) {
+                    if (platformItem != null && !platformItem.trim().isEmpty()) {
+                        platformPredicates.add(cb.equal(root.get("sourceSite"), platformItem.trim()));
+                    }
+                }
+                if (!platformPredicates.isEmpty()) {
+                    predicates.add(cb.or(platformPredicates.toArray(new Predicate[0])));
+                }
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
         Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
         return convertToResponseDTO(campaigns, userId);
     }

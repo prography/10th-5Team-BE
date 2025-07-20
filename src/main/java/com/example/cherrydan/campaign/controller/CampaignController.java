@@ -151,7 +151,7 @@ public class CampaignController {
     @GetMapping("/campaign-platforms")
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsByCampaignPlatform(
         @Parameter(description = "캠페인 플랫폼 코드 (all, chvu, revu, reviewnote, dailyview, fourblog, popomon, dinnerqueen, seoulouba, cometoplay, gangnam)", example = "fourblog")
-        @RequestParam(required = false, defaultValue = "all") String platform,
+        @RequestParam(required = false, defaultValue = "all") List<String> platform,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
         @RequestParam(required = false, defaultValue = "popular") String sort,
         @Parameter(description = "페이지 번호", example = "0")
@@ -161,24 +161,16 @@ public class CampaignController {
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
-        CampaignPlatformType platformType = CampaignPlatformType.ALL;
-        if (!"all".equalsIgnoreCase(platform.trim())) {
-            try {
-                platformType = CampaignPlatformType.fromCode(platform.trim());
-            } catch (IllegalArgumentException e) {
-                platformType = CampaignPlatformType.ALL;
-            }
-        }
         Long userId = (currentUser != null) ? currentUser.getId() : null;
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByCampaignPlatform(platformType, sort, pageable, userId);
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsByCampaignPlatform(platform, sort, pageable, userId);
         return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
     }
 
-    @Operation(summary = "SNS 플랫폼별 조회", description = "SNS 플랫폼(blog, insta, youtube, tiktok, etc)별로 캠페인 목록을 조회합니다.")
+    @Operation(summary = "SNS 플랫폼별 캠페인 조회", description = "복수 선택 가능, 예: platform=blog,insta")
     @GetMapping("/sns-platforms")
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignResponseDTO>>> getCampaignsBySnsPlatform(
-        @Parameter(description = "SNS 플랫폼 코드 (all, blog, insta, youtube, tiktok, etc)", example = "blog")
-        @RequestParam(required = false, defaultValue = "all") String platform,
+        @Parameter(description = "SNS 플랫폼 (복수 선택 가능, 예: blog,insta)", example = "blog,insta")
+        @RequestParam(required = false) List<String> platform,
         @Parameter(description = "정렬 기준 (popular, latest, deadline, low_competition)", example = "popular")
         @RequestParam(required = false, defaultValue = "popular") String sort,
         @Parameter(description = "페이지 번호", example = "0")
@@ -188,17 +180,9 @@ public class CampaignController {
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         Pageable pageable = createPageable(sort, page, size);
-        SnsPlatformType snsPlatformType = SnsPlatformType.ALL;
-        if (!"all".equalsIgnoreCase(platform.trim())) {
-            try {
-                snsPlatformType = SnsPlatformType.fromCode(platform.trim());
-            } catch (IllegalArgumentException e) {
-                snsPlatformType = SnsPlatformType.ALL;
-            }
-        }
         Long userId = (currentUser != null) ? currentUser.getId() : null;
-        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsBySnsPlatform(snsPlatformType, sort, pageable, userId);
-        return ResponseEntity.ok(ApiResponse.success("캠페인 목록 조회가 완료되었습니다.", result));
+        PageListResponseDTO<CampaignResponseDTO> result = campaignService.getCampaignsBySnsPlatform(platform, sort, pageable, userId);
+        return ResponseEntity.ok(ApiResponse.success("SNS 플랫폼별 캠페인 목록 조회가 완료되었습니다.", result));
     }
 
     @Operation(
