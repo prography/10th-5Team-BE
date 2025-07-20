@@ -19,13 +19,18 @@ public interface CampaignService {
     );
     
     PageListResponseDTO<CampaignResponseDTO> getCampaignsBySnsPlatform(
-        SnsPlatformType snsPlatformType,
+        List<String> snsPlatform,
         String sort,
         Pageable pageable,
         Long userId
     );
     
-    PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(CampaignPlatformType campaignPlatformType, String sort, Pageable pageable, Long userId);
+    PageListResponseDTO<CampaignResponseDTO> getCampaignsByCampaignPlatform(
+        List<String> platform,
+        String sort,
+        Pageable pageable,
+        Long userId
+    );
 
     PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable, Long userId);
 

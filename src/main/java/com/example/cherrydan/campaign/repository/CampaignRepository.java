@@ -7,7 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 @Repository
 public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSpecificationExecutor<Campaign> {
@@ -33,4 +36,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     @Query("SELECT c FROM Campaign c WHERE c.isActive = true")
     Page<Campaign> findActiveCampaigns(Pageable pageable);
+
+    @Query(value = "SELECT * FROM campaigns WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) LIMIT 20", nativeQuery = true)
+    List<Campaign> searchByTitleFullText(@Param("keyword") String keyword);
 } 
