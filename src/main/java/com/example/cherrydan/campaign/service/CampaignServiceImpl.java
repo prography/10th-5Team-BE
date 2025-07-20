@@ -103,7 +103,7 @@ public class CampaignServiceImpl implements CampaignService {
                 cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
             ));
             if (keyword != null && !keyword.trim().isEmpty()) {
-                String likeKeyword = "%" + keyword.trim() + "%";
+                String likeKeyword = keyword.trim() + "%";
                 predicates.add(cb.like(root.get("title"), likeKeyword));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
