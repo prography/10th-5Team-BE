@@ -33,7 +33,7 @@ jobs:
       - name: Deploy to Production EC2 (main)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
           EC2_HOST: ${{ secrets.EC2_HOST_PROD }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
@@ -57,7 +57,7 @@ jobs:
       - name: Deploy to Development EC2 (develop)
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
           EC2_HOST: ${{ secrets.EC2_HOST_DEV }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
