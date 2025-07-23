@@ -40,6 +40,9 @@ out/
 .DS_Store
 Thumbs.db
 
+### Application Config ###
 application-local.yml
-application-prod.yml
-application.yml
+
+### Firebase ###
+firebase-service-account.json
+**/firebase-service-account*.json

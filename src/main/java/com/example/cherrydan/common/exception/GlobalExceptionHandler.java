@@ -1,6 +1,7 @@
 package com.example.cherrydan.common.exception;
 
 import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,13 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.web.bind.annotation.ResponseStatus;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -36,7 +44,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleAuthException(AuthException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("AuthException: {}", errorMessage.getMessage());
+        logger.error("AuthException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
@@ -47,7 +55,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserException.class)
     public ResponseEntity<ApiResponse<Void>> handleUserException(UserException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("UserException: {}", errorMessage.getMessage());
+        logger.error("UserException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
@@ -58,11 +66,98 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OAuthException.class)
     public ResponseEntity<ApiResponse<Void>> handleOAuthException(OAuthException ex) {
         ErrorMessage errorMessage = ex.getErrorMessage();
-        logger.warn("OAuthException: {}", errorMessage.getMessage());
+        logger.error("OAuthException: {}", errorMessage.getMessage());
         return ResponseEntity.status(errorMessage.getHttpStatus())
                 .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
     
+    /**
+     * SnsException 처리
+     */
+    @ExceptionHandler(SnsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleSnsException(SnsException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("SnsException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+    
+    /**
+     * FCMException 처리
+     */
+    @ExceptionHandler(FCMException.class)
+    public ResponseEntity<ApiResponse<Void>> handleFCMException(FCMException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("FCMException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * AppVersionException 처리
+     */
+    @ExceptionHandler(AppVersionException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAppVersionException(AppVersionException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("AppVersionException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * NoticeException 처리
+     */
+    @ExceptionHandler(NoticeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNoticeException(NoticeException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("NoticeException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * InquiryException 처리
+     */
+    @ExceptionHandler(InquiryException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInquiryException(InquiryException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("InquiryException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * CampaignException 처리
+     */
+    @ExceptionHandler(CampaignException.class)
+    public ResponseEntity<ApiResponse<Void>> handleCampaignException(CampaignException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("CampaignException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * JWT 토큰 만료 예외 처리
+     */
+    @ExceptionHandler(ExpiredJwtException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExpiredJwtException(ExpiredJwtException ex) {
+        logger.warn("Expired JWT token: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "토큰이 만료되었습니다."));
+    }
+
+    /**
+     * JWT 유효성 검증 실패 예외 처리
+     */
+    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class, IllegalArgumentException.class})
+    public ResponseEntity<ApiResponse<Void>> handleJwtValidationException(Exception ex) {
+        logger.error("Invalid JWT token: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "유효하지 않은 토큰입니다."));
+    }
+
+
     /**
      * 유효성 검사 실패 예외 처리
      */
@@ -102,7 +197,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.internalServerError()
                 .body(ApiResponse.error(HttpStatus.INTERNAL_SERVER_ERROR.value(), "서버 내부 오류가 발생했습니다."));
     }
+    @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
+    public ResponseEntity<ApiResponse<Void>> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException ex) {
+        logger.error("OAuth2AuthenticationProcessingException: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+    }
     
+    /**
+     * 리소스 없음 예외 처리
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiResponse<?> handleNoResourceFound(NoResourceFoundException ex) {
+        return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Not Found");
+    }
+
     /**
      * 그 외 모든 예외 처리
      */

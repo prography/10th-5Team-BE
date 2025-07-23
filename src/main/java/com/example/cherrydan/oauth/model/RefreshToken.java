@@ -1,35 +1,28 @@
 package com.example.cherrydan.oauth.model;
 
+import com.example.cherrydan.common.entity.BaseTimeEntity;
 import com.example.cherrydan.user.domain.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.time.Instant;
+import lombok.*;
 
 @Entity
-@Table(name = "refresh_tokens")
-@Data
+@Table(name = "auth_token")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RefreshToken {
+public class RefreshToken extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String token;
+    @Column(name = "refresh_token", nullable = false)
+    private String refreshToken;
 
-    @Column(nullable = false)
-    private Instant expiryDate;
-
-    @OneToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "refreshToken")
     @JsonIgnore
     private User user;
 }

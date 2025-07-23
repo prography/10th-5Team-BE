@@ -1,26 +1,18 @@
 package com.example.cherrydan.oauth.security.oauth2;
 
-import com.example.cherrydan.common.exception.ErrorMessage;
-import com.example.cherrydan.common.exception.OAuthException;
+import com.example.cherrydan.oauth.dto.TokenDTO;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
-import com.example.cherrydan.oauth.service.RefreshTokenService;
-import com.example.cherrydan.user.domain.User;
-import com.example.cherrydan.user.repository.UserRepository;
-import com.example.cherrydan.oauth.model.AuthProvider;
-import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfo;
-import com.example.cherrydan.oauth.security.oauth2.user.OAuth2UserInfoFactory;
-import jakarta.servlet.http.Cookie;
+import com.example.cherrydan.oauth.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -31,8 +23,8 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private final JwtTokenProvider tokenProvider;
-    private final RefreshTokenService refreshTokenService;
+    private final JwtTokenProvider authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Value("${oauth2.redirect.success-url}")
     private String redirectSuccessUrl;
@@ -40,40 +32,36 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     private String redirectFailureUrl;
 
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, 
-                                      Authentication authentication) throws IOException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
 
         try {
             UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-            // JWT 토큰 생성
-            String accessToken = tokenProvider.generateAccessToken(userDetails.getId(), userDetails.getEmail());
-            String refreshToken = tokenProvider.generateRefreshToken(userDetails.getId());
+            // AuthService를 통해 토큰 생성 (UserDetailsImpl 직접 전달)
+            TokenDTO tokenDTO = jwtTokenProvider.generateTokens(userDetails.getId(),userDetails.getEmail());
 
-            // Refresh Token을 DB에 저장
-            refreshTokenService.saveRefreshToken(userDetails.getId(), refreshToken);
-
-            // Refresh Token을 HttpOnly 쿠키로 설정
-            Cookie refreshCookie = new Cookie("refreshToken", refreshToken);
-            refreshCookie.setHttpOnly(true);
-            refreshCookie.setSecure(false);
-            refreshCookie.setPath("/");
-            refreshCookie.setMaxAge(14 * 24 * 60 * 60); // 14일
-            response.addCookie(refreshCookie);
-
-            // Access Token은 URL 파라미터로 전달
-            String redirectUrl = redirectSuccessUrl + "?token=" +
-                    URLEncoder.encode(accessToken, StandardCharsets.UTF_8);
-
-            log.info("OAuth2 로그인 성공: 사용자 ID = {}, 이메일 = {}, 제공자 = {}",
+            log.info("OAuth2 로그인 성공: userId={}, email={}, provider={}", 
                     userDetails.getId(), userDetails.getEmail(), userDetails.getProvider());
 
-            getRedirectStrategy().sendRedirect(request, response, redirectUrl);
+            // 리다이렉트 URL에 TokenDTO 정보 및 userId 포함
+            String targetUrl = UriComponentsBuilder.fromUriString(redirectSuccessUrl)
+                    .queryParam("accessToken", tokenDTO.getAccessToken())
+                    .queryParam("refreshToken", tokenDTO.getRefreshToken())
+                    .queryParam("userId", userDetails.getId())
+                    .build().toUriString();
+
+            // 리다이렉트 수행
+            getRedirectStrategy().sendRedirect(request, response, targetUrl);
 
         } catch (Exception e) {
-            log.error("OAuth 인증 성공 처리 중 오류 발생: {}", e.getMessage(), e);
-            String errorUrl = redirectFailureUrl + "?message=" +
-                    URLEncoder.encode("로그인 성공 처리 중 오류가 발생했습니다.", StandardCharsets.UTF_8);
+            log.error("OAuth2 인증 성공 처리 중 오류 발생: {}", e.getMessage(), e);
+
+            // 오류 발생 시 실패 URL로 리다이렉트
+            String errorUrl = UriComponentsBuilder.fromUriString(redirectFailureUrl)
+                    .queryParam("error", URLEncoder.encode("로그인 처리 중 오류가 발생했습니다.", StandardCharsets.UTF_8))
+                    .build().toUriString();
+
             getRedirectStrategy().sendRedirect(request, response, errorUrl);
         }
     }

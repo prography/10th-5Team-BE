@@ -1,7 +1,9 @@
 package com.example.cherrydan.oauth.security.jwt;
 
+import com.example.cherrydan.oauth.dto.TokenDTO;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -29,17 +31,28 @@ public class JwtTokenProvider {
         this.refreshTokenValidityInDays = refreshTokenValidityInDays;
     }
 
+    /**
+     * Access Token과 Refresh Token을 함께 생성하여 TokenDTO로 반환
+     */
+    public TokenDTO generateTokens(Long userId, String email) {
+        String accessToken = generateAccessToken(userId, email);
+        String refreshToken = generateRefreshToken(userId);
+
+        log.info("토큰 생성 완료: 사용자 ID = {}", userId);
+
+        return new TokenDTO(accessToken, refreshToken);
+    }
+
     // Access Token 생성 (15분)
     public String generateAccessToken(Long userId, String email) {
         Instant now = Instant.now();
         Instant expiration = now.plus(accessTokenValidityInMinutes, ChronoUnit.MINUTES);
 
-        return Jwts.builder()
-                .setSubject(userId.toString())
+        return Jwts.builder().subject(userId.toString())
                 .claim("email", email)
                 .claim("type", "access")
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
                 .signWith(secretKey)
                 .compact();
     }
@@ -49,11 +62,10 @@ public class JwtTokenProvider {
         Instant now = Instant.now();
         Instant expiration = now.plus(refreshTokenValidityInDays, ChronoUnit.DAYS);
 
-        return Jwts.builder()
-                .setSubject(userId.toString())
+        return Jwts.builder().subject(userId.toString())
                 .claim("type", "refresh")
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(expiration))
                 .signWith(secretKey)
                 .compact();
     }
@@ -73,14 +85,24 @@ public class JwtTokenProvider {
         return getClaimsFromToken(token).get("type", String.class);
     }
 
-    // 토큰 유효성 검증
-    public boolean validateToken(String token) {
+    // 토큰 유효성 검증 + 예외 처리
+    public void validateToken(String token) {
         try {
             getClaimsFromToken(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-            return false;
+        } catch (ExpiredJwtException e) {
+            log.warn("토큰이 만료되었습니다: {}", e.getMessage());
+            throw e;
+        } catch (UnsupportedJwtException e) {
+            log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+        } catch (MalformedJwtException e) {
+            log.error("잘못된 형식의 JWT 토큰입니다: {}", e.getMessage());
+            throw e;
+        } catch (SignatureException e) {
+            log.error("JWT 서명이 유효하지 않습니다: {}", e.getMessage());
+            throw e;
+        } catch (IllegalArgumentException e) {
+            log.error("JWT 토큰이 비어있습니다: {}", e.getMessage());
+            throw e;
         }
     }
 
@@ -98,8 +120,6 @@ public class JwtTokenProvider {
     private Claims getClaimsFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .build().parseSignedClaims(token).getPayload();
     }
 }

@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  # main/develop 브랜치에 푸시될 때
+  push:
+    branches: [main, develop]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'adopt'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean -x test build
+
+      - name: Rename JAR for deployment
+        run: cp build/libs/cherrydan-0.0.1-SNAPSHOT.jar app.jar
+
+      # main 브랜치 푸시일 때 프로덕션 EC2로 배포
+      - name: Deploy to Production EC2 (main)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_PROD }}
+          EC2_HOST: ${{ secrets.EC2_HOST_PROD }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          echo "===== [PRODUCTION] JAR 파일 EC2로 배포 중... ====="
+          scp -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i private_key.pem \
+            app.jar ec2-user@${{ secrets.EC2_HOST_PROD }}:/home/ec2-user/
+          
+          ssh -o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=no -i private_key.pem \
+            ec2-user@${{ secrets.EC2_HOST_PROD }} << 'EOL'
+          
+          ./deploy.sh
+
+          EOL
+  
+          rm -f private_key.pem
+          echo "프로덕션 배포가 성공적으로 완료되었습니다!"
+
+      # develop 브랜치 푸시일 때 개발 EC2로 배포
+      - name: Deploy to Development EC2 (develop)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
+          EC2_HOST: ${{ secrets.EC2_HOST_DEV }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          
+          echo "===== [DEVELOPMENT] JAR 파일 EC2로 배포 중... ====="
+          scp -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i private_key.pem \
+            app.jar ec2-user@${{ secrets.EC2_HOST_DEV }}:/home/ec2-user/
+          
+          ssh -o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=no -i private_key.pem \
+            ec2-user@${{ secrets.EC2_HOST_DEV }} << 'EOL'
+          
+          ./deploy.sh
+
+          EOL
+  
+          rm -f private_key.pem
+          echo "개발 환경 배포가 성공적으로 완료되었습니다!"
