@@ -28,14 +28,16 @@ public enum RegionGroup {
     경기_인천(2, "경기/인천", "gyeonggi_incheon", Arrays.asList(
         new SubRegion(30, "남양주/구리/하남", "namyangju_guri_hanam"),
         new SubRegion(31, "일산/파주", "ilsan_paju"),
-        new SubRegion(32, "안양/안산/광명", "anam_ansan_gwangmyeong"),
-        new SubRegion(33, "용인/성남/수원", "yongin_sangnam_suwon"),
+        new SubRegion(32, "안양/안산/광명", "anyang_ansan_gwangmyeong"),
+        new SubRegion(33, "용인/성남/수원", "yongin_sangnam_suwon"), // Fadeout 예정(v1.0.1 사용중)
+        new SubRegion(33, "용인/성남/수원", "yongin_seongnam_suwon"),
         new SubRegion(34, "화성", "hwaseong"),
-        new SubRegion(35, "인천/부천", "incheon_buchon"),
+        new SubRegion(35, "인천/부천", "incheon_bucheon"),
         new SubRegion(36, "기타", "etc")
     )),
     강원(3, "강원", "gangwon", Arrays.asList(
-        new SubRegion(40, "속초/양양/강릉", "sokcho_yangyang_gangryong"),
+        new SubRegion(40, "속초/양양/강릉", "sokcho_yangyang_gangryeong"), // Fadeout 예정(v1.0.1 사용중)
+        new SubRegion(40, "속초/양양/강릉", "sokcho_yangyang_gangneung"),
         new SubRegion(41, "춘천/홍천/원주", "chuncheon_hongcheon_wonju"),
         new SubRegion(42, "기타", "etc")
     )),
