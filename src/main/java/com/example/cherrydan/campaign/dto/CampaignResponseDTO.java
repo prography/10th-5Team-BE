@@ -53,16 +53,16 @@ public class CampaignResponseDTO {
         return platforms;
     }
 
-    public static String getReviewerAnnouncementStatus(LocalDate reviewerAnnouncement) {
-        if (reviewerAnnouncement == null) return null;
+    public static String getReviewerAnnouncementStatus(LocalDate applyEnd) {
+        if (applyEnd == null) return null;
         LocalDate today = LocalDate.now();
-        long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
+        long days = ChronoUnit.DAYS.between(today, applyEnd);
         if (days > 0) {
             return days + "일 남음";
         } else if (days < 0) {
             return Math.abs(days) + "일 지남";
         } else {
-            return "오늘 발표";
+            return "오늘 마감";
         }
     }
 
@@ -83,7 +83,7 @@ public class CampaignResponseDTO {
             .title(campaign.getTitle())
             .detailUrl(campaign.getDetailUrl())
             .benefit(campaign.getBenefit())
-            .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
+            .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getApplyEnd()))
             .applicantCount(campaign.getApplicantCount())
             .recruitCount(campaign.getRecruitCount())
             .sourceSite(toPlatformLabel(campaign.getSourceSite()))
