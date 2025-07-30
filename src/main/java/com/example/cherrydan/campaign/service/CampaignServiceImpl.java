@@ -58,7 +58,7 @@ public class CampaignServiceImpl implements CampaignService {
     ) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
 
             if (snsPlatform != null && !snsPlatform.isEmpty() && !snsPlatform.contains("all")) {
                 List<Predicate> snsPlatformPredicates = new ArrayList<>();
@@ -100,7 +100,7 @@ public class CampaignServiceImpl implements CampaignService {
     ) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
             if (platform != null && !platform.isEmpty() && !platform.contains("all")) {
                 List<Predicate> platformPredicates = new ArrayList<>();
                 for (String platformItem : platform) {
@@ -128,7 +128,7 @@ public class CampaignServiceImpl implements CampaignService {
         } else {
             Specification<Campaign> spec = (root, query, cb) -> {
                 List<Predicate> predicates = new ArrayList<>();
-                predicates.add(cb.isTrue(root.get("isActive")));
+                predicates.add(cb.equal(root.get("isActive"), true));
                 predicates.add(cb.or(
                     cb.equal(root.get("campaignType"), CampaignType.REGION),
                     cb.equal(root.get("campaignType"), CampaignType.PRODUCT)
@@ -147,7 +147,7 @@ public class CampaignServiceImpl implements CampaignService {
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
             String likeKeyword = "%" + keyword.trim() + "%";
             predicates.add(cb.or(
                 cb.like(root.get("title"), likeKeyword),
@@ -170,7 +170,7 @@ public class CampaignServiceImpl implements CampaignService {
         String trimmedKeyword = keyword.trim();
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
             String likeKeyword = "%" + trimmedKeyword + "%";
             predicates.add(cb.or(
                     cb.like(root.get("title"), likeKeyword),
@@ -193,7 +193,7 @@ public class CampaignServiceImpl implements CampaignService {
     ) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
             predicates.add(cb.equal(root.get("campaignType"), CampaignType.REGION));
             
             if (regionGroup != null && !regionGroup.isEmpty() && !regionGroup.contains("all")) {
@@ -262,7 +262,7 @@ public class CampaignServiceImpl implements CampaignService {
     ) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
             predicates.add(cb.equal(root.get("campaignType"), CampaignType.PRODUCT));
 
             if (productCategory != null && !productCategory.isEmpty()) {
