@@ -44,7 +44,7 @@ public class CampaignCategoryServiceImpl implements CampaignCategoryService {
     public PageListResponseDTO<CampaignResponseDTO> searchByCategory(String title, List<String> regionGroup, List<String> subRegion, List<String> local, List<String> product, String reporter, List<String> snsPlatform, List<String> campaignPlatform, String applyStart, String applyEnd, Pageable pageable, Long userId) {
         Specification<Campaign> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.isTrue(root.get("isActive")));
+            predicates.add(cb.equal(root.get("isActive"), true));
 
             // 제목 조건 처리
             if (title != null && !title.trim().isEmpty()) {
