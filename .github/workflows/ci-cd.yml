@@ -8,7 +8,10 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout code
@@ -54,7 +57,31 @@ jobs:
           echo "프로덕션 배포가 성공적으로 완료되었습니다!"
 
       # develop 브랜치 푸시일 때 개발 EC2로 배포
-      - name: Deploy to Development EC2 (develop)
+      - name: Configure AWS credentials for dev
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN_DEV }}
+          aws-region: ap-northeast-2
+
+      - name: Login to Amazon ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image to ECR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: cherrydan-dev
+          IMAGE_TAG: latest
+        run: |
+          echo "===== [DEVELOPMENT] Building and pushing Docker image ====="
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "이미지 푸시 완료: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Deploy to Development EC2
         if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
@@ -63,14 +90,12 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           
-          echo "===== [DEVELOPMENT] JAR 파일 EC2로 배포 중... ====="
-          scp -o ConnectTimeout=10 -o StrictHostKeyChecking=no -i private_key.pem \
-            app.jar ec2-user@${{ secrets.EC2_HOST_DEV }}:/home/ec2-user/
-          
+          echo "===== [DEVELOPMENT] Deploying to EC2 ====="
           ssh -o ConnectTimeout=10 -o BatchMode=yes -o StrictHostKeyChecking=no -i private_key.pem \
             ec2-user@${{ secrets.EC2_HOST_DEV }} << 'EOL'
           
-          ./deploy.sh
+          cd /home/ec2-user
+          ./scripts/deploy-dev.sh
 
           EOL
   

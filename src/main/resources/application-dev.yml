@@ -123,3 +123,19 @@ fcm:
 
 cdn:
   base-url: ${CLOUDFRONT_URL:https://cdn.cherrydan.com/}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,loggers,readiness,liveness
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
