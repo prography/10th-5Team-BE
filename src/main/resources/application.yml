@@ -1,3 +1,21 @@
 spring:
   profiles:
     active: dev # 기본 프로파일을 local로 설정, 배포 시 prod로 변경
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+
+server:
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  prometheus:
+    metrics:
+      export:
+        enabled: true
