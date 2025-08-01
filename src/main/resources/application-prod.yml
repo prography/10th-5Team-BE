@@ -133,4 +133,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,readiness
+        include: health,info,metrics,prometheus,readiness,liveness
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
