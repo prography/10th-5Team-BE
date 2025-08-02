@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Schema(description = "Kakao 로그인 요청 DTO")
-public class KakaoLoginRequest {
+public class KakaoLoginRequest implements LoginRequest {
     
     @Schema(description = "Kakao 액세스 토큰", example = "kakao_access_token_string")
     private String accessToken;
@@ -17,4 +17,13 @@ public class KakaoLoginRequest {
     
     @Schema(description = "디바이스 타입", example = "android")
     private String deviceType;
+
+    @Schema(description = "디바이스 모델명", example = "iPhone 14 Pro")
+    private String deviceModel;
+
+    @Schema(description = "OS 버전", example = "16.5.1")
+    private String osVersion;
+
+    @Schema(description = "앱 버전", example = "1.0.0")
+    private String appVersion;
 } 

@@ -33,37 +33,35 @@ public class FCMTokenService {
     @Transactional
     public Long registerOrUpdateToken(FCMTokenRequest request) {
         try {
-            Long userId = request.getUserId();
-            String fcmToken = request.getFcmToken();
-            DeviceType deviceType = DeviceType.from(request.getDeviceType());
-            
             if (!isValidTokenRequest(request)) {
                 throw new FCMException(ErrorMessage.FCM_TOKEN_INVALID_REQUEST);
             }
             
+            DeviceType deviceType = DeviceType.from(request.getDeviceType());
             Optional<UserFCMToken> existingToken = tokenRepository
-                    .findByUserIdAndDeviceTypeAndIsActiveTrue(userId, deviceType);
+                    .findByUserIdAndDeviceTypeAndIsActiveTrue(request.getUserId(), deviceType);
             
+            UserFCMToken token;
             if (existingToken.isPresent()) {
-                UserFCMToken token = existingToken.get();
-                token.updateToken(fcmToken);
+                token = existingToken.get();
+                token.updateToken(request);
                 token.activate();
-                
-                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", userId, deviceType);
-                return token.getId();
+                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             } else {
-                UserFCMToken newToken = UserFCMToken.builder()
-                        .userId(userId)
-                        .fcmToken(fcmToken)
+                token = UserFCMToken.builder()
+                        .userId(request.getUserId())
+                        .fcmToken(request.getFcmToken())
                         .isActive(true)
                         .deviceType(deviceType)
+                        .deviceModel(request.getDeviceModel())
+                        .appVersion(request.getAppVersion())
+                        .osVersion(request.getOsVersion())
                         .build();
-                
-                UserFCMToken savedToken = tokenRepository.save(newToken);
-                
-                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", userId, deviceType);
-                return savedToken.getId();
+                token = tokenRepository.save(token);
+                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             }
+            
+            return token.getId();
             
         } catch (IllegalArgumentException e) {
             log.error("잘못된 디바이스 타입: {}", request.getDeviceType());

@@ -13,4 +13,7 @@ public class FCMTokenRequest {
     private Long userId;
     private String fcmToken;
     private String deviceType; // "android" or "ios"
+    private String deviceModel;
+    private String appVersion;
+    private String osVersion;
 }
