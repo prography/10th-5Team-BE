@@ -50,7 +50,7 @@ public class AppleAuthController {
         OAuth2UserInfo oAuth2UserInfo = new AppleOAuth2UserInfo(userInfo);
         
         // 4. 사용자 조회 또는 생성 (CustomOAuth2UserService 사용)
-        User user = customOAuth2UserService.processAppleUser(oAuth2UserInfo, request.getFcmToken(), request.getDeviceType());
+        User user = customOAuth2UserService.processAppleUser(oAuth2UserInfo, request);
         
         // 5. Access Token과 Refresh Token 생성
         TokenDTO tokenDTO = jwtTokenProvider.generateTokens(user.getId(), user.getEmail());
