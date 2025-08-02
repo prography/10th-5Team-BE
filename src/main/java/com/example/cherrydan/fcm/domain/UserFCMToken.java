@@ -1,6 +1,7 @@
 package com.example.cherrydan.fcm.domain;
 
 import com.example.cherrydan.common.entity.BaseTimeEntity;
+import com.example.cherrydan.fcm.dto.FCMTokenRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -73,12 +74,28 @@ public class UserFCMToken extends BaseTimeEntity {
     private LocalDateTime lastUsedAt;
 
     /**
-     * FCM 토큰 업데이트
-     * @param newToken 새로운 FCM 토큰
+     * FCM 토큰 및 디바이스 정보 업데이트
+     * @param request FCM 토큰 요청 정보
      */
-    public void updateToken(String newToken) {
-        this.fcmToken = newToken;
+    public void updateToken(FCMTokenRequest request) {
+        this.fcmToken = request.getFcmToken();
         this.lastUsedAt = LocalDateTime.now();
+        
+        // 디바이스 타입 업데이트
+        if (request.getDeviceType() != null && !request.getDeviceType().trim().isEmpty()) {
+            this.deviceType = DeviceType.from(request.getDeviceType());
+        }
+        
+        // null이 아닌 경우에만 업데이트
+        if (request.getDeviceModel() != null && !request.getDeviceModel().trim().isEmpty()) {
+            this.deviceModel = request.getDeviceModel();
+        }
+        if (request.getAppVersion() != null && !request.getAppVersion().trim().isEmpty()) {
+            this.appVersion = request.getAppVersion();
+        }
+        if (request.getOsVersion() != null && !request.getOsVersion().trim().isEmpty()) {
+            this.osVersion = request.getOsVersion();
+        }
     }
 
     /**
