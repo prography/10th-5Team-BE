@@ -28,6 +28,13 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> success() {
         return new ApiResponse<>(200, "API 요청이 성공했습니다.", null);
     }
+
+    /**
+     * 성공 응답 - 데이터 없고 메시지만 있음
+     */
+    public static ApiResponse<EmptyResponse> success(String message) {
+        return new ApiResponse<>(200, message, new EmptyResponse());
+    }
     
     /**
      * 성공 응답 - 커스텀 메시지
