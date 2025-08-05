@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,20 +33,22 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 추가", description = "캠페인에 북마크(찜)를 추가합니다.")
     @PostMapping("/{campaignId}/bookmark")
-    public void addBookmark(
+    public ResponseEntity<ApiResponse<EmptyResponse>> addBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.addBookmark(currentUser.getId(), campaignId);
+        return ResponseEntity.ok(ApiResponse.success("북마크 추가 성공"));
     }
 
     @Operation(summary = "북마크 취소", description = "캠페인 북마크(찜)를 취소합니다. (is_active=0)")
     @PatchMapping("/{campaignId}/bookmark")
-    public void cancelBookmark(
+    public ResponseEntity<ApiResponse<EmptyResponse>> cancelBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.cancelBookmark(currentUser.getId(), campaignId);
+        return ResponseEntity.ok(ApiResponse.success("북마크 취소 성공"));
     }
 
     @Operation(
@@ -73,10 +76,11 @@ public class BookmarkController {
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
     @DeleteMapping("/{campaignId}/bookmark")
-    public void deleteBookmark(
+    public ResponseEntity<ApiResponse<EmptyResponse>> deleteBookmark(
             @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.deleteBookmark(currentUser.getId(), campaignId);
+        return ResponseEntity.ok(ApiResponse.success("북마크 삭제 성공"));
     }
 } 
