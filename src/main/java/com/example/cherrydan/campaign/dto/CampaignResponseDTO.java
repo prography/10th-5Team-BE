@@ -12,6 +12,7 @@ import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.common.util.CloudfrontUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Builder
@@ -23,6 +24,9 @@ public class CampaignResponseDTO {
     private String reviewerAnnouncementStatus;
     private Integer applicantCount;
     private Integer recruitCount;
+
+    @Deprecated
+    @Schema(description = "플랫폼 이름(deprecated(v1.0.2까지))", deprecated = true)
     @JsonProperty("campaignSite")
     private String sourceSite;
     private String imageUrl;
@@ -35,7 +39,14 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean tiktok;
     @JsonIgnore private Boolean etc;
     private Boolean isBookmarked;
+
+    @Deprecated
+    @Schema(description = "기존 플랫폼 이미지 URL(deprecated(v1.0.2까지))", deprecated = true)
     private String campaignPlatformImageUrl;
+    
+    private String campaignSiteUrl;
+    private String campaignSiteKr;
+    private String campaignSiteEn;
     private CampaignType campaignType;
     private Float competitionRate;
 
@@ -78,6 +89,8 @@ public class CampaignResponseDTO {
 
     public static CampaignResponseDTO fromEntityWithBookmark(Campaign campaign, boolean isBookmarked) {
         String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
+        String campaignSiteUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
+        CampaignPlatformType platformType = CampaignPlatformType.fromCode(campaign.getSourceSite());
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
             .title(campaign.getTitle())
@@ -97,9 +110,12 @@ public class CampaignResponseDTO {
             .tiktok(campaign.getTiktok())
             .etc(campaign.getEtc())
             .campaignPlatformImageUrl(campaignPlatformImageUrl)
+            .campaignSiteUrl(campaignSiteUrl)
             .campaignType(campaign.getCampaignType())
             .competitionRate(campaign.getCompetitionRate())
             .isBookmarked(isBookmarked)
+            .campaignSiteKr(platformType.getLabel())
+            .campaignSiteEn(platformType.getCode())
             .build();
     }
 } 
