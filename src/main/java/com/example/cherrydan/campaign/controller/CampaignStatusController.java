@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 @Tag(name = "CampaignStatus", description = "내 체험단 상태 관리 및 팝업 API")
 @RestController
@@ -36,7 +38,7 @@ public class CampaignStatusController {
     @Operation(summary = "내 체험단 상태 생성/변경", description = "기존 데이터 있으면 is_active or status 변경, 없으면 생성")
     @PostMapping
     public ResponseEntity<ApiResponse<CampaignStatusResponseDTO>> createOrRecoverStatus(
-        @RequestBody CampaignStatusRequestDTO requestDTO,
+        @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         requestDTO.setUserId(currentUser.getId());
@@ -47,7 +49,7 @@ public class CampaignStatusController {
     @Operation(summary = "내 체험단 상태 변경", description = "is_active or status 변경")
     @PatchMapping
     public ResponseEntity<ApiResponse<CampaignStatusResponseDTO>> updateStatus(
-        @RequestBody CampaignStatusRequestDTO requestDTO,
+        @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         requestDTO.setUserId(currentUser.getId());
@@ -58,7 +60,7 @@ public class CampaignStatusController {
     @Operation(summary = "내 체험단 상태 삭제", description = "campaignId만 받아서 삭제")
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteStatus(
-        @RequestBody DeleteRequest request,
+        @Valid @RequestBody DeleteRequest request,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         campaignStatusService.deleteStatus(request.getCampaignId(), currentUser.getId());
@@ -75,6 +77,7 @@ public class CampaignStatusController {
     }
 
     public static class DeleteRequest {
+        @NotNull(message = "캠페인 ID는 필수입니다.")
         private Long campaignId;
         public Long getCampaignId() { return campaignId; }
         public void setCampaignId(Long campaignId) { this.campaignId = campaignId; }
