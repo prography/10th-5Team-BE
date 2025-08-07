@@ -1,15 +1,20 @@
 package com.example.cherrydan.user.controller;
 
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
+import com.example.cherrydan.common.exception.AuthException;
+import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.response.ApiResponse;
+import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 
+import com.example.cherrydan.user.dto.UserKeywordRequestDTO;
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.dto.KeywordCampaignAlertResponseDTO;
 import com.example.cherrydan.user.service.UserKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -60,6 +65,32 @@ public class UserKeywordController {
     }
     
 
+    @GetMapping("/me")
+    public ApiResponse<List<UserKeywordResponseDTO>> getMyKeywords(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        List<UserKeywordResponseDTO> keywords = userKeywordService.getKeywords(currentUser.getId())
+            .stream().map(UserKeywordResponseDTO::fromKeyword).toList();
+        return ApiResponse.success("키워드 목록 조회 성공", keywords);
+    }
+
+    @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
+    @PostMapping("/me")
+    public ApiResponse<EmptyResponse> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestBody UserKeywordRequestDTO request) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        userKeywordService.addKeyword(currentUser.getId(), request.getKeyword());
+        return ApiResponse.success("키워드 등록 성공");
+    }
+
+    @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
+    @DeleteMapping("/me/{keywordId}")
+    public ApiResponse<EmptyResponse> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @PathVariable Long keywordId) {
+        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
+        userKeywordService.removeKeywordById(currentUser.getId(), keywordId);
+        return ApiResponse.success("키워드 삭제 성공");
+    }
+
     @Operation(
         summary = "특정 키워드로 맞춤형 캠페인 조회",
         description = """
@@ -74,10 +105,10 @@ public class UserKeywordController {
             **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """
     )
-    @GetMapping("/campaigns/personalized/keyword")
+    @GetMapping("/campaigns/personalized")
     public ApiResponse<PageListResponseDTO<CampaignResponseDTO>> getPersonalizedCampaignsByKeyword(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @RequestParam String keyword,
+            @RequestParam("keyword") String keyword,
             @PageableDefault(size = 20) Pageable pageable
     ) {
         Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(currentUser.getId(), keyword, pageable);

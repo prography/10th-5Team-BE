@@ -53,19 +53,11 @@ public class UserKeywordService {
     }
 
     @Transactional(readOnly = true)
-    public Page<UserKeyword> getKeywords(Long userId, Pageable pageable) {
+    public List<UserKeyword> getKeywords(Long userId) {
         // 활성 사용자인지 확인
         userRepository.findActiveById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return userKeywordRepository.findByUserId(userId, pageable);
-    }
-
-    @Transactional
-    public void removeKeyword(Long userId, String keyword) {
-        // 활성 사용자인지 확인
-        userRepository.findActiveById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        userKeywordRepository.deleteByUserIdAndKeyword(userId, keyword);
+        return userKeywordRepository.findByUserId(userId);
     }
 
     @Transactional
