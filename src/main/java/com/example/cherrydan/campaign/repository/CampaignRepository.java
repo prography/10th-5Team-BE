@@ -39,4 +39,25 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     @Query(value = "SELECT * FROM campaigns WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) and is_active = 1 GROUP BY title ORDER BY competition_rate LIMIT 20", nativeQuery = true)
     List<Campaign> searchByTitleFullText(@Param("keyword") String keyword);
+
+    // 키워드 맞춤형 캠페인 FULLTEXT 검색 (페이징용)
+    @Query(value = """
+        SELECT * FROM campaigns 
+        WHERE is_active = 1 
+        AND MATCH(title, benefit) AGAINST(:keyword IN BOOLEAN MODE)
+        LIMIT :offset, :limit
+        """, nativeQuery = true)
+    List<Campaign> findByKeywordFullText(
+        @Param("keyword") String keyword, 
+        @Param("offset") int offset, 
+        @Param("limit") int limit
+    );
+    
+    // 키워드 맞춤형 캠페인 FULLTEXT 검색 개수
+    @Query(value = """
+        SELECT COUNT(*) FROM campaigns 
+        WHERE is_active = 1 
+        AND MATCH(title, benefit) AGAINST(:keyword IN BOOLEAN MODE)
+        """, nativeQuery = true)
+    long countByKeywordFullText(@Param("keyword") String keyword);
 } 
