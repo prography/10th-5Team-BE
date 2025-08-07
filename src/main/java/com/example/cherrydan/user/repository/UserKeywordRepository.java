@@ -23,7 +23,7 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword, Long> 
     @Query("SELECT uk FROM UserKeyword uk WHERE uk.keyword = :keyword AND uk.user.isActive = true")
     List<UserKeyword> findAllByKeyword(@Param("keyword") String keyword);
 
-    @Query("SELECT COUNT(uk) > 0 FROM UserKeyword uk WHERE uk.user.isActive = true AND uk.user.id = :userId AND uk.keyword = :keyword")
+    @Query("SELECT COUNT(uk) > 0 FROM UserKeyword uk WHERE uk.user.id = :userId AND uk.keyword = :keyword AND uk.user.isActive = true")
     boolean existsByUserIdAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);
     
     void deleteByUserIdAndKeyword(Long userId, String keyword);
