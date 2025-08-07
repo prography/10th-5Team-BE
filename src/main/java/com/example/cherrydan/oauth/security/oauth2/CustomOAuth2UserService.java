@@ -152,8 +152,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             userLoginHistoryRepository.save(loginHistory);
         } catch (Exception e) {
+            // 로그인 히스토리를 못 찍어도 기능상 문제 없기에 롤백 x
             log.error("로그인 히스토리 저장 중 에러 발생: {}", e.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -227,7 +227,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * FCM 토큰 등록 (선택적)
      * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
     protected void registerFCMTokenIfPresent(Long userId, LoginRequest loginRequest) {
         if (loginRequest.getFcmToken() != null && !loginRequest.getFcmToken().trim().isEmpty()) {
             try {
