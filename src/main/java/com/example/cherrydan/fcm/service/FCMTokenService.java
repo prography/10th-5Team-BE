@@ -31,7 +31,7 @@ public class FCMTokenService {
      * FCM 토큰 등록 또는 업데이트
      */
     @Transactional
-    public Long registerOrUpdateToken(FCMTokenRequest request) {
+    public void registerOrUpdateToken(FCMTokenRequest request) {
         try {
             if (!isValidTokenRequest(request)) {
                 throw new FCMException(ErrorMessage.FCM_TOKEN_INVALID_REQUEST);
@@ -61,16 +61,12 @@ public class FCMTokenService {
                 log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             }
             
-            return token.getId();
-            
         } catch (IllegalArgumentException e) {
             log.error("잘못된 디바이스 타입: {}", request.getDeviceType());
-            throw new FCMException(ErrorMessage.FCM_DEVICE_TYPE_INVALID);
         } catch (FCMException e) {
-            throw e;
-        } catch (Exception e) {
             log.error("FCM 토큰 등록/업데이트 실패: {}", e.getMessage());
-            throw new FCMException(ErrorMessage.FCM_TOKEN_REGISTRATION_FAILED);
+        } catch (Exception e) {
+            log.error("서버 내부 에러 발생 {}", e.getMessage());
         }
     }
     
