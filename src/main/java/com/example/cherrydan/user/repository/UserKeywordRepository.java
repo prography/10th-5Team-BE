@@ -31,12 +31,6 @@ public interface UserKeywordRepository extends JpaRepository<UserKeyword, Long> 
     /**
      * 모든 사용자 키워드를 키워드별로 그룹핑하여 조회 (배치 최적화) - 활성 사용자만
      */
-    @Query("SELECT uk FROM UserKeyword uk JOIN FETCH uk.user WHERE uk.user.isActive = true")
+    @Query("SELECT uk FROM UserKeyword uk JOIN FETCH uk.user u LEFT JOIN FETCH u.pushSettings WHERE uk.user.isActive = true")
     List<UserKeyword> findAllWithUser();
-    
-    /**
-     * 특정 키워드의 모든 사용자 조회 (배치 최적화) - 활성 사용자만
-     */
-    @Query("SELECT uk FROM UserKeyword uk JOIN FETCH uk.user WHERE uk.keyword = :keyword AND uk.user.isActive = true")
-    List<UserKeyword> findByKeywordWithUser(@Param("keyword") String keyword);
 } 

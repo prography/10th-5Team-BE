@@ -52,7 +52,8 @@ public class UserKeywordController {
             - ?sort=alertDate,asc (오래된 순)
             
             **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
-            """
+            """,
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @GetMapping("/alerts")
     public ApiResponse<PageListResponseDTO<KeywordCampaignAlertResponseDTO>> getUserKeywordAlerts(
@@ -65,6 +66,11 @@ public class UserKeywordController {
     }
     
 
+    @Operation(
+        summary = "내 키워드 목록 조회",
+        description = "사용자가 등록한 키워드 목록을 조회합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
     @GetMapping("/me")
     public ApiResponse<List<UserKeywordResponseDTO>> getMyKeywords(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
@@ -75,17 +81,31 @@ public class UserKeywordController {
         return ApiResponse.success("키워드 목록 조회 성공", keywords);
     }
 
-    @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
+    @Operation(
+        summary = "내 키워드 등록",
+        description = "새로운 키워드를 등록합니다. 이미 등록된 키워드인 경우 400 에러를 반환합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
     @PostMapping("/me")
-    public ApiResponse<EmptyResponse> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestBody UserKeywordRequestDTO request) {
+    public ApiResponse<EmptyResponse> addMyKeyword(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser, 
+            @RequestBody UserKeywordRequestDTO request
+    ) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         userKeywordService.addKeyword(currentUser.getId(), request.getKeyword());
         return ApiResponse.success("키워드 등록 성공");
     }
 
-    @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
+    @Operation(
+        summary = "내 키워드 삭제",
+        description = "등록된 키워드를 삭제합니다. 본인의 키워드가 아닌 경우 404 에러를 반환합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
+    )
     @DeleteMapping("/me/{keywordId}")
-    public ApiResponse<EmptyResponse> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @PathVariable Long keywordId) {
+    public ApiResponse<EmptyResponse> deleteMyKeyword(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser, 
+            @PathVariable("keywordId") Long keywordId
+    ) {
         if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         userKeywordService.removeKeywordById(currentUser.getId(), keywordId);
         return ApiResponse.success("키워드 삭제 성공");
@@ -95,15 +115,18 @@ public class UserKeywordController {
         summary = "특정 키워드로 맞춤형 캠페인 조회",
         description = """
             특정 키워드로 매칭된 캠페인 목록을 조회합니다.
+            등록되지 않은 키워드로 조회 시 404 에러를 반환합니다.
             
             **쿼리 파라미터 예시:**
-            - ?page=0&size=20&keyword=키워드
-            - ?page=1&size=10&keyword=캠페인
+            - ?page=0&size=20&keyword=고기
+            - ?page=1&size=10&keyword=서울
             
             **정렬**: 캠페인 생성 시각 내림차순 (고정)
+            **검색**: MySQL FULLTEXT 검색 사용 (ngram 파서)
             
             **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
-            """
+            """,
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @GetMapping("/campaigns/personalized")
     public ApiResponse<PageListResponseDTO<CampaignResponseDTO>> getPersonalizedCampaignsByKeyword(
@@ -118,7 +141,8 @@ public class UserKeywordController {
 
     @Operation(
         summary = "맞춤형 알림 삭제",
-        description = "선택한 맞춤형 알림들을 삭제합니다."
+        description = "선택한 맞춤형 알림들을 삭제합니다. 본인의 알림이 아닌 경우 403 에러를 반환합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @DeleteMapping("/alerts")
     public ApiResponse<Void> deleteKeywordAlert(
@@ -131,7 +155,8 @@ public class UserKeywordController {
 
     @Operation(
         summary = "키워드 알림 읽음 처리",
-        description = "선택한 키워드 알림들을 읽음 상태로 변경합니다."
+        description = "선택한 키워드 알림들을 읽음 상태로 변경합니다. 본인의 알림이 아닌 경우 403 에러를 반환합니다.",
+        security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @PutMapping("/alerts/read")
     public ApiResponse<Void> markKeywordAlertsAsRead(
