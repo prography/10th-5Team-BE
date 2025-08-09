@@ -12,6 +12,7 @@ import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -146,17 +147,15 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     @PerformanceMonitor
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
-        // ngram 파서 최적화 키워드 변환
-        String fullTextKeyword = "+" + keyword.trim() + "*";
         
         // 기존 방식으로 되돌림 (Object[] 매핑 복잡성으로 인해)
         List<Campaign> campaigns = campaignRepository.findByKeywordFullText(
-            fullTextKeyword, 
+            keyword.trim(), 
             (int) pageable.getOffset(), 
             pageable.getPageSize()
         );
         
-        long totalElements = campaignRepository.countByKeywordFullText(fullTextKeyword);
+        long totalElements = campaignRepository.countByKeywordFullText(keyword.trim());
         
         // DTO 변환
         List<CampaignResponseDTO> content = campaigns.stream()
@@ -172,9 +171,16 @@ public class CampaignServiceImpl implements CampaignService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return 0;
         }
-        // ngram 파서 최적화 키워드 변환
-        String fullTextKeyword = "+" + keyword.trim() + "*";
-        return campaignRepository.countByKeywordFullText(fullTextKeyword);
+        return campaignRepository.countByKeywordFullText(keyword.trim());
+    }
+    
+    @Override
+    @PerformanceMonitor
+    public long getDailyCampaignCountByKeyword(String keyword, LocalDate date) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return 0;
+        }
+        return campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
     }
 
     @Override
