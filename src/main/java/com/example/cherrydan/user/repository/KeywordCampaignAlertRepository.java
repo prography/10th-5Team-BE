@@ -24,9 +24,9 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
     Page<KeywordCampaignAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId, Pageable pageable);
     
     /**
-     * 알림 미발송된 키워드 알림들 조회
+     * 알림 미발송된 키워드 알림들 조회 (alertStage = 0인 발송 대기 중인 알림들)
      */
-    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.isNotified = false AND kca.isVisibleToUser = true")
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.alertStage = 0 AND kca.isVisibleToUser = true")
     List<KeywordCampaignAlert> findUnnotifiedAlerts();
 
     /**
