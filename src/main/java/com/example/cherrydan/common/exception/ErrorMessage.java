@@ -124,7 +124,13 @@ public enum ErrorMessage {
     NAVER_BLOG_NOT_FOUND(NOT_FOUND, "네이버 블로그를 찾을 수 없습니다."),
     NAVER_BLOG_INVALID_URL(BAD_REQUEST, "올바른 네이버 블로그 주소가 아닙니다."),
     NAVER_BLOG_INVALID_DESCRIPTION(BAD_REQUEST, "네이버 블로그 description에 인증코드가 없습니다."),
-    NAVER_BLOG_INVALID_ID(BAD_REQUEST, "네이버 블로그 ID에 유효하지 않은 문자가 포함되어 있습니다.");
+    NAVER_BLOG_INVALID_ID(BAD_REQUEST, "네이버 블로그 ID에 유효하지 않은 문자가 포함되어 있습니다."),
+
+    // 사용자 키워드 관련 에러
+    USER_KEYWORD_ALREADY_EXISTS(BAD_REQUEST, "이미 등록된 키워드입니다."),
+    USER_KEYWORD_NOT_FOUND(NOT_FOUND, "등록된 키워드를 찾을 수 없습니다."),
+    USER_KEYWORD_LIMIT_EXCEEDED(BAD_REQUEST, "키워드 등록 개수가 한도를 초과했습니다."),
+    USER_KEYWORD_ACCESS_DENIED(FORBIDDEN, "본인의 키워드/알림만 처리할 수 있습니다.");
 
     private final HttpStatus httpStatus;
     private final String message;

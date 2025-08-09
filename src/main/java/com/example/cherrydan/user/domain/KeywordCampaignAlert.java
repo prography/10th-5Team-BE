@@ -32,11 +32,7 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
 
     @Column(name = "alert_stage", nullable = false)
     @Builder.Default
-    private Integer alertStage = 0; // 0: 미알림, 1: 10개 알림 완료, 2: 100개 알림 완료
-
-    @Column(name = "is_notified", nullable = false)
-    @Builder.Default
-    private Boolean isNotified = false; // 푸시 알림 발송 여부
+    private Integer alertStage = 0; // 0: 미발송, 1: 10개 알림 발송완료, 2: 100개 알림 발송완료
 
     @Column(name = "is_visible_to_user", nullable = false)
     @Builder.Default
@@ -46,8 +42,14 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
     @Builder.Default
     private Boolean isRead = false; // 읽음 상태
 
+
     public void markAsNotified() {
-        this.isNotified = true;
+        // 발송 완료 상태로 변경 (간단!)
+        this.alertStage = 1;
+    }
+    
+    public boolean isNotified() {
+        return alertStage > 0;
     }
 
     /**
@@ -55,26 +57,5 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
      */
     public void markAsRead() {
         this.isRead = true;
-    }
-
-    /**
-     * 알림 정보 업데이트
-     */
-    public void updateAlertInfo(int campaignCount, LocalDate alertDate) {
-        this.campaignCount = campaignCount;
-        this.alertDate = alertDate;
-        this.isNotified = false; // 알림 발송 상태 초기화
-        updateAlertStage(campaignCount);
-    }
-
-    /**
-     * 알림 단계 업데이트
-     */
-    public void updateAlertStage(int campaignCount) {
-        if (campaignCount >= 100) {
-            this.alertStage = 2; // 100개 알림 완료
-        } else if (campaignCount >= 10) {
-            this.alertStage = 1; // 10개 알림 완료
-        }
     }
 } 

@@ -7,6 +7,7 @@ import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.UserDto;
+import com.example.cherrydan.user.dto.UserKeywordRequestDTO;
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.dto.UserUpdateRequestDTO;
 import com.example.cherrydan.user.service.UserKeywordService;
@@ -24,13 +25,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 @Tag(name = "User", description = "사용자 정보 관련 API")
 public class UserController {
     private final UserService userService;
-    private final UserKeywordService userKeywordService;
 
     @Operation(
         summary = "현재 사용자 정보 조회",
@@ -79,49 +81,6 @@ public class UserController {
         }
         userService.deleteUser(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success("사용자 탈퇴가 완료되었습니다."));
-    }
-
-    @Operation(
-        summary = "내 키워드 목록 조회", 
-        description = """
-            사용자가 등록한 키워드 목록을 조회합니다.
-            
-            **쿼리 파라미터 예시:**
-            - ?page=0&size=20
-            - ?page=1&size=10
-            
-            **정렬**: 키워드 등록 시각 내림차순 (고정)
-
-            """,
-        security = { @SecurityRequirement(name = "bearerAuth") }
-    )
-    @GetMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<PageListResponseDTO<UserKeywordResponseDTO>>> getMyKeywords(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @Parameter(description = "페이지네이션 정보")
-            @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
-    ) {
-        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        Page<UserKeywordResponseDTO> keywords = userKeywordService.getKeywords(currentUser.getId(), pageable)
-            .map(UserKeywordResponseDTO::fromKeyword);
-        PageListResponseDTO<UserKeywordResponseDTO> response = PageListResponseDTO.from(keywords);
-        return ResponseEntity.ok(ApiResponse.success("키워드 목록 조회 성공", response));
-    }
-
-    @Operation(summary = "내 키워드 등록", security = { @SecurityRequirement(name = "bearerAuth") })
-    @PostMapping("/me/keywords")
-    public ResponseEntity<ApiResponse<EmptyResponse>> addMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @RequestParam("keyword") String keyword) {
-        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        userKeywordService.addKeyword(currentUser.getId(), keyword);
-        return ResponseEntity.ok(ApiResponse.success("키워드 등록 성공"));
-    }
-
-    @Operation(summary = "내 키워드 삭제", security = { @SecurityRequirement(name = "bearerAuth") })
-    @DeleteMapping("/me/keywords/{keywordId}")
-    public ResponseEntity<ApiResponse<EmptyResponse>> deleteMyKeyword(@AuthenticationPrincipal UserDetailsImpl currentUser, @PathVariable Long keywordId) {
-        if (currentUser == null) throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
-        userKeywordService.removeKeywordById(currentUser.getId(), keywordId);
-        return ResponseEntity.ok(ApiResponse.success("키워드 삭제 성공"));
     }
 
     @Operation(

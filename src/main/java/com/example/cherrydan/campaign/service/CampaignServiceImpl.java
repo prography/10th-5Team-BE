@@ -12,6 +12,7 @@ import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -141,24 +142,27 @@ public class CampaignServiceImpl implements CampaignService {
     }
 
     /**
-     * 특정 키워드로 맞춤형 캠페인 목록 조회
+     * 특정 키워드로 맞춤형 캠페인 목록 조회 (FULLTEXT 인덱스 활용)
      */
     @Override
+    @PerformanceMonitor
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
-        Specification<Campaign> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("isActive"), true));
-            String likeKeyword = "%" + keyword.trim() + "%";
-            predicates.add(cb.or(
-                cb.like(root.get("title"), likeKeyword),
-                cb.like(root.get("address"), likeKeyword),
-                cb.like(root.get("benefit"), likeKeyword)
-            ));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-
-        Page<Campaign> campaigns = campaignRepository.findAll(spec, pageable);
-        return campaigns.map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false));
+        
+        // 기존 방식으로 되돌림 (Object[] 매핑 복잡성으로 인해)
+        List<Campaign> campaigns = campaignRepository.findByKeywordFullText(
+            keyword.trim(), 
+            (int) pageable.getOffset(), 
+            pageable.getPageSize()
+        );
+        
+        long totalElements = campaignRepository.countByKeywordFullText(keyword.trim());
+        
+        // DTO 변환
+        List<CampaignResponseDTO> content = campaigns.stream()
+            .map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false))
+            .collect(Collectors.toList());
+            
+        return new PageImpl<>(content, pageable, totalElements);
     }
 
     @Override
@@ -167,19 +171,16 @@ public class CampaignServiceImpl implements CampaignService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return 0;
         }
-        String trimmedKeyword = keyword.trim();
-        Specification<Campaign> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            predicates.add(cb.equal(root.get("isActive"), true));
-            String likeKeyword = "%" + trimmedKeyword + "%";
-            predicates.add(cb.or(
-                    cb.like(root.get("title"), likeKeyword),
-                    cb.like(root.get("address"), likeKeyword),
-                    cb.like(root.get("benefit"), likeKeyword)
-            ));
-            return cb.and(predicates.toArray(new Predicate[0]));
-        };
-        return campaignRepository.count(spec);
+        return campaignRepository.countByKeywordFullText(keyword.trim());
+    }
+    
+    @Override
+    @PerformanceMonitor
+    public long getDailyCampaignCountByKeyword(String keyword, LocalDate date) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return 0;
+        }
+        return campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
     }
 
     @Override
