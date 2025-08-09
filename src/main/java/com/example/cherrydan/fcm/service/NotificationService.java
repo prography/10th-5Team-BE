@@ -2,7 +2,6 @@ package com.example.cherrydan.fcm.service;
 
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.NotificationException;
-import com.example.cherrydan.fcm.domain.DeviceType;
 import com.example.cherrydan.fcm.dto.NotificationRequest;
 import com.example.cherrydan.fcm.dto.NotificationResultDto;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
@@ -12,11 +11,9 @@ import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -54,16 +51,19 @@ public class NotificationService {
                     .collect(Collectors.toList());
             
             return sendMulticastNotification(tokenStrings, request, tokens);
-        }catch (Exception e) {
+        } catch (NotificationException e) {
+            log.error("사용자 {}에게 알림 전송 실패 (NotificationException): {}", userId, e.getMessage());
+            return NotificationResultDto.multipleResult(0, 1, e.getMessage());
+        } catch (Exception e) {
             log.error("사용자 {}에게 알림 전송 실패: {}", userId, e.getMessage());
-            throw new NotificationException(ErrorMessage.NOTIFICATION_SEND_FAILED);
+            return NotificationResultDto.multipleResult(0, 1, "알림 전송 중 오류가 발생했습니다");
         }
     }
     
     /**
      * 여러 사용자에게 알림 전송
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
+    @Transactional
     public NotificationResultDto sendNotificationToUsers(List<Long> userIds, NotificationRequest request) {
         try {
             List<UserFCMToken> tokens = tokenRepository.findActiveTokensByUserIds(userIds);
@@ -80,35 +80,11 @@ public class NotificationService {
             return sendMulticastNotification(tokenStrings, request, tokens);
             
         } catch (NotificationException e) {
-            throw e;
+            log.error("알림 전송 실패 (NotificationException): {}", e.getMessage());
+            return NotificationResultDto.multipleResult(0, userIds.size(), e.getMessage());
         } catch (Exception e) {
             log.error("여러 사용자에게 알림 전송 실패: {}", e.getMessage());
-            throw new NotificationException(ErrorMessage.NOTIFICATION_MULTIPLE_SEND_FAILED);
-        }
-    }
-    
-    /**
-     * 토픽을 통한 알림 전송
-     * 이 부분은 프론트와 협의해서 토픽을 서버에 저장할 지 고민
-     */
-    public NotificationResultDto sendNotificationToTopic(String topic, NotificationRequest request) {
-        try {
-            Message message = Message.builder()
-                    .setNotification(buildNotification(request))
-                    .putAllData(request.getData())
-                    .setTopic(topic)
-                    .setAndroidConfig(buildAndroidConfig(request))
-                    .setApnsConfig(buildApnsConfig(request))
-                    .build();
-            
-            String response = FirebaseMessaging.getInstance().send(message);
-            log.info("토픽 {} 알림 전송 성공: {}", topic, response);
-            
-            return NotificationResultDto.topicResult(topic);
-            
-        } catch (FirebaseMessagingException e) {
-            log.error("토픽 {} 알림 전송 실패: {}", topic, e.getMessage());
-            throw new NotificationException(ErrorMessage.NOTIFICATION_TOPIC_SEND_FAILED);
+            return NotificationResultDto.multipleResult(0, userIds.size(), "알림 전송 중 오류가 발생했습니다");
         }
     }
     
@@ -136,7 +112,8 @@ public class NotificationService {
             log.error("FCM 토큰 알림 전송 실패: {}", e.getMessage());
             
             if (isInvalidTokenError(e)) {
-                deactivateToken(fcmToken);
+                tokenRepository.findByFcmToken(fcmToken)
+                    .ifPresent(UserFCMToken::deactivate);
             }
             
             throw new NotificationException(ErrorMessage.NOTIFICATION_TOKEN_SEND_FAILED);
@@ -171,7 +148,7 @@ public class NotificationService {
             }
             
             updateSuccessfulTokensLastUsed(tokenEntities, invalidTokens);
-            deactivateInvalidTokens(invalidTokens);
+            deactivateInvalidTokens(tokenEntities, invalidTokens);
             
             // 성공한 토큰을 통해 성공한 사용자 ID 추출
             List<Long> successfulUserIds = extractSuccessfulUserIds(successfulTokens, tokenEntities);
@@ -289,18 +266,10 @@ public class NotificationService {
     /**
      * 무효한 토큰들 비활성화
      */
-    public void deactivateInvalidTokens(List<String> invalidTokens) {
-        for (String token : invalidTokens) {
-            deactivateToken(token);
-        }
-    }
-    
-    /**
-     * 특정 토큰 비활성화
-     */
-    public void deactivateToken(String fcmToken) {
-        tokenRepository.deactivateByFcmToken(fcmToken);
-        log.info("FCM 토큰 비활성화: {}", fcmToken.substring(0, Math.min(20, fcmToken.length())) + "...");
+    private void deactivateInvalidTokens(List<UserFCMToken> tokenEntities, List<String> invalidTokens) {
+        tokenEntities.stream()
+            .filter(token -> invalidTokens.contains(token.getFcmToken()))
+            .forEach(UserFCMToken::deactivate);
     }
     
     /**
