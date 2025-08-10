@@ -12,6 +12,7 @@ import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.common.util.CloudfrontUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Builder
@@ -23,6 +24,9 @@ public class CampaignResponseDTO {
     private String reviewerAnnouncementStatus;
     private Integer applicantCount;
     private Integer recruitCount;
+
+    @Deprecated
+    @Schema(description = "플랫폼 이름(deprecated(v1.0.2까지))", deprecated = true)
     @JsonProperty("campaignSite")
     private String sourceSite;
     private String imageUrl;
@@ -33,9 +37,17 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean blog;
     @JsonIgnore private Boolean clip;
     @JsonIgnore private Boolean tiktok;
+    @JsonIgnore private Boolean thread;
     @JsonIgnore private Boolean etc;
     private Boolean isBookmarked;
+
+    @Deprecated
+    @Schema(description = "기존 플랫폼 이미지 URL(deprecated(v1.0.2까지))", deprecated = true)
     private String campaignPlatformImageUrl;
+    
+    private String campaignSiteUrl;
+    private String campaignSiteKr;
+    private String campaignSiteEn;
     private CampaignType campaignType;
     private Float competitionRate;
 
@@ -43,12 +55,13 @@ public class CampaignResponseDTO {
     public List<String> getSnsPlatforms() {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(youtube)) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
-        if (Boolean.TRUE.equals(shorts)) platforms.add("쇼츠");
+        if (Boolean.TRUE.equals(shorts)) platforms.add(SnsPlatformType.SHORTS.getLabel());
         if (Boolean.TRUE.equals(insta)) platforms.add(SnsPlatformType.INSTAGRAM.getLabel());
-        if (Boolean.TRUE.equals(reels)) platforms.add("릴스");
+        if (Boolean.TRUE.equals(reels)) platforms.add(SnsPlatformType.REELS.getLabel());
         if (Boolean.TRUE.equals(blog)) platforms.add(SnsPlatformType.BLOG.getLabel());
-        if (Boolean.TRUE.equals(clip)) platforms.add("클립");
+        if (Boolean.TRUE.equals(clip)) platforms.add(SnsPlatformType.CLIP.getLabel());
         if (Boolean.TRUE.equals(tiktok)) platforms.add(SnsPlatformType.TIKTOK.getLabel());
+        if (Boolean.TRUE.equals(thread)) platforms.add(SnsPlatformType.THREAD.getLabel());
         if (Boolean.TRUE.equals(etc)) platforms.add(SnsPlatformType.ETC.getLabel());
         return platforms;
     }
@@ -58,11 +71,11 @@ public class CampaignResponseDTO {
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, applyEnd);
         if (days > 0) {
-            return days + "일 남음";
+            return "신청 마감 " + days + "일 전";
         } else if (days < 0) {
-            return Math.abs(days) + "일 지남";
+            return "모집이 종료되었어요";
         } else {
-            return "오늘 마감";
+            return "오늘이 마감일!";
         }
     }
 
@@ -78,6 +91,8 @@ public class CampaignResponseDTO {
 
     public static CampaignResponseDTO fromEntityWithBookmark(Campaign campaign, boolean isBookmarked) {
         String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
+        String campaignSiteUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
+        CampaignPlatformType platformType = CampaignPlatformType.fromCode(campaign.getSourceSite());
         return CampaignResponseDTO.builder()
             .id(campaign.getId())
             .title(campaign.getTitle())
@@ -95,11 +110,15 @@ public class CampaignResponseDTO {
             .blog(campaign.getBlog())
             .clip(campaign.getClip())
             .tiktok(campaign.getTiktok())
+            .thread(campaign.getThread())
             .etc(campaign.getEtc())
             .campaignPlatformImageUrl(campaignPlatformImageUrl)
+            .campaignSiteUrl(campaignSiteUrl)
             .campaignType(campaign.getCampaignType())
             .competitionRate(campaign.getCompetitionRate())
             .isBookmarked(isBookmarked)
+            .campaignSiteKr(platformType.getLabel())
+            .campaignSiteEn(platformType.getCode())
             .build();
     }
 } 

@@ -4,6 +4,8 @@ import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
 import com.example.cherrydan.fcm.service.FCMTokenService;
+import com.example.cherrydan.oauth.dto.AppleLoginRequest;
+import com.example.cherrydan.oauth.dto.LoginRequest;
 import com.example.cherrydan.oauth.model.AuthProvider;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.oauth.security.oauth2.exception.OAuth2AuthenticationProcessingException;
@@ -84,96 +86,52 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * Apple 사용자 정보 처리 (Apple용 별도 메서드)
-     * Process Apple user information manually (not through OAuth2 flow)
+     * OAuth 사용자 정보 처리 (공통 메서드 - 다형성 활용)
+     * Process OAuth user information using polymorphism
      */
-    public User processAppleUser(OAuth2UserInfo appleUserInfo, String fcmToken, String deviceType) {
+    public User processOAuthUser(OAuth2UserInfo userInfo, String provider, LoginRequest loginRequest) {
         try {
-            // 이메일 확인 (Validate email)
-            validateEmail(appleUserInfo);
-
-            // 사용자 조회 또는 생성 (Find or create user)
-            User user = findOrCreateUser(appleUserInfo, "apple");
-            
-            // 로그인 기록 저장 (Save login history)
+            validateEmail(userInfo);
+            User user = findOrCreateUser(userInfo, provider);
             saveLoginHistory(user.getId());
-
-            // FCM 토큰 등록 (선택적)
-            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
+            registerFCMTokenIfPresent(user.getId(), loginRequest);
             
             return user;
         } catch (OAuth2AuthenticationProcessingException ex) {
             throw ex;
         } catch (Exception ex) {
-            log.error("Apple 사용자 처리 중 오류 발생: {}", ex.getMessage());
+            log.error("{} 사용자 처리 중 오류 발생: {}", provider, ex.getMessage());
             throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Apple 사용자 정보 처리 (Apple용 별도 메서드)
+     * Process Apple user information manually (not through OAuth2 flow)
+     */
+    public User processAppleUser(OAuth2UserInfo appleUserInfo, AppleLoginRequest appleLoginRequest) {
+        return processOAuthUser(appleUserInfo, "apple", appleLoginRequest);
     }
 
     /**
      * Google 사용자 정보 처리 (ID Token 기반)
      */
-    public User processGoogleUser(OAuth2UserInfo googleUserInfo, String fcmToken, String deviceType) {
-        try {
-            validateEmail(googleUserInfo);
-            User user = findOrCreateUser(googleUserInfo, "google");
-            
-            // FCM 토큰 등록 (선택적)
-            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
-
-            saveLoginHistory(user.getId());
-            
-            return user;
-        } catch (OAuth2AuthenticationProcessingException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Google 사용자 처리 중 오류 발생: {}", ex.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
-        }
+    public User processGoogleUser(OAuth2UserInfo googleUserInfo, LoginRequest loginRequest) {
+        return processOAuthUser(googleUserInfo, "google", loginRequest);
     }
 
     /**
      * Kakao 사용자 정보 처리 (액세스 토큰 기반)
      */
-    public User processKakaoUser(OAuth2UserInfo kakaoUserInfo, String fcmToken, String deviceType) {
-        try {
-            validateEmail(kakaoUserInfo);
-            User user = findOrCreateUser(kakaoUserInfo, "kakao");
-            
-            // FCM 토큰 등록 (선택적)
-            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
-
-            saveLoginHistory(user.getId());
-            
-            return user;
-        } catch (OAuth2AuthenticationProcessingException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Kakao 사용자 처리 중 오류 발생: {}", ex.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
-        }
+    public User processKakaoUser(OAuth2UserInfo kakaoUserInfo, LoginRequest loginRequest) {
+        return processOAuthUser(kakaoUserInfo, "kakao", loginRequest);
     }
 
     /**
      * Naver 사용자 정보 처리 (액세스 토큰 기반)
      */
-    public User processNaverUser(OAuth2UserInfo naverUserInfo, String fcmToken, String deviceType) {
-        try {
-            validateEmail(naverUserInfo);
-            User user = findOrCreateUser(naverUserInfo, "naver");
-            
-            // FCM 토큰 등록 (선택적)
-            registerFCMTokenIfPresent(user.getId(), fcmToken, deviceType);
-
-            saveLoginHistory(user.getId());
-            
-            return user;
-        } catch (OAuth2AuthenticationProcessingException ex) {
-            throw ex;
-        } catch (Exception ex) {
-            log.error("Naver 사용자 처리 중 오류 발생: {}", ex.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
-        }
+    public User processNaverUser(OAuth2UserInfo naverUserInfo, LoginRequest loginRequest) {
+        return processOAuthUser(naverUserInfo, "naver", loginRequest);
     }
 
     /**
@@ -194,8 +152,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .build();
             userLoginHistoryRepository.save(loginHistory);
         } catch (Exception e) {
+            // 로그인 히스토리를 못 찍어도 기능상 문제 없기에 롤백 x
             log.error("로그인 히스토리 저장 중 에러 발생: {}", e.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -269,17 +227,19 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * FCM 토큰 등록 (선택적)
      * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
      */
-    @Transactional(propagation = Propagation.REQUIRES_NEW, noRollbackFor = Exception.class)
-    protected void registerFCMTokenIfPresent(Long userId, String fcmToken, String deviceType) {
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+    protected void registerFCMTokenIfPresent(Long userId, LoginRequest loginRequest) {
+        if (loginRequest.getFcmToken() != null && !loginRequest.getFcmToken().trim().isEmpty()) {
             try {
                 FCMTokenRequest fcmRequest = FCMTokenRequest.builder()
                         .userId(userId)
-                        .fcmToken(fcmToken)
-                        .deviceType(deviceType)
+                        .fcmToken(loginRequest.getFcmToken())
+                        .deviceType(loginRequest.getDeviceType())
+                        .deviceModel(loginRequest.getDeviceModel())
+                        .appVersion(loginRequest.getAppVersion())
+                        .osVersion(loginRequest.getOsVersion())
                         .build();
                 fcmTokenService.registerOrUpdateToken(fcmRequest);
-                log.info("FCM 토큰 등록 성공: userId={}, deviceType={}", userId, deviceType);
+                log.info("FCM 토큰 등록 성공: userId={}, deviceType={}", userId, loginRequest.getDeviceType());
             } catch (Exception e) {
                 log.warn("FCM 토큰 등록 실패 (로그인은 성공): userId={}, error={}", userId, e.getMessage());
             }

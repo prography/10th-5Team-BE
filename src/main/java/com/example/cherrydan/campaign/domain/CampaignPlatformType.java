@@ -14,7 +14,14 @@ public enum CampaignPlatformType {
     DINNERQUEEN("dinnerqueen", "디너의여왕"),
     SEOULOUBA("seoulouba", "서울오빠"),
     COMETOPLAY("cometoplay", "놀러와체험단"),
-    GANGNAM("gangnam", "강남맛집");
+    GANGNAM("gangnam", "강남맛집"),
+    MRBLOG("mrblog", "미블"),
+    WHOGIUP("whogiup", "후기업"),
+    WEU("weu", "위우"),
+    TBLE("tble", "티블"),
+    STORYN("storyn", "스토리앤미디어"),
+    REVIEWPLACE("reviewplace", "리뷰플레이스"),
+    BLOGDEXREVIEW("blogdexreview", "블덱스체험단");
 
     private final String code;
     private final String label;

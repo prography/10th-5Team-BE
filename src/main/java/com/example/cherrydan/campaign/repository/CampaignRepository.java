@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -39,4 +40,29 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     @Query(value = "SELECT * FROM campaigns WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE) and is_active = 1 GROUP BY title ORDER BY competition_rate LIMIT 20", nativeQuery = true)
     List<Campaign> searchByTitleFullText(@Param("keyword") String keyword);
+
+    // 키워드 맞춤형 캠페인 FULLTEXT 검색 (지정 날짜 기준 전일)
+    @Query(value = """
+        SELECT * FROM campaigns 
+        WHERE MATCH(title) AGAINST(:keyword)
+        AND is_active = 1 
+        AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
+        ORDER BY MATCH(title) AGAINST(:keyword) DESC, created_at DESC
+        LIMIT :offset, :limit
+        """, nativeQuery = true)
+    List<Campaign> findByKeywordFullText(
+        @Param("keyword") String keyword, 
+        @Param("date") LocalDate date,
+        @Param("offset") int offset, 
+        @Param("limit") int limit
+    );
+    
+    // 지정 날짜 기준 전일 생성된 키워드 맞춤형 캠페인 개수
+    @Query(value = """
+        SELECT COUNT(*) FROM campaigns 
+        WHERE MATCH(title) AGAINST(:keyword)
+        AND is_active = 1 
+        AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
+        """, nativeQuery = true)
+    long countByKeywordAndCreatedDate(@Param("keyword") String keyword, @Param("date") LocalDate date);
 } 

@@ -51,12 +51,13 @@ public class BookmarkResponseDTO {
     public static List<String> getPlatforms(Campaign campaign) {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(campaign.getYoutube())) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
-        if (Boolean.TRUE.equals(campaign.getShorts())) platforms.add("쇼츠");
+        if (Boolean.TRUE.equals(campaign.getShorts())) platforms.add(SnsPlatformType.SHORTS.getLabel());
         if (Boolean.TRUE.equals(campaign.getInsta())) platforms.add(SnsPlatformType.INSTAGRAM.getLabel());
-        if (Boolean.TRUE.equals(campaign.getReels())) platforms.add("릴스");
+        if (Boolean.TRUE.equals(campaign.getReels())) platforms.add(SnsPlatformType.REELS.getLabel());
         if (Boolean.TRUE.equals(campaign.getBlog())) platforms.add(SnsPlatformType.BLOG.getLabel());
-        if (Boolean.TRUE.equals(campaign.getClip())) platforms.add("클립");
+        if (Boolean.TRUE.equals(campaign.getClip())) platforms.add(SnsPlatformType.CLIP.getLabel());
         if (Boolean.TRUE.equals(campaign.getTiktok())) platforms.add(SnsPlatformType.TIKTOK.getLabel());
+        if (Boolean.TRUE.equals(campaign.getThread())) platforms.add(SnsPlatformType.THREAD.getLabel());
         if (Boolean.TRUE.equals(campaign.getEtc())) platforms.add(SnsPlatformType.ETC.getLabel());
         return platforms;
     }
@@ -66,11 +67,11 @@ public class BookmarkResponseDTO {
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
         if (days > 0) {
-            return "발표 " + days + "일 전";
+            return "신청 마감 " + days + "일 전";
         } else if (days < 0) {
-            return "발표 " + Math.abs(days) + "일 지남";
+            return "모집이 종료되었어요";
         } else {
-            return "오늘 발표";
+            return "오늘이 마감일!";
         }
     }
 

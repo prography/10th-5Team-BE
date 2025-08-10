@@ -106,4 +106,11 @@ public class NotificationResultDto {
                 .completedAt(LocalDateTime.now())
                 .build();
     }
+    
+    /**
+     * 전송 성공 여부 확인
+     */
+    public boolean isSuccess() {
+        return successCount > 0;
+    }
 }

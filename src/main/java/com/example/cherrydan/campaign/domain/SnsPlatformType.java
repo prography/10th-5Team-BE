@@ -6,9 +6,13 @@ import lombok.Getter;
 public enum SnsPlatformType {
     ALL("all", "전체"),
     BLOG("blog", "네이버 블로그"),
+    CLIP("clip", "네이버 클립"),
     INSTAGRAM("insta", "인스타그램"),
+    REELS("reels", "인스타그램 릴스"),
     YOUTUBE("youtube", "유튜브"),
+    SHORTS("shorts", "유튜브 쇼츠"),
     TIKTOK("tiktok", "틱톡"),
+    THREAD("thread", "스레드"),
     ETC("etc", "기타");
 
     private final String code;
@@ -32,13 +36,21 @@ public enum SnsPlatformType {
     public String[] getRelatedFields() {
         switch (this) {
             case BLOG:
-                return new String[]{"blog", "clip"};
+                return new String[]{"blog"};
+            case CLIP:
+                return new String[]{"clip"};
             case YOUTUBE:
-                return new String[]{"youtube", "shorts"};
+                return new String[]{"youtube"};
+            case SHORTS:
+                return new String[]{"shorts"};
             case INSTAGRAM:
-                return new String[]{"insta", "reels"};
+                return new String[]{"insta"};
+            case REELS:
+                return new String[]{"reels"};
             case TIKTOK:
                 return new String[]{"tiktok"};
+            case THREAD:
+                return new String[]{"thread"};
             case ETC:
                 return new String[]{"etc"};
             default:

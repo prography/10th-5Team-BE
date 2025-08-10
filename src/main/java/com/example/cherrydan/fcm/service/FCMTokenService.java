@@ -31,48 +31,42 @@ public class FCMTokenService {
      * FCM 토큰 등록 또는 업데이트
      */
     @Transactional
-    public Long registerOrUpdateToken(FCMTokenRequest request) {
+    public void registerOrUpdateToken(FCMTokenRequest request) {
         try {
-            Long userId = request.getUserId();
-            String fcmToken = request.getFcmToken();
-            DeviceType deviceType = DeviceType.from(request.getDeviceType());
-            
             if (!isValidTokenRequest(request)) {
                 throw new FCMException(ErrorMessage.FCM_TOKEN_INVALID_REQUEST);
             }
             
+            DeviceType deviceType = DeviceType.from(request.getDeviceType());
             Optional<UserFCMToken> existingToken = tokenRepository
-                    .findByUserIdAndDeviceTypeAndIsActiveTrue(userId, deviceType);
+                    .findByUserIdAndDeviceTypeAndIsActiveTrue(request.getUserId(), deviceType);
             
+            UserFCMToken token;
             if (existingToken.isPresent()) {
-                UserFCMToken token = existingToken.get();
-                token.updateToken(fcmToken);
+                token = existingToken.get();
+                token.updateToken(request);
                 token.activate();
-                
-                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", userId, deviceType);
-                return token.getId();
+                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             } else {
-                UserFCMToken newToken = UserFCMToken.builder()
-                        .userId(userId)
-                        .fcmToken(fcmToken)
+                token = UserFCMToken.builder()
+                        .userId(request.getUserId())
+                        .fcmToken(request.getFcmToken())
                         .isActive(true)
                         .deviceType(deviceType)
+                        .deviceModel(request.getDeviceModel())
+                        .appVersion(request.getAppVersion())
+                        .osVersion(request.getOsVersion())
                         .build();
-                
-                UserFCMToken savedToken = tokenRepository.save(newToken);
-                
-                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", userId, deviceType);
-                return savedToken.getId();
+                token = tokenRepository.save(token);
+                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             }
             
         } catch (IllegalArgumentException e) {
             log.error("잘못된 디바이스 타입: {}", request.getDeviceType());
-            throw new FCMException(ErrorMessage.FCM_DEVICE_TYPE_INVALID);
         } catch (FCMException e) {
-            throw e;
-        } catch (Exception e) {
             log.error("FCM 토큰 등록/업데이트 실패: {}", e.getMessage());
-            throw new FCMException(ErrorMessage.FCM_TOKEN_REGISTRATION_FAILED);
+        } catch (Exception e) {
+            log.error("서버 내부 에러 발생 {}", e.getMessage());
         }
     }
     
