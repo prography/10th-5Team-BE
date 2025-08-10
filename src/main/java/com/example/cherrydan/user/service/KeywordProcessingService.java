@@ -46,9 +46,8 @@ public class KeywordProcessingService {
         int failureCount = 0;
         
         try {
-            // 어제 하루 동안 생성된 캠페인 수 조회 (간단!)
-            LocalDate yesterday = today.minusDays(1);
-            long dailyNewCount = campaignService.getDailyCampaignCountByKeyword(keyword, yesterday);
+            // 지정 날짜 기준으로 생성된 캠페인 수 조회
+            long dailyNewCount = campaignService.getDailyCampaignCountByKeyword(keyword, today);
             
             // 신규 캠페인이 없으면 알림 생성하지 않음
             if (dailyNewCount == 0) {

@@ -183,12 +183,8 @@ public class UserKeywordService {
      * 특정 키워드로 맞춤형 캠페인 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
-        // 해당 유저가 등록한 키워드인지 검증
-        if (!userKeywordRepository.existsByUserIdAndKeyword(userId, keyword)) {
-            throw new UserException(ErrorMessage.USER_KEYWORD_NOT_FOUND);
-        }
-        return campaignService.getPersonalizedCampaignsByKeyword(userId, keyword, pageable);
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Pageable pageable) {
+        return campaignService.getPersonalizedCampaignsByKeyword(keyword, date, pageable);
     }
 
     /**
