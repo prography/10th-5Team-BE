@@ -18,6 +18,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     void deleteByUserAndCampaign(User user, Campaign campaign);
     boolean existsByUserIdAndCampaignIdAndIsActiveTrue(Long userId, Long campaignId);
     List<Bookmark> findAllByUserIdAndIsActiveTrue(Long userId);
-    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementGreaterThanEqual(Long userId, LocalDate date, Pageable pageable);
-    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementLessThan(Long userId, LocalDate date, Pageable pageable);
+    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(Long userId, LocalDate date, Pageable pageable);
+    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(Long userId, LocalDate date, Pageable pageable);
 } 
