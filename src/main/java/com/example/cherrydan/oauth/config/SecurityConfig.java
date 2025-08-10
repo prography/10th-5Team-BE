@@ -53,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/campaigns/**").permitAll()
                         // 공지사항/홈 광고 배너 관련 경로
                         .requestMatchers("/api/noticeboard/**").permitAll()
+                        .requestMatchers("/api/mypage/version").permitAll()
                         // 헬스 체크 관련
                         .requestMatchers("/actuator/**").permitAll()
                         // 나머지는 인증 필요
