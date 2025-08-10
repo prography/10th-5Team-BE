@@ -71,11 +71,11 @@ public class CampaignResponseDTO {
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, applyEnd);
         if (days > 0) {
-            return days + "일 남음";
+            return "신청 마감 " + days + "일 전";
         } else if (days < 0) {
-            return Math.abs(days) + "일 지남";
+            return "모집이 종료되었어요";
         } else {
-            return "오늘 마감";
+            return "오늘이 마감일!";
         }
     }
 
