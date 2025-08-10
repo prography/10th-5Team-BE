@@ -146,16 +146,17 @@ public class CampaignServiceImpl implements CampaignService {
      */
     @Override
     @PerformanceMonitor
-    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable) {
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Pageable pageable) {
         
         // 기존 방식으로 되돌림 (Object[] 매핑 복잡성으로 인해)
         List<Campaign> campaigns = campaignRepository.findByKeywordFullText(
-            keyword.trim(), 
+            keyword.trim(),
+            date, 
             (int) pageable.getOffset(), 
             pageable.getPageSize()
         );
         
-        long totalElements = campaignRepository.countByKeywordFullText(keyword.trim());
+        long totalElements = campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
         
         // DTO 변환
         List<CampaignResponseDTO> content = campaigns.stream()
@@ -163,15 +164,6 @@ public class CampaignServiceImpl implements CampaignService {
             .collect(Collectors.toList());
             
         return new PageImpl<>(content, pageable, totalElements);
-    }
-
-    @Override
-    @PerformanceMonitor
-    public long getCampaignCountByKeyword(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return 0;
-        }
-        return campaignRepository.countByKeywordFullText(keyword.trim());
     }
     
     @Override
