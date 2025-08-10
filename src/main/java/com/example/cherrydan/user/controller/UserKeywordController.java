@@ -139,7 +139,7 @@ public class UserKeywordController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(keyword, date, pageable);
+        Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(keyword, date, currentUser.getId(), pageable);
         PageListResponseDTO<CampaignResponseDTO> response = PageListResponseDTO.from(campaigns);
         return ApiResponse.success("맞춤형 캠페인 조회 성공", response);
     }

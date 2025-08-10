@@ -183,8 +183,8 @@ public class UserKeywordService {
      * 특정 키워드로 맞춤형 캠페인 목록 조회
      */
     @Transactional(readOnly = true)
-    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Pageable pageable) {
-        return campaignService.getPersonalizedCampaignsByKeyword(keyword, date, pageable);
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
+        return campaignService.getPersonalizedCampaignsByKeyword(keyword, date, userId, pageable);
     }
 
     /**
