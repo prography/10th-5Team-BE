@@ -67,11 +67,11 @@ public class BookmarkResponseDTO {
         LocalDate today = LocalDate.now();
         long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
         if (days > 0) {
-            return "발표 " + days + "일 전";
+            return "신청 마감 " + days + "일 전";
         } else if (days < 0) {
-            return "발표 " + Math.abs(days) + "일 지남";
+            return "모집이 종료되었어요";
         } else {
-            return "오늘 발표";
+            return "오늘이 마감일!";
         }
     }
 
