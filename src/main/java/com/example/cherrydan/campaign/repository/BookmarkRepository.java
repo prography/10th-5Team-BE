@@ -22,9 +22,9 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     boolean existsByUserIdAndCampaignIdAndIsActiveTrue(Long userId, Long campaignId);
     List<Bookmark> findAllByUserIdAndIsActiveTrue(Long userId);
     
-    // 원격에서 추가된 메서드들
-    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementGreaterThanEqual(Long userId, LocalDate date, Pageable pageable);
-    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementLessThan(Long userId, LocalDate date, Pageable pageable);
+    // 원격에서 추가된 메서드들 (ReviewerAnnouncement -> ApplyEnd로 변경)
+    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(Long userId, LocalDate date, Pageable pageable);
+    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(Long userId, LocalDate date, Pageable pageable);
 
     /**
      * 특정 날짜에 마감되는 활성 캠페인의 북마크들을 조회 (페치 조인 포함)

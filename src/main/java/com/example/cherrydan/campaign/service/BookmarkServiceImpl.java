@@ -80,12 +80,12 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     public PageListResponseDTO<BookmarkResponseDTO> getOpenBookmarks(Long userId, Pageable pageable) {
-        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementGreaterThanEqual(userId, LocalDate.now(), pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(userId, LocalDate.now(), pageable);
         return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
     }
 
     public PageListResponseDTO<BookmarkResponseDTO> getClosedBookmarks(Long userId, Pageable pageable) {
-        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementLessThan(userId, LocalDate.now(), pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(userId, LocalDate.now(), pageable);
         return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
     }
 } 
