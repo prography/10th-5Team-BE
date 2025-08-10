@@ -158,10 +158,16 @@ public class CampaignServiceImpl implements CampaignService {
         
         long totalElements = campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
         
-        // DTO 변환 (북마크 여부 확인)
+        // N+1 문제 해결: 벌크 조회로 북마크 여부 확인
+        List<Long> campaignIds = campaigns.stream()
+            .map(Campaign::getId)
+            .collect(Collectors.toList());
+        
+        Set<Long> bookmarkedCampaignIds = bookmarkRepository.findBookmarkedCampaignIds(userId, campaignIds);
+        
         List<CampaignResponseDTO> content = campaigns.stream()
             .map(campaign -> {
-                boolean isBookmarked = bookmarkRepository.existsByUserIdAndCampaignIdAndIsActiveTrue(userId, campaign.getId());
+                boolean isBookmarked = bookmarkedCampaignIds.contains(campaign.getId());
                 return CampaignResponseDTO.fromEntityWithBookmark(campaign, isBookmarked);
             })
             .collect(Collectors.toList());

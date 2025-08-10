@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Optional<Bookmark> findByUserAndCampaign(User user, Campaign campaign);
@@ -35,4 +36,13 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
            "AND c.isActive = true " +
            "AND c.applyEnd = :applyEndDate")
     List<Bookmark> findActiveBookmarksWithCampaignAndUserByApplyEndDate(@Param("applyEndDate") LocalDate applyEndDate);
+
+    /**
+     * 특정 사용자가 북마크한 캠페인 ID들을 벌크 조회 (N+1 문제 해결)
+     */
+    @Query("SELECT b.campaign.id FROM Bookmark b " +
+           "WHERE b.user.id = :userId " +
+           "AND b.campaign.id IN :campaignIds " +
+           "AND b.isActive = true")
+    Set<Long> findBookmarkedCampaignIds(@Param("userId") Long userId, @Param("campaignIds") List<Long> campaignIds);
 } 
