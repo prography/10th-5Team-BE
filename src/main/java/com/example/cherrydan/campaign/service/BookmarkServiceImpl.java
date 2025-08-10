@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.time.LocalDate;
 import org.springframework.data.domain.PageImpl;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 
@@ -69,31 +70,6 @@ public class BookmarkServiceImpl implements BookmarkService {
     }
 
     @Override
-    public BookmarkSplitResponseDTO getBookmarks(Long userId, Pageable pageable) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrue(userId, pageable);
-        LocalDate today = LocalDate.now();
-        List<BookmarkResponseDTO> open = new ArrayList<>();
-        List<BookmarkResponseDTO> closed = new ArrayList<>();
-        for (Bookmark bookmark : bookmarks) {
-            BookmarkResponseDTO dto = BookmarkResponseDTO.fromEntity(bookmark);
-            LocalDate reviewerAnnouncement = bookmark.getCampaign().getReviewerAnnouncement();
-            if (reviewerAnnouncement != null && !reviewerAnnouncement.isBefore(today)) {
-                open.add(dto);
-            } else {
-                closed.add(dto);
-            }
-        }
-        Page<BookmarkResponseDTO> openPage = new PageImpl<>(open, pageable, open.size());
-        Page<BookmarkResponseDTO> closedPage = new PageImpl<>(closed, pageable, closed.size());
-        return BookmarkSplitResponseDTO.builder()
-            .open(PageListResponseDTO.from(openPage))
-            .closed(PageListResponseDTO.from(closedPage))
-            .build();
-    }
-
-    @Override
     @Transactional
     public void deleteBookmark(Long userId, Long campaignId) {
         User user = userRepository.findActiveById(userId)
@@ -101,5 +77,15 @@ public class BookmarkServiceImpl implements BookmarkService {
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
         bookmarkRepository.deleteByUserAndCampaign(user, campaign);
+    }
+
+    public PageListResponseDTO<BookmarkResponseDTO> getOpenBookmarks(Long userId, Pageable pageable) {
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementGreaterThanEqual(userId, LocalDate.now(), pageable);
+        return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
+    }
+
+    public PageListResponseDTO<BookmarkResponseDTO> getClosedBookmarks(Long userId, Pageable pageable) {
+        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ReviewerAnnouncementLessThan(userId, LocalDate.now(), pageable);
+        return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
     }
 } 
