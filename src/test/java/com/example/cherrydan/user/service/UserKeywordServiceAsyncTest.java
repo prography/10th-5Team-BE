@@ -172,7 +172,7 @@ class UserKeywordServiceAsyncTest {
         // When & Then
         testKeywords.forEach(keyword -> {
             long startTime = System.currentTimeMillis();
-            long campaignCount = campaignService.getCampaignCountByKeyword(keyword);
+            long campaignCount = campaignService.getDailyCampaignCountByKeyword(keyword, LocalDate.of(2025, 7, 20)); // 어제 날짜로 고정
             long endTime = System.currentTimeMillis();
             
             log.info("키워드 '{}': {}개 캠페인, 조회 시간: {}ms", 

@@ -18,6 +18,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -132,9 +135,10 @@ public class UserKeywordController {
     public ApiResponse<PageListResponseDTO<CampaignResponseDTO>> getPersonalizedCampaignsByKeyword(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
             @RequestParam("keyword") String keyword,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @PageableDefault(size = 20) Pageable pageable
     ) {
-        Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(currentUser.getId(), keyword, pageable);
+        Page<CampaignResponseDTO> campaigns = userKeywordService.getPersonalizedCampaignsByKeyword(keyword, date, pageable);
         PageListResponseDTO<CampaignResponseDTO> response = PageListResponseDTO.from(campaigns);
         return ApiResponse.success("맞춤형 캠페인 조회 성공", response);
     }

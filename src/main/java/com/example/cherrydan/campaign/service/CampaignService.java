@@ -35,9 +35,7 @@ public interface CampaignService {
 
     PageListResponseDTO<CampaignResponseDTO> searchByKeyword(String keyword, Pageable pageable, Long userId);
 
-    Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(Long userId, String keyword, Pageable pageable);
-
-    long getCampaignCountByKeyword(String keyword);
+    Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Pageable pageable);
     
     long getDailyCampaignCountByKeyword(String keyword, LocalDate date);
 

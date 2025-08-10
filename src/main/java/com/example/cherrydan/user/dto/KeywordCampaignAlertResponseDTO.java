@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import java.time.LocalDate;
 
 
 @Getter
@@ -27,6 +27,9 @@ public class KeywordCampaignAlertResponseDTO {
 
     @Schema(description = "매칭된 캠페인 수", example = "10")
     private Integer campaignCount;
+
+    @Schema(description = "알림 날짜", example = "2024-07-21")
+    private LocalDate alertDate;
     
     /**
      * 엔티티를 DTO로 변환
@@ -37,6 +40,7 @@ public class KeywordCampaignAlertResponseDTO {
                 .keyword(alert.getKeyword())
                 .isRead(alert.getIsRead())
                 .campaignCount(alert.getCampaignCount())
+                .alertDate(alert.getAlertDate())
                 .build();
     }
 } 
