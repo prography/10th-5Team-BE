@@ -11,6 +11,7 @@ import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.dto.UserKeywordRequestDTO;
 import com.example.cherrydan.user.dto.UserKeywordResponseDTO;
 import com.example.cherrydan.user.dto.KeywordCampaignAlertResponseDTO;
+import com.example.cherrydan.user.dto.AlertIdsRequestDTO;
 import com.example.cherrydan.user.service.UserKeywordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -151,9 +152,9 @@ public class UserKeywordController {
     @DeleteMapping("/alerts")
     public ApiResponse<Void> deleteKeywordAlert(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @RequestBody List<Long> alertIds
+            @RequestBody AlertIdsRequestDTO request
     ) {
-        userKeywordService.deleteKeywordAlert(currentUser.getId(), alertIds);
+        userKeywordService.deleteKeywordAlert(currentUser.getId(), request.getAlertIds());
         return ApiResponse.success("키워드 알림 삭제 성공", null);
     }
 
@@ -162,12 +163,12 @@ public class UserKeywordController {
         description = "선택한 키워드 알림들을 읽음 상태로 변경합니다. 본인의 알림이 아닌 경우 403 에러를 반환합니다.",
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
-    @PutMapping("/alerts/read")
+    @PatchMapping("/alerts/read")
     public ApiResponse<Void> markKeywordAlertsAsRead(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser,
-            @RequestBody List<Long> alertIds
+            @RequestBody AlertIdsRequestDTO request
     ) {
-        userKeywordService.markKeywordAlertsAsRead(currentUser.getId(), alertIds);
+        userKeywordService.markKeywordAlertsAsRead(currentUser.getId(), request.getAlertIds());
         return ApiResponse.success("키워드 알림 읽음 처리 성공", null);
     }
 } 
