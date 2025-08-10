@@ -100,6 +100,10 @@ public class Campaign extends BaseTimeEntity {
     @ColumnDefault("0")
     private Boolean tiktok;
 
+    @Column(name = "thread")
+    @ColumnDefault("0")
+    private Boolean thread;
+
     @Column(name = "etc")
     @ColumnDefault("0")
     private Boolean etc;

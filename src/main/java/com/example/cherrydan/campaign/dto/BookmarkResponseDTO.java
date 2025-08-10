@@ -51,12 +51,13 @@ public class BookmarkResponseDTO {
     public static List<String> getPlatforms(Campaign campaign) {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(campaign.getYoutube())) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
-        if (Boolean.TRUE.equals(campaign.getShorts())) platforms.add("쇼츠");
+        if (Boolean.TRUE.equals(campaign.getShorts())) platforms.add(SnsPlatformType.SHORTS.getLabel());
         if (Boolean.TRUE.equals(campaign.getInsta())) platforms.add(SnsPlatformType.INSTAGRAM.getLabel());
-        if (Boolean.TRUE.equals(campaign.getReels())) platforms.add("릴스");
+        if (Boolean.TRUE.equals(campaign.getReels())) platforms.add(SnsPlatformType.REELS.getLabel());
         if (Boolean.TRUE.equals(campaign.getBlog())) platforms.add(SnsPlatformType.BLOG.getLabel());
-        if (Boolean.TRUE.equals(campaign.getClip())) platforms.add("클립");
+        if (Boolean.TRUE.equals(campaign.getClip())) platforms.add(SnsPlatformType.CLIP.getLabel());
         if (Boolean.TRUE.equals(campaign.getTiktok())) platforms.add(SnsPlatformType.TIKTOK.getLabel());
+        if (Boolean.TRUE.equals(campaign.getThread())) platforms.add(SnsPlatformType.THREAD.getLabel());
         if (Boolean.TRUE.equals(campaign.getEtc())) platforms.add(SnsPlatformType.ETC.getLabel());
         return platforms;
     }

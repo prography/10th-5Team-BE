@@ -79,7 +79,7 @@ public class CampaignStatusController {
     public static class DeleteRequest {
         @NotNull(message = "캠페인 ID는 필수입니다.")
         private Long campaignId;
+
         public Long getCampaignId() { return campaignId; }
-        public void setCampaignId(Long campaignId) { this.campaignId = campaignId; }
     }
 } 

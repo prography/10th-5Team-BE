@@ -37,6 +37,7 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean blog;
     @JsonIgnore private Boolean clip;
     @JsonIgnore private Boolean tiktok;
+    @JsonIgnore private Boolean thread;
     @JsonIgnore private Boolean etc;
     private Boolean isBookmarked;
 
@@ -54,12 +55,13 @@ public class CampaignResponseDTO {
     public List<String> getSnsPlatforms() {
         List<String> platforms = new ArrayList<>();
         if (Boolean.TRUE.equals(youtube)) platforms.add(SnsPlatformType.YOUTUBE.getLabel());
-        if (Boolean.TRUE.equals(shorts)) platforms.add("쇼츠");
+        if (Boolean.TRUE.equals(shorts)) platforms.add(SnsPlatformType.SHORTS.getLabel());
         if (Boolean.TRUE.equals(insta)) platforms.add(SnsPlatformType.INSTAGRAM.getLabel());
-        if (Boolean.TRUE.equals(reels)) platforms.add("릴스");
+        if (Boolean.TRUE.equals(reels)) platforms.add(SnsPlatformType.REELS.getLabel());
         if (Boolean.TRUE.equals(blog)) platforms.add(SnsPlatformType.BLOG.getLabel());
-        if (Boolean.TRUE.equals(clip)) platforms.add("클립");
+        if (Boolean.TRUE.equals(clip)) platforms.add(SnsPlatformType.CLIP.getLabel());
         if (Boolean.TRUE.equals(tiktok)) platforms.add(SnsPlatformType.TIKTOK.getLabel());
+        if (Boolean.TRUE.equals(thread)) platforms.add(SnsPlatformType.THREAD.getLabel());
         if (Boolean.TRUE.equals(etc)) platforms.add(SnsPlatformType.ETC.getLabel());
         return platforms;
     }
@@ -108,6 +110,7 @@ public class CampaignResponseDTO {
             .blog(campaign.getBlog())
             .clip(campaign.getClip())
             .tiktok(campaign.getTiktok())
+            .thread(campaign.getThread())
             .etc(campaign.getEtc())
             .campaignPlatformImageUrl(campaignPlatformImageUrl)
             .campaignSiteUrl(campaignSiteUrl)
