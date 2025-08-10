@@ -146,7 +146,7 @@ public class CampaignServiceImpl implements CampaignService {
      */
     @Override
     @PerformanceMonitor
-    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Pageable pageable) {
+    public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
         
         // 기존 방식으로 되돌림 (Object[] 매핑 복잡성으로 인해)
         List<Campaign> campaigns = campaignRepository.findByKeywordFullText(
@@ -158,9 +158,12 @@ public class CampaignServiceImpl implements CampaignService {
         
         long totalElements = campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
         
-        // DTO 변환
+        // DTO 변환 (북마크 여부 확인)
         List<CampaignResponseDTO> content = campaigns.stream()
-            .map(campaign -> CampaignResponseDTO.fromEntityWithBookmark(campaign, false))
+            .map(campaign -> {
+                boolean isBookmarked = bookmarkRepository.existsByUserIdAndCampaignIdAndIsActiveTrue(userId, campaign.getId());
+                return CampaignResponseDTO.fromEntityWithBookmark(campaign, isBookmarked);
+            })
             .collect(Collectors.toList());
             
         return new PageImpl<>(content, pageable, totalElements);
