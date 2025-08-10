@@ -157,15 +157,15 @@ public class KeywordProcessingService {
      */
     private KeywordCampaignAlert processKeywordAlert(UserKeyword userKeyword, int dailyNewCount, LocalDate today) {
         // 1. 사용자 푸시 설정 확인
-        User user = userKeyword.getUser();
+        // User user = userKeyword.getUser();
 
-        if (user.getPushSettings() == null || 
-            !user.getPushSettings().getPushEnabled() || 
-            !user.getPushSettings().getPersonalizedEnabled()) {
-            log.info("사용자 푸시 설정으로 인해 키워드 알림 생성 제외: 사용자={}, 키워드={}", 
-                    user.getId(), userKeyword.getKeyword());
-            return null;
-        }
+        // if (user.getPushSettings() == null || 
+        //     !user.getPushSettings().getPushEnabled() || 
+        //     !user.getPushSettings().getPersonalizedEnabled()) {
+        //     log.info("사용자 푸시 설정으로 인해 키워드 알림 생성 제외: 사용자={}, 키워드={}", 
+        //             user.getId(), userKeyword.getKeyword());
+        //     return null;
+        // }
         
         // 2. 어제 신규 증가분이 있으므로 알림 생성 (간단!)
         return createKeywordAlertEntity(userKeyword, dailyNewCount, today);
