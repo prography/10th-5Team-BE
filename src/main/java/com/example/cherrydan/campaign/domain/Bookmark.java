@@ -6,7 +6,14 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "campaign_bookmark")
+@Table(name = "campaign_bookmark",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "campaign_id"})
+    },
+    indexes = {
+        @Index(name = "idx_campaign_bookmark_user_active", columnList = "user_id, is_active")
+    }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
