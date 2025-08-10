@@ -24,6 +24,9 @@ public class KeywordCampaignAlertResponseDTO {
     
     @Schema(description = "읽음 상태", example = "false")
     private Boolean isRead;
+
+    @Schema(description = "매칭된 캠페인 수", example = "10")
+    private Integer campaignCount;
     
     /**
      * 엔티티를 DTO로 변환
@@ -33,6 +36,7 @@ public class KeywordCampaignAlertResponseDTO {
                 .id(alert.getId())
                 .keyword(alert.getKeyword())
                 .isRead(alert.getIsRead())
+                .campaignCount(alert.getCampaignCount())
                 .build();
     }
 } 
