@@ -52,26 +52,29 @@ public class BookmarkController {
     }
 
     @Operation(
-        summary = "내 북마크 목록 조회", 
-        description = """
-            내가 북마크(찜)한 캠페인 목록을 조회합니다.
-            
-            **쿼리 파라미터 예시:**
-            - ?page=0&size=20
-            - ?page=1&size=10
-            
-            **정렬**: 북마크 생성 시각 내림차순 (고정)
-            
-            **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
-            """
+        summary = "오늘+기간 남은 북마크 목록 조회",
+        description = "오늘 이후 reviewerAnnouncement가 남아있는 북마크 목록을 조회합니다."
     )
-    @GetMapping("/bookmarks")
-    public ResponseEntity<ApiResponse<BookmarkSplitResponseDTO>> getBookmarks(
+    @GetMapping("/bookmarks/open")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<BookmarkResponseDTO>>> getOpenBookmarks(
             @AuthenticationPrincipal UserDetailsImpl currentUser,
             Pageable pageable
     ) {
-        BookmarkSplitResponseDTO result = bookmarkService.getBookmarks(currentUser.getId(), pageable);
-        return ResponseEntity.ok(ApiResponse.success("북마크 목록 조회 성공", result));
+        PageListResponseDTO<BookmarkResponseDTO> result = bookmarkService.getOpenBookmarks(currentUser.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success("기간 남은 북마크 목록 조회 성공", result));
+    }
+
+    @Operation(
+        summary = "기간 지난 북마크 목록 조회",
+        description = "오늘 이전 reviewerAnnouncement가 지난 북마크 목록을 조회합니다."
+    )
+    @GetMapping("/bookmarks/closed")
+    public ResponseEntity<ApiResponse<PageListResponseDTO<BookmarkResponseDTO>>> getClosedBookmarks(
+            @AuthenticationPrincipal UserDetailsImpl currentUser,
+            Pageable pageable
+    ) {
+        PageListResponseDTO<BookmarkResponseDTO> result = bookmarkService.getClosedBookmarks(currentUser.getId(), pageable);
+        return ResponseEntity.ok(ApiResponse.success("기간 지난 북마크 목록 조회 성공", result));
     }
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
