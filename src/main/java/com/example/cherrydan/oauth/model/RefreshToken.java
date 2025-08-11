@@ -22,7 +22,5 @@ public class RefreshToken extends BaseTimeEntity {
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    @OneToOne(mappedBy = "refreshToken")
-    @JsonIgnore
-    private User user;
+    // User 참조 제거 - User 중심 단방향 관계로 변경
 }

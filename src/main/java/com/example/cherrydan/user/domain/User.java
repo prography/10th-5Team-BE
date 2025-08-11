@@ -57,7 +57,7 @@ public class User extends BaseTimeEntity {
     // 프로필 이미지 URL
     private String picture;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JoinColumn(name = "refresh_token_id")
     private RefreshToken refreshToken;
 
