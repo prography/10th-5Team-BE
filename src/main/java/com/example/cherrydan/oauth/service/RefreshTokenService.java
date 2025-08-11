@@ -64,6 +64,8 @@ public class RefreshTokenService {
             log.error("DB에 존재하지 않는 Refresh Token: {}", tokenValue);
             return false;
         }
+        
+        // 2. JWT 토큰 자체의 유효성 확인
         jwtTokenProvider.validateToken(tokenValue);
 
         // 3. 리프레쉬 토큰 타입 확인
@@ -72,12 +74,15 @@ public class RefreshTokenService {
             return false;
         }
 
-        // RefreshToken으로 User 조회 (안전한 방식)
+        // 4. RefreshToken으로 User 조회 (User 활성 상태 확인)
         Optional<User> userOpt = getUserByRefreshToken(tokenValue);
         if (userOpt.isPresent()) {
             log.info("Refresh Token 유효성 검사 통과: 사용자 ID = {}", userOpt.get().getId());
+            return true;
+        } else {
+            log.error("RefreshToken과 연결된 활성 사용자가 없습니다: {}", tokenValue);
+            return false;
         }
-        return true;
     }
 
     @Transactional(readOnly = true)
