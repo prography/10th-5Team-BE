@@ -11,15 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    @Query("SELECT rt FROM RefreshToken rt WHERE rt.refreshToken = :refreshToken AND rt.user.isActive = true")
-    Optional<RefreshToken> findByRefreshToken(@Param("refreshToken") String refreshToken);
-    
-    @Query("SELECT rt FROM RefreshToken rt WHERE rt.user = :user AND rt.user.isActive = true")
-    Optional<RefreshToken> findByUser(@Param("user") User user);
-    
-    @Query("SELECT rt FROM RefreshToken rt WHERE rt.user.id = :userId AND rt.user.isActive = true")
-    Optional<RefreshToken> findByUserId(@Param("userId") Long userId);
-    
-    void deleteByUser(User user);
-    void deleteByUserId(Long userId);
+    // RefreshToken에 user 필드가 없으므로 단순 조회만 가능
+    Optional<RefreshToken> findByRefreshToken(String refreshToken);
 }
