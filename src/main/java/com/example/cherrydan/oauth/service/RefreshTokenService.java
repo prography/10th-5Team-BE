@@ -27,29 +27,26 @@ public class RefreshTokenService {
 
     /**
      * 리프레쉬 토큰 저장 또는 업데이트
-     * 기존 토큰이 있으면 업데이트, 없으면 새로 생성
+     * 데이터 정합성을 위해 기존 토큰 삭제 후 새로 생성
      */
     public void saveOrUpdateRefreshToken(Long userId, String refreshTokenValue) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
 
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserId(userId);
-        
-        if (existingToken.isPresent()) {
-            // 기존 토큰 업데이트
-            RefreshToken token = existingToken.get();
-            token.setRefreshToken(refreshTokenValue);
+        if (user.getRefreshToken() != null) {
+            // 기존 토큰 값만 변경
+            user.getRefreshToken().setRefreshToken(refreshTokenValue);
             log.info("사용자 ID {}의 기존 Refresh Token 업데이트", userId);
         } else {
-            // 새 토큰 생성
+            // 새 토큰 생성 (첫 로그인)
             RefreshToken newToken = RefreshToken.builder()
                     .refreshToken(refreshTokenValue)
-                    .user(user)
                     .build();
             RefreshToken savedToken = refreshTokenRepository.save(newToken);
             user.setRefreshToken(savedToken);
             log.info("사용자 ID {}의 새 Refresh Token 생성", userId);
         }
+        userRepository.save(user); // 변경감지로 모든 변경사항 저장
     }
 
     /**
@@ -75,22 +72,33 @@ public class RefreshTokenService {
             return false;
         }
 
-        log.info("Refresh Token 유효성 검사 통과: 사용자 ID = {}", 
-                refreshTokenOpt.get().getUser().getId());
+        // RefreshToken으로 User 조회 (안전한 방식)
+        Optional<User> userOpt = getUserByRefreshToken(tokenValue);
+        if (userOpt.isPresent()) {
+            log.info("Refresh Token 유효성 검사 통과: 사용자 ID = {}", userOpt.get().getId());
+        }
         return true;
     }
 
     @Transactional(readOnly = true)
     public Optional<User> getUserByRefreshToken(String tokenValue) {
-        return refreshTokenRepository.findByRefreshToken(tokenValue)
-                .map(RefreshToken::getUser)
-                .filter(user -> user.getIsActive()); // 활성 사용자만 반환
+        // User 중심의 효율적인 조인 쿼리 사용
+        return userRepository.findByRefreshTokenValue(tokenValue);
     }
 
     public void deleteRefreshTokenByUserId(Long userId) {
         try {
-            refreshTokenRepository.deleteByUserId(userId);
-            log.info("사용자 ID {}의 Refresh Token 삭제 완료", userId);
+            User user = userRepository.findActiveById(userId)
+                    .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+            
+            if (user.getRefreshToken() != null) {
+                refreshTokenRepository.delete(user.getRefreshToken());
+                user.setRefreshToken(null);
+                userRepository.save(user);
+                log.info("사용자 ID {}의 Refresh Token 삭제 완료", userId);
+            } else {
+                log.info("사용자 ID {}는 Refresh Token이 없습니다", userId);
+            }
         } catch (Exception e) {
             log.error("사용자 ID {}의 Refresh Token 삭제 실패: {}", userId, e.getMessage());
             throw new RefreshTokenException(ErrorMessage.REFRESH_TOKEN_DELETE_ERROR);
