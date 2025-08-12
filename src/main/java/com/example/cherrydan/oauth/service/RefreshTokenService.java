@@ -22,69 +22,59 @@ import java.util.Optional;
 public class RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
-    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     /**
      * 리프레쉬 토큰 저장 또는 업데이트
-     * 기존 토큰이 있으면 업데이트, 없으면 새로 생성
+     * 데이터 정합성을 위해 기존 토큰 삭제 후 새로 생성
      */
-    public void saveOrUpdateRefreshToken(Long userId, String refreshTokenValue) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserId(userId);
-        
+    public void saveOrUpdateRefreshToken(User user, String refreshTokenValue) {
+        // 기존 토큰 확인 (userId로만 조회)
+        Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserId(user.getId());
         if (existingToken.isPresent()) {
-            // 기존 토큰 업데이트
-            RefreshToken token = existingToken.get();
-            token.setRefreshToken(refreshTokenValue);
-            log.info("사용자 ID {}의 기존 Refresh Token 업데이트", userId);
-        } else {
-            // 새 토큰 생성
-            RefreshToken newToken = RefreshToken.builder()
-                    .refreshToken(refreshTokenValue)
-                    .user(user)
-                    .build();
-            RefreshToken savedToken = refreshTokenRepository.save(newToken);
-            user.setRefreshToken(savedToken);
-            log.info("사용자 ID {}의 새 Refresh Token 생성", userId);
+            // 기존 토큰의 값만 업데이트
+            existingToken.get().setRefreshToken(refreshTokenValue);
+            log.info("사용자 ID {}의 기존 Refresh Token 업데이트", user.getId());
+            return;
         }
+
+        // 새 토큰 생성 (첫 로그인 등)
+        RefreshToken newToken = RefreshToken.builder()
+                .refreshToken(refreshTokenValue)
+                .user(user)
+                .build();
+        refreshTokenRepository.save(newToken);
+        log.info("사용자 ID {}의 새 Refresh Token 생성", user.getId());
     }
 
-    /**
-     * 리프레쉬 토큰 완전한 유효성 검사
-     * 1. 토큰 존재 여부 확인
-     * 2. JWT 토큰 자체의 유효성 확인 (만료, 서명 등)
-     * 3. 리프레쉬 토큰 타입 확인
-     */
     @Transactional(readOnly = true)
-    public boolean validateRefreshToken(String tokenValue) {
-        // 1. DB에서 토큰 존재 여부 확인
-        Optional<RefreshToken> refreshTokenOpt = refreshTokenRepository.findByRefreshToken(tokenValue);
-        
-        if (refreshTokenOpt.isEmpty()) {
-            log.error("DB에 존재하지 않는 Refresh Token: {}", tokenValue);
-            return false;
-        }
+    public RefreshToken getRefreshTokenEntity(String tokenValue) {
+        // 1. JWT 토큰 자체의 유효성 확인 (만료, 서명 등)
         jwtTokenProvider.validateToken(tokenValue);
 
-        // 3. 리프레쉬 토큰 타입 확인
+        // 2. 리프레쉬 토큰 타입 확인
         if (!jwtTokenProvider.isRefreshToken(tokenValue)) {
             log.error("잘못된 토큰 타입 (Access Token이 전달됨): {}", tokenValue);
-            return false;
+            throw new RefreshTokenException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
         }
 
-        log.info("Refresh Token 유효성 검사 통과: 사용자 ID = {}", 
-                refreshTokenOpt.get().getUser().getId());
-        return true;
-    }
+        // 3. JWT에서 userId 추출
+        Long userId = jwtTokenProvider.getUserIdFromToken(tokenValue);
 
-    @Transactional(readOnly = true)
-    public Optional<User> getUserByRefreshToken(String tokenValue) {
-        return refreshTokenRepository.findByRefreshToken(tokenValue)
-                .map(RefreshToken::getUser)
-                .filter(user -> user.getIsActive()); // 활성 사용자만 반환
+        // 4. userId와 tokenValue로 RefreshToken 조회
+        RefreshToken refreshToken = refreshTokenRepository.findByUserIdAndRefreshToken(userId, tokenValue)
+                .orElseThrow(() -> {
+                    log.error("유효하지 않은 Refresh Token");
+                    return new RefreshTokenException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
+                });
+
+        // 5. 활성 사용자 확인
+        if (!refreshToken.getUser().getIsActive()) {
+            log.error("비활성 사용자: {}", userId);
+            throw new RefreshTokenException(ErrorMessage.AUTH_INVALID_REFRESH_TOKEN);
+        }
+
+        return refreshToken;
     }
 
     public void deleteRefreshTokenByUserId(Long userId) {

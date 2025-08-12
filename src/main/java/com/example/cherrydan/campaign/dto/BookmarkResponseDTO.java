@@ -62,10 +62,10 @@ public class BookmarkResponseDTO {
         return platforms;
     }
 
-    public static String getReviewerAnnouncementStatus(LocalDate reviewerAnnouncement) {
-        if (reviewerAnnouncement == null) return null;
+    public static String getReviewerAnnouncementStatus(LocalDate applyEnd) {
+        if (applyEnd == null) return null;
         LocalDate today = LocalDate.now();
-        long days = ChronoUnit.DAYS.between(today, reviewerAnnouncement);
+        long days = ChronoUnit.DAYS.between(today, applyEnd);
         if (days > 0) {
             return "신청 마감 " + days + "일 전";
         } else if (days < 0) {

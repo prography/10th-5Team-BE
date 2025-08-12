@@ -44,4 +44,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // 모든 활성 사용자 조회
     @Query("SELECT u FROM User u WHERE u.isActive = true")
     List<User> findAllActive();
+    
 }

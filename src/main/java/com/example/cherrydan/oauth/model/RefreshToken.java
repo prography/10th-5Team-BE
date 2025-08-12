@@ -22,7 +22,7 @@ public class RefreshToken extends BaseTimeEntity {
     @Column(name = "refresh_token", nullable = false)
     private String refreshToken;
 
-    @OneToOne(mappedBy = "refreshToken")
-    @JsonIgnore
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }

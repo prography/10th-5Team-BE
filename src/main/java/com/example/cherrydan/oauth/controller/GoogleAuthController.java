@@ -99,7 +99,7 @@ public class GoogleAuthController {
         TokenDTO tokenDTO = jwtTokenProvider.generateTokens(user.getId(), user.getEmail());
 
         // 5. Refresh Token을 DB에 저장
-        refreshTokenService.saveOrUpdateRefreshToken(user.getId(), tokenDTO.getRefreshToken());
+        refreshTokenService.saveOrUpdateRefreshToken(user, tokenDTO.getRefreshToken());
 
         log.info("Google 모바일 로그인 성공: userId={}, email={}, name={}", user.getId(), user.getEmail(), user.getName());
 
