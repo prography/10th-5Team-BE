@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -94,7 +95,7 @@ public class ActivityProcessingService {
         
         try {
             // D-day 계산
-            LocalDate today = LocalDate.now();
+            LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
             int dDay = (int) today.until(campaign.getApplyEnd()).getDays();
             
             // 알림 메시지 구성

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,9 +40,8 @@ public class ActivityAlertService {
      */
     @Transactional
     public void updateActivityAlerts() {
-        log.info("=== 활동 알림 업데이트 작업 시작 ===");
         
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         LocalDate threeDaysLater = today.plusDays(3);
         
         // 3일 후 마감되는 활성 캠페인의 북마크들을 조회 (페치 조인으로 N+1 문제 해결)
@@ -90,7 +90,6 @@ public class ActivityAlertService {
      */
     @Transactional
     public void sendActivityNotifications() {
-        log.info("=== 활동 알림 발송 시작 ===");
         
         List<ActivityAlert> unnotifiedAlerts = activityAlertRepository.findUnnotifiedAlerts();
         
