@@ -45,7 +45,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u WHERE u.isActive = true")
     List<User> findAllActive();
     
-    // RefreshToken 값으로 User 조회 (효율적인 조인)
-    @Query("SELECT u FROM User u JOIN u.refreshToken rt WHERE rt.refreshToken = :tokenValue AND u.isActive = true")
-    Optional<User> findByRefreshTokenValue(@Param("tokenValue") String tokenValue);
 }

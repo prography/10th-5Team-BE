@@ -228,11 +228,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
      * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
      */
     protected void registerFCMTokenIfPresent(Long userId, LoginRequest loginRequest) {
-        if (loginRequest.getFcmToken() != null && !loginRequest.getFcmToken().trim().isEmpty()) {
+        String fcmToken = loginRequest.getFcmToken();
+        log.info("FCM 토큰 체크: userId={}, fcmToken={}", userId, 
+            fcmToken == null ? "null" : (fcmToken.trim().isEmpty() ? "empty" : "exists"));
+        
+        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
             try {
                 FCMTokenRequest fcmRequest = FCMTokenRequest.builder()
                         .userId(userId)
-                        .fcmToken(loginRequest.getFcmToken())
+                        .fcmToken(fcmToken)
                         .deviceType(loginRequest.getDeviceType())
                         .deviceModel(loginRequest.getDeviceModel())
                         .appVersion(loginRequest.getAppVersion())
@@ -243,6 +247,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             } catch (Exception e) {
                 log.warn("FCM 토큰 등록 실패 (로그인은 성공): userId={}, error={}", userId, e.getMessage());
             }
+        } else {
+            log.warn("FCM 토큰 조건 미충족으로 스킵: userId={}", userId);
         }
     }
 }

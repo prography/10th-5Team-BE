@@ -138,6 +138,39 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * RefreshTokenException 처리
+     */
+    @ExceptionHandler(RefreshTokenException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRefreshTokenException(RefreshTokenException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("RefreshTokenException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * PushException 처리
+     */
+    @ExceptionHandler(PushException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePushException(PushException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("PushException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
+     * NotificationException 처리
+     */
+    @ExceptionHandler(NotificationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleNotificationException(NotificationException ex) {
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("NotificationException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
+    }
+
+    /**
      * JWT 토큰 만료 예외 처리
      */
     @ExceptionHandler(ExpiredJwtException.class)

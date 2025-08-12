@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -84,8 +85,8 @@ public class UserKeywordService {
         Map<String, List<UserKeyword>> keywordGroups = userKeywordRepository.findAllWithUser()
                 .stream()
                 .collect(Collectors.groupingBy(UserKeyword::getKeyword));
-        
-        LocalDate today = LocalDate.now();
+
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
         
         // 모든 키워드에 대해 비동기 처리 시작 (예외 처리 포함)
         List<CompletableFuture<List<KeywordCampaignAlert>>> safeFutures = keywordGroups.entrySet().stream()
