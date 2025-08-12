@@ -8,6 +8,8 @@ import java.util.Optional;
 
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Long> {
-    // RefreshToken에 user 필드가 없으므로 단순 조회만 가능
     Optional<RefreshToken> findByRefreshToken(String refreshToken);
+    Optional<RefreshToken> findByUserId(Long userId);
+    void deleteByUserId(Long userId);
+    Optional<RefreshToken> findByUserIdAndRefreshToken(Long userId, String refreshToken);
 }
