@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -96,7 +97,7 @@ public class ActivityProcessingService {
         try {
             // D-day 계산
             LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-            int dDay = (int) today.until(campaign.getApplyEnd()).getDays();
+            long dDay = ChronoUnit.DAYS.between(today, campaign.getApplyEnd());
             
             // 알림 메시지 구성
             String title = "신청 마감 알림";
