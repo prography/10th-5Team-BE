@@ -38,7 +38,7 @@ public class UserFCMToken extends BaseTimeEntity {
     /**
      * FCM 토큰 (디바이스별로 고유)
      */
-    @Column(name = "fcm_token", nullable = false, length = 500)
+    @Column(name = "fcm_token", length = 500)
     private String fcmToken;
 
     /**
@@ -51,7 +51,7 @@ public class UserFCMToken extends BaseTimeEntity {
      * 디바이스 타입 (android, ios)
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "device_type", nullable = false, length = 10)
+    @Column(name = "device_type", length = 10)
     private DeviceType deviceType;
 
     @Column(name = "app_version")
@@ -64,7 +64,7 @@ public class UserFCMToken extends BaseTimeEntity {
     /**
      * 토큰 활성화 상태
      */
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private Boolean isActive;
 
     /**
@@ -78,8 +78,9 @@ public class UserFCMToken extends BaseTimeEntity {
      * @param request FCM 토큰 요청 정보
      */
     public void updateToken(FCMTokenRequest request) {
-        this.fcmToken = request.getFcmToken();
-        this.lastUsedAt = LocalDateTime.now();
+        if (request.getFcmToken() != null && !request.getFcmToken().trim().isEmpty()) {
+            this.fcmToken = request.getFcmToken();
+        }
         
         // 디바이스 타입 업데이트
         if (request.getDeviceType() != null && !request.getDeviceType().trim().isEmpty()) {

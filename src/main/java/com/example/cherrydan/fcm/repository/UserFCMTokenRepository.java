@@ -24,12 +24,20 @@ import java.util.Optional;
 public interface UserFCMTokenRepository extends JpaRepository<UserFCMToken, Long> {
     
     /**
-     * 사용자 ID로 활성화된 모든 토큰 조회
+     * 사용자 ID로 활성화된 모든 디바이스 조회 (FCM 토큰이 있는 것만)
      * @param userId 사용자 ID
-     * @return 활성화된 FCM 토큰 리스트
+     * @return FCM 토큰이 있고 활성화된 디바이스 리스트
+     */
+    @Query("SELECT t FROM UserFCMToken t WHERE t.userId = :userId AND t.fcmToken IS NOT NULL AND t.isActive = true")
+    List<UserFCMToken> findActiveTokensByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 사용자 ID로 활성화된 모든 디바이스 조회 (FCM 토큰 유무와 관계없이)
+     * @param userId 사용자 ID
+     * @return 활성화된 모든 디바이스 리스트
      */
     @Query("SELECT t FROM UserFCMToken t WHERE t.userId = :userId AND t.isActive = true")
-    List<UserFCMToken> findActiveTokensByUserId(@Param("userId") Long userId);
+    List<UserFCMToken> findActiveDevicesByUserId(@Param("userId") Long userId);
     
     /**
      * 사용자 ID와 디바이스 타입으로 토큰 조회
@@ -51,38 +59,6 @@ public interface UserFCMTokenRepository extends JpaRepository<UserFCMToken, Long
      * @param userIds 사용자 ID 리스트
      * @return 활성화된 FCM 토큰 리스트
      */
-    @Query("SELECT t FROM UserFCMToken t WHERE t.userId IN :userIds AND t.isActive = true")
+    @Query("SELECT t FROM UserFCMToken t WHERE t.userId IN :userIds AND t.fcmToken IS NOT NULL AND t.isActive = true")
     List<UserFCMToken> findActiveTokensByUserIds(@Param("userIds") List<Long> userIds);
-
-    
-    /**
-     * 마지막 사용 시간이 특정 기간 이전인 토큰들 조회 (정리용)
-     * @param dateTime 기준 시간
-     * @return 오래된 FCM 토큰 리스트
-     */
-    @Query("SELECT t FROM UserFCMToken t WHERE t.lastUsedAt < :dateTime AND t.isActive = true")
-    List<UserFCMToken> findTokensNotUsedSince(@Param("dateTime") LocalDateTime dateTime);
-    
-    /**
-     * 특정 FCM 토큰 비활성화
-     * @param fcmToken FCM 토큰
-     */
-    @Modifying
-    @Query("UPDATE UserFCMToken t SET t.isActive = false WHERE t.fcmToken = :fcmToken")
-    void deactivateByFcmToken(@Param("fcmToken") String fcmToken);
-    
-    /**
-     * 사용자의 모든 토큰 비활성화
-     * @param userId 사용자 ID
-     */
-    @Modifying
-    @Query("UPDATE UserFCMToken t SET t.isActive = false WHERE t.userId = :userId")
-    void deactivateAllTokensByUserId(@Param("userId") Long userId);
-    
-    /**
-     * 사용자 ID로 토큰 존재 여부 확인
-     * @param userId 사용자 ID
-     * @return 토큰 존재 여부
-     */
-    boolean existsByUserIdAndIsActiveTrue(Long userId);
 }
