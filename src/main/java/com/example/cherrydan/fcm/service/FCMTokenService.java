@@ -33,9 +33,6 @@ public class FCMTokenService {
     @Transactional
     public void registerOrUpdateToken(FCMTokenRequest request) {
         try {
-            if (!isValidTokenRequest(request)) {
-                throw new FCMException(ErrorMessage.FCM_TOKEN_INVALID_REQUEST);
-            }
             
             DeviceType deviceType = DeviceType.from(request.getDeviceType());
             Optional<UserFCMToken> existingToken = tokenRepository
@@ -57,7 +54,7 @@ public class FCMTokenService {
                         .appVersion(request.getAppVersion())
                         .osVersion(request.getOsVersion())
                         .build();
-                token = tokenRepository.save(token);
+                tokenRepository.save(token);
                 log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
             }
             
@@ -68,31 +65,5 @@ public class FCMTokenService {
         } catch (Exception e) {
             log.error("서버 내부 에러 발생 {}", e.getMessage());
         }
-    }
-    
-    /**
-     * 오래된 토큰 정리 (스케줄링)
-     * 90일 이상 사용되지 않은 토큰들을 비활성화
-     */
-    @Scheduled(cron = "0 0 2 * * ?",zone = "Asia/Seoul")
-    @Transactional
-    public void cleanupOldTokens() {
-        LocalDateTime cutoffDate = LocalDateTime.now().minusDays(90);
-        List<UserFCMToken> oldTokens = tokenRepository.findTokensNotUsedSince(cutoffDate);
-
-        if (!oldTokens.isEmpty()) {
-            tokenRepository.deleteAll(oldTokens);  // 진짜 삭제
-            log.info("오래된 FCM 토큰 삭제 완료 - 삭제된 토큰 수: {}", oldTokens.size());
-        }
-    }
-    
-    /**
-     * 토큰 요청 유효성 검사
-     */
-    private boolean isValidTokenRequest(FCMTokenRequest request) {
-        return request != null &&
-               request.getUserId() != null &&
-               request.getFcmToken() != null && !request.getFcmToken().trim().isEmpty() &&
-               request.getDeviceType() != null && !request.getDeviceType().trim().isEmpty();
     }
 }
