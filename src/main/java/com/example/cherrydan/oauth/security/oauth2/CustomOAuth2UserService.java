@@ -16,7 +16,6 @@ import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.UserLoginHistory;
 import com.example.cherrydan.user.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.annotation.Propagation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -224,31 +223,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     /**
-     * FCM 토큰 등록 (선택적)
-     * 로그인 시 FCM 토큰이 있으면 등록하고, 없으면 무시
+     * 디바이스 정보 및 FCM 토큰 등록
+     * 디바이스 정보는 항상 저장하며, FCM 토큰이 없으면 null로 저장
      */
     protected void registerFCMTokenIfPresent(Long userId, LoginRequest loginRequest) {
         String fcmToken = loginRequest.getFcmToken();
-        log.info("FCM 토큰 체크: userId={}, fcmToken={}", userId, 
+        log.info("디바이스 정보 및 FCM 토큰 처리: userId={}, fcmToken={}", userId, 
             fcmToken == null ? "null" : (fcmToken.trim().isEmpty() ? "empty" : "exists"));
         
-        if (fcmToken != null && !fcmToken.trim().isEmpty()) {
-            try {
-                FCMTokenRequest fcmRequest = FCMTokenRequest.builder()
-                        .userId(userId)
-                        .fcmToken(fcmToken)
-                        .deviceType(loginRequest.getDeviceType())
-                        .deviceModel(loginRequest.getDeviceModel())
-                        .appVersion(loginRequest.getAppVersion())
-                        .osVersion(loginRequest.getOsVersion())
-                        .build();
-                fcmTokenService.registerOrUpdateToken(fcmRequest);
-                log.info("FCM 토큰 등록 성공: userId={}, deviceType={}", userId, loginRequest.getDeviceType());
-            } catch (Exception e) {
-                log.warn("FCM 토큰 등록 실패 (로그인은 성공): userId={}, error={}", userId, e.getMessage());
-            }
-        } else {
-            log.warn("FCM 토큰 조건 미충족으로 스킵: userId={}", userId);
+        try {
+            FCMTokenRequest fcmRequest = FCMTokenRequest.builder()
+                    .userId(userId)
+                    .fcmToken(fcmToken != null && !fcmToken.trim().isEmpty() ? fcmToken : null)
+                    .deviceType(loginRequest.getDeviceType())
+                    .deviceModel(loginRequest.getDeviceModel())
+                    .appVersion(loginRequest.getAppVersion())
+                    .osVersion(loginRequest.getOsVersion())
+                    .build();
+            fcmTokenService.registerOrUpdateToken(fcmRequest);
+            log.info("디바이스 정보 등록 성공: userId={}, deviceType={}, fcmToken={}", 
+                userId, loginRequest.getDeviceType(), fcmToken != null ? "exists" : "null");
+        } catch (Exception e) {
+            log.warn("디바이스 정보 등록 실패 (로그인은 성공): userId={}, error={}", userId, e.getMessage());
         }
     }
 }
