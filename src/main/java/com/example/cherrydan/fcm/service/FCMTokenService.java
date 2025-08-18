@@ -28,6 +28,39 @@ public class FCMTokenService {
     private final UserFCMTokenRepository tokenRepository;
     
     /**
+     * 특정 디바이스의 FCM 토큰 수정
+     */
+    @Transactional
+    public void updateFCMToken(Long userId, Long deviceId, String newFcmToken) {
+        try {
+            UserFCMToken token = tokenRepository.findById(deviceId)
+                .orElseThrow(() -> new FCMException(ErrorMessage.FCM_TOKEN_NOT_FOUND));
+            
+            if (!token.getUserId().equals(userId)) {
+                throw new FCMException(ErrorMessage.FCM_TOKEN_ACCESS_DENIED);
+            }
+            
+            token.updateFcmToken(newFcmToken);
+            log.info("FCM 토큰 수정 완료 - 사용자: {}, 디바이스 ID: {}, 디바이스: {}", 
+                    userId, deviceId, token.getDeviceType());
+            
+        } catch (FCMException e) {
+            log.error("FCM 토큰 수정 실패: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("FCM 토큰 수정 중 서버 내부 에러 발생: {}", e.getMessage());
+            throw new FCMException(ErrorMessage.FCM_TOKEN_UPDATE_FAILED);
+        }
+    }
+
+    /**
+     * 사용자의 모든 활성화된 FCM 토큰 조회
+     */
+    public List<UserFCMToken> getUserFCMTokens(Long userId) {
+        return tokenRepository.findActiveTokensByUserId(userId);
+    }
+
+    /**
      * FCM 토큰 등록 또는 업데이트
      */
     @Transactional

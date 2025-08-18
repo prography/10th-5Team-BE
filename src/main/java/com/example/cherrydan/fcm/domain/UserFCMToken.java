@@ -74,6 +74,16 @@ public class UserFCMToken extends BaseTimeEntity {
     private LocalDateTime lastUsedAt;
 
     /**
+     * FCM 토큰만 업데이트
+     * @param newFcmToken 새로운 FCM 토큰
+     */
+    public void updateFcmToken(String newFcmToken) {
+        if (newFcmToken != null && !newFcmToken.trim().isEmpty()) {
+            this.fcmToken = newFcmToken;
+        }
+    }
+
+    /**
      * FCM 토큰 및 디바이스 정보 업데이트
      * @param request FCM 토큰 요청 정보
      */
