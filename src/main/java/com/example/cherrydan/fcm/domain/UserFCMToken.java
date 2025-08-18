@@ -143,4 +143,12 @@ public class UserFCMToken extends BaseTimeEntity {
     public void updateLastUsed() {
         this.lastUsedAt = LocalDateTime.now();
     }
+
+    /**
+     * 알림 허용 상태 업데이트
+     * @param isAllowed 알림 허용 여부
+     */
+    public void updateAllowedStatus(Boolean isAllowed) {
+        this.isAllowed = isAllowed;
+    }
 }

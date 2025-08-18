@@ -54,6 +54,13 @@ public interface UserFCMTokenRepository extends JpaRepository<UserFCMToken, Long
     Optional<UserFCMToken> findByFcmToken(String fcmToken);
     
     /**
+     * 사용자 ID로 모든 디바이스 조회 (활성화 여부 무관)
+     * @param userId 사용자 ID
+     * @return 해당 사용자의 모든 디바이스 리스트
+     */
+    List<UserFCMToken> findByUserId(Long userId);
+    
+    /**
      * 여러 사용자 ID로 활성화되고 알림이 허용된 토큰들 조회
      * @param userIds 사용자 ID 리스트
      * @return 활성화되고 알림이 허용된 FCM 토큰 리스트

@@ -6,6 +6,7 @@ import com.example.cherrydan.fcm.domain.DeviceType;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
 import com.example.cherrydan.fcm.dto.FCMTokenResponseDTO;
+import com.example.cherrydan.fcm.dto.FCMTokenUpdateRequest;
 import com.example.cherrydan.fcm.repository.UserFCMTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class FCMTokenService {
     
     /**
      * 특정 디바이스의 FCM 토큰 수정
+     * 기존 테스트용
      */
     @Transactional
     public void updateFCMToken(Long userId, Long deviceId, String newFcmToken) {
@@ -56,23 +58,56 @@ public class FCMTokenService {
     }
 
     /**
-     * 사용자의 모든 활성화된 FCM 토큰 조회
+     * 특정 디바이스의 FCM 토큰 및 상태 수정
      */
-    public List<FCMTokenResponseDTO> getUserFCMTokens(Long userId) {
-        List<UserFCMToken> tokens = tokenRepository.findActiveTokensByUserId(userId);
-        return tokens.stream()
-                .map(FCMTokenResponseDTO::from)
-                .collect(Collectors.toList());
+    @Transactional
+    public void updateFCMTokenWithStatus(Long userId, FCMTokenUpdateRequest request) {
+        try {
+            UserFCMToken token = tokenRepository.findById(request.getDeviceId())
+                .orElseThrow(() -> new FCMException(ErrorMessage.FCM_TOKEN_NOT_FOUND));
+            
+            if (!token.getUserId().equals(userId)) {
+                throw new FCMException(ErrorMessage.FCM_TOKEN_ACCESS_DENIED);
+            }
+            
+            // FCM 토큰 업데이트
+            if (request.getFcmToken() != null) {
+                token.updateFcmToken(request.getFcmToken());
+            }
+            
+            // 활성화 상태 업데이트
+            if (request.getIsActive() != null) {
+                if (request.getIsActive()) {
+                    token.activate();
+                } else {
+                    token.deactivate();
+                }
+            }
+            
+            // 알림 허용 상태 업데이트
+            if (request.getIsAllowed() != null) {
+                token.updateAllowedStatus(request.getIsAllowed());
+            }
+            
+            log.info("FCM 토큰 및 상태 수정 완료 - 사용자: {}, 디바이스 ID: {}", userId, request.getDeviceId());
+            
+        } catch (FCMException e) {
+            log.error("FCM 토큰 수정 실패: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("FCM 토큰 수정 중 서버 내부 에러 발생: {}", e.getMessage());
+            throw new FCMException(ErrorMessage.FCM_TOKEN_UPDATE_FAILED);
+        }
     }
 
     /**
-     * 사용자가 알림을 허용하는 디바이스가 있는지 확인
-     * @param userId 사용자 ID
-     * @return 알림 허용 디바이스가 하나라도 있으면 true, 없으면 false
+     * 사용자의 모든 FCM 토큰 조회 (활성화 및 알림 허용 여부 무관)
      */
-    public boolean hasNotificationAllowedDevice(Long userId) {
-        List<UserFCMToken> allowedTokens = tokenRepository.findActiveTokensByUserId(userId);
-        return !allowedTokens.isEmpty();
+    public List<FCMTokenResponseDTO> getUserFCMTokens(Long userId) {
+        List<UserFCMToken> tokens = tokenRepository.findByUserId(userId);
+        return tokens.stream()
+                .map(FCMTokenResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
     /**

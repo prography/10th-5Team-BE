@@ -108,7 +108,7 @@ public class UserController {
 
     @Operation(
         summary = "사용자 FCM 토큰 조회",
-        description = "현재 사용자의 모든 활성화된 FCM 토큰을 조회합니다.",
+        description = "현재 사용자의 모든 FCM 토큰을 조회합니다. (활성화 및 알림 허용 여부 무관)",
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @GetMapping("/fcm-tokens")
@@ -123,8 +123,8 @@ public class UserController {
     }
 
     @Operation(
-        summary = "FCM 토큰 수정",
-        description = "요청 본문에 포함된 디바이스 ID로 특정 디바이스의 FCM 토큰을 수정합니다.",
+        summary = "FCM 토큰 및 설정 수정",
+        description = "디바이스 ID로 특정 디바이스의 FCM 토큰, 활성화 상태, 알림 허용 상태를 수정합니다.",
         security = { @SecurityRequirement(name = "bearerAuth") }
     )
     @PatchMapping("/fcm-token")
@@ -135,7 +135,7 @@ public class UserController {
             throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         }
         
-        fcmTokenService.updateFCMToken(currentUser.getId(), request.getDeviceId(), request.getFcmToken());
-        return ResponseEntity.ok(ApiResponse.success("FCM 토큰이 수정되었습니다."));
+        fcmTokenService.updateFCMTokenWithStatus(currentUser.getId(), request);
+        return ResponseEntity.ok(ApiResponse.success("FCM 토큰 및 설정이 수정되었습니다."));
     }
 }
