@@ -1,5 +1,6 @@
 package com.example.cherrydan.fcm.service;
 
+import com.example.cherrydan.common.exception.FCMException;
 import com.example.cherrydan.fcm.domain.DeviceType;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
@@ -287,6 +288,172 @@ class FCMTokenServiceTest {
             assertThat(tokens).hasSize(1);
             assertThat(tokens.get(0).getFcmToken()).isEqualTo("active-token");
             assertThat(tokens.get(0).getIsActive()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("FCM 토큰 수정")
+    class UpdateFCMToken {
+
+        @Test
+        @DisplayName("특정 디바이스의 FCM 토큰이 성공적으로 수정된다")
+        void updateFCMToken_Success() {
+            // given
+            Long userId = 100L;
+            UserFCMToken savedToken = tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken("old-token")
+                    .deviceType(DeviceType.ANDROID)
+                    .deviceModel("Galaxy S23")
+                    .isActive(true)
+                    .build());
+
+            String newToken = "new-updated-token";
+
+            // when
+            fcmTokenService.updateFCMToken(userId, savedToken.getId(), newToken);
+
+            // then
+            UserFCMToken updatedToken = tokenRepository.findById(savedToken.getId()).orElseThrow();
+            assertThat(updatedToken.getFcmToken()).isEqualTo(newToken);
+            assertThat(updatedToken.getDeviceType()).isEqualTo(DeviceType.ANDROID);
+            assertThat(updatedToken.getDeviceModel()).isEqualTo("Galaxy S23");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 디바이스 ID로 FCM 토큰 수정 시 예외가 발생한다")
+        void updateFCMToken_DeviceNotFound() {
+            // given
+            Long userId = 101L;
+            Long nonExistentDeviceId = 999L;
+            String newToken = "new-token";
+
+            // when & then
+            assertThatThrownBy(() -> fcmTokenService.updateFCMToken(userId, nonExistentDeviceId, newToken))
+                    .isInstanceOf(FCMException.class);
+        }
+
+        @Test
+        @DisplayName("다른 사용자의 디바이스 FCM 토큰 수정 시 접근 거부 예외가 발생한다")
+        void updateFCMToken_AccessDenied() {
+            // given
+            Long ownerUserId = 102L;
+            Long unauthorizedUserId = 103L;
+            
+            UserFCMToken savedToken = tokenRepository.save(UserFCMToken.builder()
+                    .userId(ownerUserId)
+                    .fcmToken("original-token")
+                    .deviceType(DeviceType.ANDROID)
+                    .isActive(true)
+                    .build());
+
+            String newToken = "unauthorized-token";
+
+            // when & then
+            assertThatThrownBy(() -> fcmTokenService.updateFCMToken(unauthorizedUserId, savedToken.getId(), newToken))
+                    .isInstanceOf(FCMException.class);
+        }
+
+        @Test
+        @DisplayName("null 또는 빈 문자열 FCM 토큰으로 수정 시 토큰이 변경되지 않는다")
+        void updateFCMToken_NullOrEmptyToken() {
+            // given
+            Long userId = 104L;
+            String originalToken = "original-token";
+            UserFCMToken savedToken = tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken(originalToken)
+                    .deviceType(DeviceType.IOS)
+                    .isActive(true)
+                    .build());
+
+            // when - null 토큰으로 수정 시도
+            fcmTokenService.updateFCMToken(userId, savedToken.getId(), null);
+
+            // then
+            UserFCMToken tokenAfterNull = tokenRepository.findById(savedToken.getId()).orElseThrow();
+            assertThat(tokenAfterNull.getFcmToken()).isEqualTo(originalToken);
+
+            // when - 빈 문자열 토큰으로 수정 시도
+            fcmTokenService.updateFCMToken(userId, savedToken.getId(), "");
+
+            // then
+            UserFCMToken tokenAfterEmpty = tokenRepository.findById(savedToken.getId()).orElseThrow();
+            assertThat(tokenAfterEmpty.getFcmToken()).isEqualTo(originalToken);
+
+            // when - 공백만 있는 토큰으로 수정 시도
+            fcmTokenService.updateFCMToken(userId, savedToken.getId(), "   ");
+
+            // then
+            UserFCMToken tokenAfterWhitespace = tokenRepository.findById(savedToken.getId()).orElseThrow();
+            assertThat(tokenAfterWhitespace.getFcmToken()).isEqualTo(originalToken);
+        }
+    }
+
+    @Nested
+    @DisplayName("사용자 FCM 토큰 조회")
+    class GetUserFCMTokens {
+
+        @Test
+        @DisplayName("사용자의 활성화된 FCM 토큰들이 성공적으로 조회된다")
+        void getUserFCMTokens_Success() {
+            // given
+            Long userId = 200L;
+            
+            UserFCMToken token1 = tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken("token-1")
+                    .deviceType(DeviceType.ANDROID)
+                    .deviceModel("Galaxy S23")
+                    .isActive(true)
+                    .build());
+
+            UserFCMToken token2 = tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken("token-2")
+                    .deviceType(DeviceType.IOS)
+                    .deviceModel("iPhone 14")
+                    .isActive(true)
+                    .build());
+
+            // 비활성화된 토큰 (조회되지 않아야 함)
+            tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken("inactive-token")
+                    .deviceType(DeviceType.ANDROID)
+                    .isActive(false)
+                    .build());
+
+            // FCM 토큰이 null인 디바이스 (조회되지 않아야 함)
+            tokenRepository.save(UserFCMToken.builder()
+                    .userId(userId)
+                    .fcmToken(null)
+                    .deviceType(DeviceType.IOS)
+                    .isActive(true)
+                    .build());
+
+            // when
+            List<UserFCMToken> userTokens = fcmTokenService.getUserFCMTokens(userId);
+
+            // then
+            assertThat(userTokens).hasSize(2);
+            assertThat(userTokens).extracting(UserFCMToken::getFcmToken)
+                    .containsExactlyInAnyOrder("token-1", "token-2");
+            assertThat(userTokens).allMatch(UserFCMToken::getIsActive);
+            assertThat(userTokens).allMatch(token -> token.getFcmToken() != null);
+        }
+
+        @Test
+        @DisplayName("FCM 토큰이 없는 사용자는 빈 리스트가 반환된다")
+        void getUserFCMTokens_EmptyList() {
+            // given
+            Long userIdWithNoTokens = 201L;
+
+            // when
+            List<UserFCMToken> userTokens = fcmTokenService.getUserFCMTokens(userIdWithNoTokens);
+
+            // then
+            assertThat(userTokens).isEmpty();
         }
     }
 }
