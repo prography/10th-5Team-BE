@@ -15,7 +15,6 @@ import com.example.cherrydan.user.service.UserService;
 import com.example.cherrydan.fcm.service.FCMTokenService;
 import com.example.cherrydan.fcm.dto.FCMTokenUpdateRequest;
 import com.example.cherrydan.fcm.dto.FCMTokenResponseDTO;
-import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,7 +29,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/user")
@@ -120,11 +118,8 @@ public class UserController {
             throw new AuthException(ErrorMessage.AUTH_UNAUTHORIZED);
         }
         
-        List<UserFCMToken> fcmTokens = fcmTokenService.getUserFCMTokens(currentUser.getId());
-        List<FCMTokenResponseDTO> response = fcmTokens.stream()
-                .map(FCMTokenResponseDTO::from)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(ApiResponse.success("FCM 토큰 조회가 완료되었습니다.", response));
+        List<FCMTokenResponseDTO> fcmTokens = fcmTokenService.getUserFCMTokens(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("FCM 토큰 조회가 완료되었습니다.", fcmTokens));
     }
 
     @Operation(

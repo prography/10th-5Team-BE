@@ -70,8 +70,11 @@ class UserControllerTest {
                 .isActive(true)
                 .build();
 
-        List<UserFCMToken> tokens = Arrays.asList(token1, token2);
-        given(fcmTokenService.getUserFCMTokens(1L)).willReturn(tokens);
+        List<FCMTokenResponseDTO> tokenDTOs = Arrays.asList(
+                FCMTokenResponseDTO.from(token1),
+                FCMTokenResponseDTO.from(token2)
+        );
+        given(fcmTokenService.getUserFCMTokens(1L)).willReturn(tokenDTOs);
 
         // when
         ResponseEntity<ApiResponse<List<FCMTokenResponseDTO>>> response = userController.getUserFCMTokens(currentUser);

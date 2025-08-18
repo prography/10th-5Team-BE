@@ -4,6 +4,7 @@ import com.example.cherrydan.common.exception.FCMException;
 import com.example.cherrydan.fcm.domain.DeviceType;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
+import com.example.cherrydan.fcm.dto.FCMTokenResponseDTO;
 import com.example.cherrydan.fcm.repository.UserFCMTokenRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -433,13 +434,13 @@ class FCMTokenServiceTest {
                     .build());
 
             // when
-            List<UserFCMToken> userTokens = fcmTokenService.getUserFCMTokens(userId);
+            List<FCMTokenResponseDTO> userTokens = fcmTokenService.getUserFCMTokens(userId);
 
             // then
             assertThat(userTokens).hasSize(2);
-            assertThat(userTokens).extracting(UserFCMToken::getFcmToken)
+            assertThat(userTokens).extracting(FCMTokenResponseDTO::getFcmToken)
                     .containsExactlyInAnyOrder("token-1", "token-2");
-            assertThat(userTokens).allMatch(UserFCMToken::getIsActive);
+            assertThat(userTokens).allMatch(FCMTokenResponseDTO::getIsActive);
             assertThat(userTokens).allMatch(token -> token.getFcmToken() != null);
         }
 
@@ -450,7 +451,7 @@ class FCMTokenServiceTest {
             Long userIdWithNoTokens = 201L;
 
             // when
-            List<UserFCMToken> userTokens = fcmTokenService.getUserFCMTokens(userIdWithNoTokens);
+            List<FCMTokenResponseDTO> userTokens = fcmTokenService.getUserFCMTokens(userIdWithNoTokens);
 
             // then
             assertThat(userTokens).isEmpty();

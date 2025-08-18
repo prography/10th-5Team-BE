@@ -5,6 +5,7 @@ import com.example.cherrydan.common.exception.FCMException;
 import com.example.cherrydan.fcm.domain.DeviceType;
 import com.example.cherrydan.fcm.domain.UserFCMToken;
 import com.example.cherrydan.fcm.dto.FCMTokenRequest;
+import com.example.cherrydan.fcm.dto.FCMTokenResponseDTO;
 import com.example.cherrydan.fcm.repository.UserFCMTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * FCM 토큰 관리 서비스
@@ -56,8 +58,11 @@ public class FCMTokenService {
     /**
      * 사용자의 모든 활성화된 FCM 토큰 조회
      */
-    public List<UserFCMToken> getUserFCMTokens(Long userId) {
-        return tokenRepository.findActiveTokensByUserId(userId);
+    public List<FCMTokenResponseDTO> getUserFCMTokens(Long userId) {
+        List<UserFCMToken> tokens = tokenRepository.findActiveTokensByUserId(userId);
+        return tokens.stream()
+                .map(FCMTokenResponseDTO::from)
+                .collect(Collectors.toList());
     }
 
     /**
