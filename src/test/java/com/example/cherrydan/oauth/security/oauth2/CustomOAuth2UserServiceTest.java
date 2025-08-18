@@ -55,8 +55,8 @@ class CustomOAuth2UserServiceTest {
             customOAuth2UserService.registerFCMTokenIfPresent(userId, loginRequest);
 
             // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    userId, DeviceType.ANDROID);
+            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceModelAndIsActiveTrue(
+                    userId, "Galaxy S23");
             
             assertThat(savedToken).isPresent();
             assertThat(savedToken.get().getFcmToken()).isEqualTo("test-fcm-token");
@@ -81,8 +81,8 @@ class CustomOAuth2UserServiceTest {
             customOAuth2UserService.registerFCMTokenIfPresent(userId, nullTokenRequest);
 
             // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    userId, DeviceType.IOS);
+            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceModelAndIsActiveTrue(
+                    userId, "iPhone 14 Pro");
             
             assertThat(savedToken).isPresent();
             assertThat(savedToken.get().getFcmToken()).isNull();
@@ -108,8 +108,8 @@ class CustomOAuth2UserServiceTest {
             customOAuth2UserService.registerFCMTokenIfPresent(userId, emptyTokenRequest);
 
             // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    userId, DeviceType.ANDROID);
+            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceModelAndIsActiveTrue(
+                    userId, "Pixel 7");
             
             assertThat(savedToken).isPresent();
             assertThat(savedToken.get().getFcmToken()).isNull();
@@ -135,8 +135,8 @@ class CustomOAuth2UserServiceTest {
             customOAuth2UserService.registerFCMTokenIfPresent(userId, whitespaceTokenRequest);
 
             // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    userId, DeviceType.ANDROID);
+            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceModelAndIsActiveTrue(
+                    userId, "OnePlus 10");
             
             assertThat(savedToken).isPresent();
             assertThat(savedToken.get().getFcmToken()).isNull();

@@ -91,7 +91,8 @@ public class ActivityAlertService {
     @Transactional
     public void sendActivityNotifications() {
         
-        List<ActivityAlert> unnotifiedAlerts = activityAlertRepository.findUnnotifiedAlerts();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        List<ActivityAlert> unnotifiedAlerts = activityAlertRepository.findTodayUnnotifiedAlerts(today);
         
         if (unnotifiedAlerts.isEmpty()) {
             log.info("발송할 활동 알림이 없습니다.");
