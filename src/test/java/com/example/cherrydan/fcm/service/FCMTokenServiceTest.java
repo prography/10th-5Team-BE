@@ -44,6 +44,7 @@ class FCMTokenServiceTest {
                 .deviceModel("Galaxy S23")
                 .appVersion("1.0.0")
                 .osVersion("13")
+                .isAllowed(true)
                 .build();
     }
 
@@ -58,8 +59,8 @@ class FCMTokenServiceTest {
             fcmTokenService.registerOrUpdateToken(fcmTokenRequest);
 
             // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    fcmTokenRequest.getUserId(), DeviceType.ANDROID);
+            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceModelAndIsActiveTrue(
+                    fcmTokenRequest.getUserId(), "Galaxy S23");
             
             assertThat(savedToken).isPresent();
             assertThat(savedToken.get().getFcmToken()).isEqualTo("test-fcm-token");
@@ -67,6 +68,7 @@ class FCMTokenServiceTest {
             assertThat(savedToken.get().getAppVersion()).isEqualTo("1.0.0");
             assertThat(savedToken.get().getOsVersion()).isEqualTo("13");
             assertThat(savedToken.get().getIsActive()).isTrue();
+            assertThat(savedToken.get().getIsAllowed()).isTrue();
         }
 
         @Test
@@ -77,10 +79,11 @@ class FCMTokenServiceTest {
                     .userId(1L)
                     .fcmToken("existing-fcm-token")
                     .deviceType(DeviceType.ANDROID)
-                    .deviceModel("Galaxy S22")
+                    .deviceModel("Galaxy S23")
                     .appVersion("0.9.0")
                     .osVersion("12")
                     .isActive(true)
+                    .isAllowed(true)
                     .lastUsedAt(LocalDateTime.now().minusDays(1))
                     .build());
 
@@ -94,64 +97,10 @@ class FCMTokenServiceTest {
             assertThat(updatedToken.getAppVersion()).isEqualTo("1.0.0");
             assertThat(updatedToken.getOsVersion()).isEqualTo("13");
             assertThat(updatedToken.getIsActive()).isTrue();
+            assertThat(updatedToken.getIsAllowed()).isTrue();
         }
 
-        @Test
-        @DisplayName("FCM 토큰이 null이어도 디바이스 정보가 저장된다")
-        void registerDeviceInfoWithNullToken_Success() {
-            // given
-            FCMTokenRequest nullTokenRequest = FCMTokenRequest.builder()
-                    .userId(2L)
-                    .fcmToken(null)
-                    .deviceType("ios")
-                    .deviceModel("iPhone 14 Pro")
-                    .appVersion("2.0.0")
-                    .osVersion("16")
-                    .build();
 
-            // when
-            fcmTokenService.registerOrUpdateToken(nullTokenRequest);
-
-            // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    2L, DeviceType.IOS);
-            
-            assertThat(savedToken).isPresent();
-            assertThat(savedToken.get().getFcmToken()).isNull();
-            assertThat(savedToken.get().getDeviceType()).isEqualTo(DeviceType.IOS);
-            assertThat(savedToken.get().getDeviceModel()).isEqualTo("iPhone 14 Pro");
-            assertThat(savedToken.get().getAppVersion()).isEqualTo("2.0.0");
-            assertThat(savedToken.get().getOsVersion()).isEqualTo("16");
-            assertThat(savedToken.get().getIsActive()).isTrue();
-        }
-
-        @Test
-        @DisplayName("FCM 토큰이 빈 문자열이어도 디바이스 정보가 저장된다")
-        void registerDeviceInfoWithEmptyToken_Success() {
-            // given
-            FCMTokenRequest emptyTokenRequest = FCMTokenRequest.builder()
-                    .userId(3L)
-                    .fcmToken(null)
-                    .deviceType("android")
-                    .deviceModel("Pixel 7")
-                    .appVersion("1.5.0")
-                    .osVersion("13")
-                    .build();
-
-            // when
-            fcmTokenService.registerOrUpdateToken(emptyTokenRequest);
-
-            // then
-            Optional<UserFCMToken> savedToken = tokenRepository.findByUserIdAndDeviceTypeAndIsActiveTrue(
-                    3L, DeviceType.ANDROID);
-            
-            assertThat(savedToken).isPresent();
-            assertThat(savedToken.get().getFcmToken()).isNull();
-            assertThat(savedToken.get().getDeviceType()).isEqualTo(DeviceType.ANDROID);
-            assertThat(savedToken.get().getDeviceModel()).isEqualTo("Pixel 7");
-            assertThat(savedToken.get().getAppVersion()).isEqualTo("1.5.0");
-            assertThat(savedToken.get().getOsVersion()).isEqualTo("13");
-        }
 
         @Test
         @DisplayName("잘못된 디바이스 타입으로 예외가 발생해도 처리된다")
@@ -164,6 +113,7 @@ class FCMTokenServiceTest {
                     .deviceModel("Test Device")
                     .appVersion("1.0.0")
                     .osVersion("1.0")
+                    .isAllowed(true)
                     .build();
 
             // when & then
@@ -177,8 +127,8 @@ class FCMTokenServiceTest {
     class FindTokens {
 
         @Test
-        @DisplayName("FCM 토큰이 있는 디바이스만 조회된다")
-        void findActiveTokensByUserId_OnlyWithTokens() {
+        @DisplayName("활성화되고 알림이 허용된 디바이스만 조회된다")
+        void findActiveTokensByUserId_OnlyAllowedTokens() {
             // given
             Long userId = 20L;
             
@@ -189,16 +139,9 @@ class FCMTokenServiceTest {
                     .deviceType(DeviceType.ANDROID)
                     .deviceModel("Galaxy S23")
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
                     
-            // FCM 토큰이 null인 디바이스
-            tokenRepository.save(UserFCMToken.builder()
-                    .userId(userId)
-                    .fcmToken(null)
-                    .deviceType(DeviceType.IOS)
-                    .deviceModel("iPhone 14")
-                    .isActive(true)
-                    .build());
                     
             // FCM 토큰이 있는 다른 디바이스
             tokenRepository.save(UserFCMToken.builder()
@@ -207,6 +150,7 @@ class FCMTokenServiceTest {
                     .deviceType(DeviceType.ANDROID)
                     .deviceModel("Pixel 8")
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             // when
@@ -215,13 +159,12 @@ class FCMTokenServiceTest {
 
             // then
             assertThat(tokensWithFcm).hasSize(2);
-            assertThat(tokensWithFcm).allMatch(token -> token.getFcmToken() != null);
-            assertThat(allDevices).hasSize(3);
+            assertThat(allDevices).hasSize(2);
         }
 
         @Test
-        @DisplayName("여러 사용자의 FCM 토큰이 있는 디바이스만 조회된다")
-        void findActiveTokensByUserIds_OnlyWithTokens() {
+        @DisplayName("여러 사용자의 활성화되고 알림이 허용된 디바이스가 조회된다")
+        void findActiveTokensByUserIds_OnlyAllowedTokens() {
             // given
             Long userId1 = 21L;
             Long userId2 = 22L;
@@ -232,15 +175,9 @@ class FCMTokenServiceTest {
                     .fcmToken("user1-token")
                     .deviceType(DeviceType.ANDROID)
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
                     
-            // 사용자1 - FCM 토큰 null
-            tokenRepository.save(UserFCMToken.builder()
-                    .userId(userId1)
-                    .fcmToken(null)
-                    .deviceType(DeviceType.IOS)
-                    .isActive(true)
-                    .build());
                     
             // 사용자2 - FCM 토큰 있음
             tokenRepository.save(UserFCMToken.builder()
@@ -248,6 +185,7 @@ class FCMTokenServiceTest {
                     .fcmToken("user2-token")
                     .deviceType(DeviceType.IOS)
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             // when
@@ -255,7 +193,6 @@ class FCMTokenServiceTest {
 
             // then
             assertThat(tokens).hasSize(2);
-            assertThat(tokens).allMatch(token -> token.getFcmToken() != null);
             assertThat(tokens).extracting(UserFCMToken::getUserId)
                     .containsExactlyInAnyOrder(userId1, userId2);
         }
@@ -272,6 +209,7 @@ class FCMTokenServiceTest {
                     .fcmToken("active-token")
                     .deviceType(DeviceType.ANDROID)
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
                     
             // 비활성화된 디바이스
@@ -280,6 +218,7 @@ class FCMTokenServiceTest {
                     .fcmToken("inactive-token")
                     .deviceType(DeviceType.IOS)
                     .isActive(false)
+                    .isAllowed(true)
                     .build());
 
             // when
@@ -307,6 +246,7 @@ class FCMTokenServiceTest {
                     .deviceType(DeviceType.ANDROID)
                     .deviceModel("Galaxy S23")
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             String newToken = "new-updated-token";
@@ -346,6 +286,7 @@ class FCMTokenServiceTest {
                     .fcmToken("original-token")
                     .deviceType(DeviceType.ANDROID)
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             String newToken = "unauthorized-token";
@@ -366,6 +307,7 @@ class FCMTokenServiceTest {
                     .fcmToken(originalToken)
                     .deviceType(DeviceType.IOS)
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             // when - null 토큰으로 수정 시도
@@ -401,20 +343,22 @@ class FCMTokenServiceTest {
             // given
             Long userId = 200L;
             
-            UserFCMToken token1 = tokenRepository.save(UserFCMToken.builder()
+            tokenRepository.save(UserFCMToken.builder()
                     .userId(userId)
                     .fcmToken("token-1")
                     .deviceType(DeviceType.ANDROID)
                     .deviceModel("Galaxy S23")
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
-            UserFCMToken token2 = tokenRepository.save(UserFCMToken.builder()
+            tokenRepository.save(UserFCMToken.builder()
                     .userId(userId)
                     .fcmToken("token-2")
                     .deviceType(DeviceType.IOS)
                     .deviceModel("iPhone 14")
                     .isActive(true)
+                    .isAllowed(true)
                     .build());
 
             // 비활성화된 토큰 (조회되지 않아야 함)
@@ -423,14 +367,17 @@ class FCMTokenServiceTest {
                     .fcmToken("inactive-token")
                     .deviceType(DeviceType.ANDROID)
                     .isActive(false)
+                    .isAllowed(true)
                     .build());
 
-            // FCM 토큰이 null인 디바이스 (조회되지 않아야 함)
+            // 알림 비허용 디바이스 (조회되지 않아야 함)
             tokenRepository.save(UserFCMToken.builder()
                     .userId(userId)
-                    .fcmToken(null)
+                    .fcmToken("notification-disabled-token")
                     .deviceType(DeviceType.IOS)
+                    .deviceModel("iPhone 15")
                     .isActive(true)
+                    .isAllowed(false)
                     .build());
 
             // when
@@ -441,7 +388,7 @@ class FCMTokenServiceTest {
             assertThat(userTokens).extracting(FCMTokenResponseDTO::getFcmToken)
                     .containsExactlyInAnyOrder("token-1", "token-2");
             assertThat(userTokens).allMatch(FCMTokenResponseDTO::getIsActive);
-            assertThat(userTokens).allMatch(token -> token.getFcmToken() != null);
+            assertThat(userTokens).allMatch(FCMTokenResponseDTO::getIsAllowed);
         }
 
         @Test

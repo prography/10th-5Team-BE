@@ -16,4 +16,5 @@ public class FCMTokenRequest {
     private String deviceModel;
     private String appVersion;
     private String osVersion;
+    private Boolean isAllowed;
 }

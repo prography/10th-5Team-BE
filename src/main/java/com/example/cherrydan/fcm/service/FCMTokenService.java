@@ -66,34 +66,44 @@ public class FCMTokenService {
     }
 
     /**
+     * 사용자가 알림을 허용하는 디바이스가 있는지 확인
+     * @param userId 사용자 ID
+     * @return 알림 허용 디바이스가 하나라도 있으면 true, 없으면 false
+     */
+    public boolean hasNotificationAllowedDevice(Long userId) {
+        List<UserFCMToken> allowedTokens = tokenRepository.findActiveTokensByUserId(userId);
+        return !allowedTokens.isEmpty();
+    }
+
+    /**
      * FCM 토큰 등록 또는 업데이트
      */
     @Transactional
     public void registerOrUpdateToken(FCMTokenRequest request) {
         try {
             
-            DeviceType deviceType = DeviceType.from(request.getDeviceType());
             Optional<UserFCMToken> existingToken = tokenRepository
-                    .findByUserIdAndDeviceTypeAndIsActiveTrue(request.getUserId(), deviceType);
+                    .findByUserIdAndDeviceModelAndIsActiveTrue(request.getUserId(), request.getDeviceModel());
             
             UserFCMToken token;
             if (existingToken.isPresent()) {
                 token = existingToken.get();
                 token.updateToken(request);
                 token.activate();
-                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
+                log.info("FCM 토큰 업데이트 - 사용자: {}, 디바이스: {}", request.getUserId(), request.getDeviceModel());
             } else {
                 token = UserFCMToken.builder()
                         .userId(request.getUserId())
                         .fcmToken(request.getFcmToken())
                         .isActive(true)
-                        .deviceType(deviceType)
+                        .isAllowed(request.getIsAllowed() != null ? request.getIsAllowed() : true)
+                        .deviceType(DeviceType.from(request.getDeviceType()))
                         .deviceModel(request.getDeviceModel())
                         .appVersion(request.getAppVersion())
                         .osVersion(request.getOsVersion())
                         .build();
                 tokenRepository.save(token);
-                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), deviceType);
+                log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), request.getDeviceModel());
             }
             
         } catch (IllegalArgumentException e) {

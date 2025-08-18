@@ -68,6 +68,12 @@ public class UserFCMToken extends BaseTimeEntity {
     private Boolean isActive;
 
     /**
+     * 알림 허용 상태 (사용자 설정)
+     */
+    @Column(name = "is_allowed")
+    private Boolean isAllowed;
+
+    /**
      * 마지막 사용 시간 (알림 전송 시 업데이트)
      */
     @Column(name = "last_used_at")
@@ -88,7 +94,7 @@ public class UserFCMToken extends BaseTimeEntity {
      * @param request FCM 토큰 요청 정보
      */
     public void updateToken(FCMTokenRequest request) {
-        if (request.getFcmToken() != null && !request.getFcmToken().trim().isEmpty()) {
+        if (request.getFcmToken() != null) {
             this.fcmToken = request.getFcmToken();
         }
         
@@ -106,6 +112,11 @@ public class UserFCMToken extends BaseTimeEntity {
         }
         if (request.getOsVersion() != null && !request.getOsVersion().trim().isEmpty()) {
             this.osVersion = request.getOsVersion();
+        }
+        
+        // 알림 허용 상태 업데이트
+        if (request.getIsAllowed() != null) {
+            this.isAllowed = request.getIsAllowed();
         }
     }
 

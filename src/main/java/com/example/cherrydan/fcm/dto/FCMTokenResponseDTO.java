@@ -24,6 +24,7 @@ public class FCMTokenResponseDTO {
     private String appVersion;
     private String osVersion;
     private Boolean isActive;
+    private Boolean isAllowed;
     private LocalDateTime lastUsedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -37,6 +38,7 @@ public class FCMTokenResponseDTO {
                 .appVersion(token.getAppVersion())
                 .osVersion(token.getOsVersion())
                 .isActive(token.getIsActive())
+                .isAllowed(token.getIsAllowed())
                 .lastUsedAt(token.getLastUsedAt())
                 .createdAt(token.getCreatedAt())
                 .updatedAt(token.getUpdatedAt())
