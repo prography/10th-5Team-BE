@@ -92,7 +92,7 @@ public class CampaignStatusController {
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @Operation(summary = "내 체험단 노출 팝업 조회", description = "신청/선정/등록 상태 중 기간이 지난 데이터만 최대 4개씩, 각 상태별 총 개수와 함께 반환")
+    @Operation(summary = "내 체험단 노출 팝업 조회", description = "지원한 공고/선정 결과/리뷰 작성 중 상태 중 기간이 지난 데이터만 최대 4개씩, 각 상태별 총 개수와 함께 반환")
     @GetMapping("/popup")
     public ResponseEntity<ApiResponse<CampaignStatusPopupResponseDTO>> getPopupStatus(
         @AuthenticationPrincipal UserDetailsImpl currentUser
