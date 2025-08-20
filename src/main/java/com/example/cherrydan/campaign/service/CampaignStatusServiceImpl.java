@@ -138,7 +138,41 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 .reviewingTotal(filteredReviewing.size())
                 .apply(filteredApply.stream().limit(4).toList())
                 .selected(filteredSelected.stream().limit(4).toList())
-                .registered(filteredRegistered.stream().limit(4).toList())
+                .reviewing(filteredReviewing.stream().limit(4).toList())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        Page<CampaignStatus> page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrue(user, statusType, pageable);
+        List<CampaignStatusResponseDTO> content = page.getContent().stream()
+                .map(CampaignStatusResponseDTO::fromEntity)
+                .toList();
+        return PageListResponseDTO.<CampaignStatusResponseDTO>builder()
+                .content(content)
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .hasNext(page.hasNext())
+                .hasPrevious(page.hasPrevious())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CampaignStatusCountResponseDTO getStatusCounts(Long userId) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        return CampaignStatusCountResponseDTO.builder()
+                .apply(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.APPLY))
+                .selected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.SELECTED))
+                .notSelected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.NOT_SELECTED))
+                .reviewing(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.REVIEWING))
+                .ended(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.ENDED))
                 .build();
     }
 }
