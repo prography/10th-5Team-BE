@@ -18,6 +18,9 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     Optional<CampaignStatus> findByUserAndCampaignAndIsActiveTrue(User user, Campaign campaign);
     long countByCampaignAndStatusAndIsActiveTrue(Campaign campaign, CampaignStatusType status);
     Optional<CampaignStatus> findByUserAndCampaign(User user, Campaign campaign);
+
+    Page<CampaignStatus> findByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status, Pageable pageable);
+    long countByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status);
     
     /**
      * 사용자의 활동 알림 대상 캠페인들 조회 (3일 이내 마감)

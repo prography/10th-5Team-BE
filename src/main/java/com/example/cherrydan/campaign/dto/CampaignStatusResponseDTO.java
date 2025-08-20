@@ -51,13 +51,13 @@ public class CampaignStatusResponseDTO {
             case "not_selected":
                 prefix = "방문 마감 ";
                 break;
-            case "registered":
+            case "reviewing":
                 prefix = "리뷰 마감 ";
                 break;
         }
         if (days > 0) return prefix + days + "일 전";
         if (days < 0) return prefix + Math.abs(days) + "일 지남";
-        return "오늘" + prefix.replace(" ", "");
+        return prefix + "D-Day"; 
     }
 
     public static CampaignStatusResponseDTO fromEntity(com.example.cherrydan.campaign.domain.CampaignStatus status) {
@@ -72,8 +72,8 @@ public class CampaignStatusResponseDTO {
             case NOT_SELECTED:
                 reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "not_selected");
                 break;
-            case REGISTERED:
-                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "registered");
+            case REVIEWING:
+                reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "reviewing");
                 break;
             case ENDED:
                 reviewerAnnouncementStatus = getStatusMessage(status.getCampaign().getResultAnnouncement(), "ended");

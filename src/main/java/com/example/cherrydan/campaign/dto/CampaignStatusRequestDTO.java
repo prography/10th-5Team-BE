@@ -15,7 +15,7 @@ public class CampaignStatusRequestDTO {
     @JsonIgnore
     private Long userId;
     @NotNull(message = "상태는 필수입니다.")
-    @Schema(description = "캠페인 상태 타입 (APPLY: 신청, SELECTED: 선정, REGISTERED: 등록, ENDED: 종료)", example = "APPLY", allowableValues = {"APPLY", "SELECTED", "REGISTERED", "ENDED"})
+    @Schema(description = "캠페인 상태 타입 (APPLY: 지원한 공고, SELECTED: 선정 결과, NOT_SELECTED: 미선정 결과, REVIEWING: 리뷰 작성 중, ENDED: 작성 완료)", example = "APPLY", allowableValues = {"APPLY", "SELECTED", "NOT_SELECTED", "REVIEWING", "ENDED"})
     private CampaignStatusType status;
     private Boolean isActive;
 } 

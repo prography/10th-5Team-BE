@@ -14,12 +14,12 @@ public class CampaignStatusPopupResponseDTO {
     private long applyTotal;
     @Schema(description = "선정 상태 총 개수", example = "2")
     private long selectedTotal;
-    @Schema(description = "등록 상태 총 개수", example = "1")
-    private long registeredTotal;
+    @Schema(description = "리뷰 작성 중 상태 총 개수", example = "1")
+    private long reviewingTotal;
     @Schema(description = "신청 상태 리스트")
     private List<CampaignStatusPopupItemDTO> apply;
     @Schema(description = "선정 상태 리스트")
     private List<CampaignStatusPopupItemDTO> selected;
-    @Schema(description = "등록 상태 리스트")
-    private List<CampaignStatusPopupItemDTO> registered;
+    @Schema(description = "리뷰 작성 중 상태 리스트")
+    private List<CampaignStatusPopupItemDTO> reviewing;
 }
