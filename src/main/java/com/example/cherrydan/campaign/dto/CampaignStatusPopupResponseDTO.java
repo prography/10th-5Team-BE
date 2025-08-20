@@ -15,11 +15,11 @@ public class CampaignStatusPopupResponseDTO {
     @Schema(description = "선정 상태 총 개수", example = "2")
     private long selectedTotal;
     @Schema(description = "등록 상태 총 개수", example = "1")
-    private long registeredTotal;
+    private long reviewingTotal;
     @Schema(description = "신청 상태 리스트")
     private List<CampaignStatusPopupItemDTO> apply;
     @Schema(description = "선정 상태 리스트")
     private List<CampaignStatusPopupItemDTO> selected;
     @Schema(description = "등록 상태 리스트")
-    private List<CampaignStatusPopupItemDTO> registered;
+    private List<CampaignStatusPopupItemDTO> reviewing;
 }

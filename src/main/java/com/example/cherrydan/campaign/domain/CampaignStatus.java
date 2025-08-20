@@ -86,10 +86,10 @@ public class CampaignStatus extends BaseTimeEntity {
         
         switch (this.status) {
             case APPLY:
-                return campaign.getReviewerAnnouncement(); // 발표일
+                return campaign.getReviewerAnnouncement();
             case SELECTED:
-            case REGISTERED:
-                return campaign.getContentSubmissionEnd(); // 콘텐츠 제출 마감일
+            case REVIEWING:
+                return campaign.getContentSubmissionEnd();
             default:
                 return null;
         }
