@@ -18,6 +18,7 @@ import com.example.cherrydan.common.util.CloudfrontUtil;
 public class BookmarkResponseDTO {
     private Long id;
     private Long campaignId;
+    private Long userId;
     private String campaignTitle;
     private String campaignDetailUrl;
     private String campaignImageUrl;
@@ -34,6 +35,7 @@ public class BookmarkResponseDTO {
         String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(campaign.getSourceSite());
         return BookmarkResponseDTO.builder()
                 .id(bookmark.getId())
+                .userId(bookmark.getUser().getId())
                 .campaignId(campaign.getId())
                 .campaignTitle(campaign.getTitle())
                 .campaignDetailUrl(campaign.getDetailUrl())

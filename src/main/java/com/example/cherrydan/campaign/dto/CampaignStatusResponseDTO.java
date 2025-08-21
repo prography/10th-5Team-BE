@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import com.example.cherrydan.common.util.CloudfrontUtil;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
+import com.example.cherrydan.campaign.domain.CampaignStatus;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -60,7 +61,7 @@ public class CampaignStatusResponseDTO {
         return prefix + "D-Day"; 
     }
 
-    public static CampaignStatusResponseDTO fromEntity(com.example.cherrydan.campaign.domain.CampaignStatus status) {
+    public static CampaignStatusResponseDTO fromEntity(CampaignStatus status) {
         String reviewerAnnouncementStatus = null;
         switch (status.getStatus()) {
             case APPLY:
