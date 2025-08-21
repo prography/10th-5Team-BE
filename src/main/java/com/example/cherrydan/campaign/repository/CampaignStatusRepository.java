@@ -25,13 +25,13 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     
     /**
      * APPLY 상태에 대한 세부 필터링 (기한 남은 공고 vs 기한 지난 공고)
-     * subFilter: "open" (기한 남은 공고), "close" (기한 지난 공고)
+     * subFilter: "waiting" (기한 남은 공고), "completed" (기한 지난 공고)
      */
     @Query("SELECT cs FROM CampaignStatus cs " +
            "JOIN FETCH cs.campaign c " +
            "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
-           "AND (:subFilter = 'open' AND c.applyEnd > :today " +
-           "     OR :subFilter = 'close' AND c.applyEnd <= :today)")
+           "AND (:subFilter = 'waiting' AND c.applyEnd > :today " +
+           "     OR :subFilter = 'completed' AND c.applyEnd <= :today)")
     Page<CampaignStatus> findByUserAndStatusAndIsActiveTrueWithSubFilter(
         @Param("user") User user, 
         @Param("status") CampaignStatusType status, 
