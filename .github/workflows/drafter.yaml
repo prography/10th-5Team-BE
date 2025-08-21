@@ -20,4 +20,4 @@ jobs:
         with:
           config-name: drafter-config.yaml
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ODDONG_GITHUB_TOKEN }}
