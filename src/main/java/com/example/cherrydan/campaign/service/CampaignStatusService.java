@@ -14,6 +14,6 @@ public interface CampaignStatusService {
     CampaignStatusResponseDTO updateStatus(CampaignStatusRequestDTO requestDTO);
     void deleteStatus(Long campaignId, Long userId);
     CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId);
-    PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable);
+    PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, String subFilter, Pageable pageable);
     CampaignStatusCountResponseDTO getStatusCounts(Long userId);
 } 

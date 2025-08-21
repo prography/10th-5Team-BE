@@ -23,6 +23,7 @@ public enum ErrorMessage {
     CAMPAIGN_SNS_NOT_FOUND(NOT_FOUND, "존재하지 않는 SNS 플랫폼입니다."),
     CAMPAIGN_EXPERIENCE_PLATFORM_NOT_FOUND(NOT_FOUND, "존재하지 않는 체험단 플랫폼입니다."),
     CAMPAIGN_STATUS_INVALID(BAD_REQUEST, "유효하지 않은 상태값입니다."),
+    CAMPAIGN_STATUS_SUBFILTER_INVALID(BAD_REQUEST, "유효하지 않은 서브 필터값입니다."),
     
     // OAuth 관련 에러
     OAUTH_DUPLICATE_EMAIL(BAD_REQUEST, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
