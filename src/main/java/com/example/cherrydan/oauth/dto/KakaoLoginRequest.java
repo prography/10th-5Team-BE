@@ -26,4 +26,7 @@ public class KakaoLoginRequest implements LoginRequest {
 
     @Schema(description = "앱 버전", example = "1.0.0")
     private String appVersion;
+    
+    @Schema(description = "푸시 알림 허용 여부", example = "true")
+    private Boolean isAllowed;
 } 

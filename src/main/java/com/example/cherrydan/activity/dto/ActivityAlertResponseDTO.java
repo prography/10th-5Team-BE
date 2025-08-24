@@ -38,9 +38,8 @@ public class ActivityAlertResponseDTO {
     private Integer dDay;
 
     public static ActivityAlertResponseDTO fromEntity(ActivityAlert activityAlert) {
-        LocalDate today = LocalDate.now();
+        final int FIXED_D_DAY = 3;
         LocalDate applyEndDate = activityAlert.getCampaign().getApplyEnd();
-        int dDay = (int) today.until(applyEndDate).getDays();
         
         return ActivityAlertResponseDTO.builder()
                 .id(activityAlert.getId())
@@ -49,7 +48,7 @@ public class ActivityAlertResponseDTO {
                 .applyEndDate(applyEndDate)
                 .alertDate(activityAlert.getAlertDate())
                 .isRead(activityAlert.getIsRead())
-                .dDay(dDay)
+                .dDay(FIXED_D_DAY)
                 .build();
     }
 }

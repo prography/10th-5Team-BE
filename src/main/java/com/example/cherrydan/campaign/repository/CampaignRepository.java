@@ -44,10 +44,10 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     // 키워드 맞춤형 캠페인 FULLTEXT 검색 (지정 날짜 기준 전일)
     @Query(value = """
         SELECT * FROM campaigns 
-        WHERE MATCH(title) AGAINST(:keyword)
+        WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE)
         AND is_active = 1 
         AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
-        ORDER BY MATCH(title) AGAINST(:keyword) DESC, created_at DESC
+        ORDER BY created_at DESC
         LIMIT :offset, :limit
         """, nativeQuery = true)
     List<Campaign> findByKeywordFullText(
@@ -60,7 +60,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     // 지정 날짜 기준 전일 생성된 키워드 맞춤형 캠페인 개수
     @Query(value = """
         SELECT COUNT(*) FROM campaigns 
-        WHERE MATCH(title) AGAINST(:keyword)
+        WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE)
         AND is_active = 1 
         AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
         """, nativeQuery = true)

@@ -35,4 +35,9 @@ public interface LoginRequest {
      * 앱 버전 반환
      */
     String getAppVersion();
+    
+    /**
+     * 푸시 알림 허용 여부 반환
+     */
+    Boolean getIsAllowed();
 }
