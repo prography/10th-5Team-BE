@@ -148,15 +148,16 @@ public class CampaignServiceImpl implements CampaignService {
     @PerformanceMonitor
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
         
-        // 기존 방식으로 되돌림 (Object[] 매핑 복잡성으로 인해)
+        // Boolean 모드로 변경: +키워드* 형태로 검색
+        String fullTextKeyword = "+" + keyword.trim() + "*";
         List<Campaign> campaigns = campaignRepository.findByKeywordFullText(
-            keyword.trim(),
+            fullTextKeyword,
             date, 
             (int) pageable.getOffset(), 
             pageable.getPageSize()
         );
         
-        long totalElements = campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
+        long totalElements = campaignRepository.countByKeywordAndCreatedDate(fullTextKeyword, date);
         
         // N+1 문제 해결: 벌크 조회로 북마크 여부 확인
         List<Long> campaignIds = campaigns.stream()
@@ -181,7 +182,8 @@ public class CampaignServiceImpl implements CampaignService {
         if (keyword == null || keyword.trim().isEmpty()) {
             return 0;
         }
-        return campaignRepository.countByKeywordAndCreatedDate(keyword.trim(), date);
+        String fullTextKeyword = "+" + keyword.trim() + "*";
+        return campaignRepository.countByKeywordAndCreatedDate(fullTextKeyword, date);
     }
 
     @Override
