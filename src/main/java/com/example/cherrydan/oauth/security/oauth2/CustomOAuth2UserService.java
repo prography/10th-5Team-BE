@@ -239,6 +239,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     .deviceModel(loginRequest.getDeviceModel())
                     .appVersion(loginRequest.getAppVersion())
                     .osVersion(loginRequest.getOsVersion())
+                    .isAllowed(loginRequest.getIsAllowed())
                     .build();
             fcmTokenService.registerOrUpdateToken(fcmRequest);
             log.info("디바이스 정보 등록 성공: userId={}, deviceType={}, fcmToken={}", 
