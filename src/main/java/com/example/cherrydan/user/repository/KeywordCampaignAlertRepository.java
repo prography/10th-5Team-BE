@@ -21,4 +21,10 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
      */
     @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.alertStage = 0 AND kca.isVisibleToUser = true")
     List<KeywordCampaignAlert> findUnnotifiedAlerts();
+
+    /**
+     * 당일 생성된 알림 미발송 키워드 알림들 조회
+     */
+    @Query("SELECT kca FROM KeywordCampaignAlert kca WHERE kca.alertStage = 0 AND kca.isVisibleToUser = true AND kca.alertDate = :alertDate")
+    List<KeywordCampaignAlert> findTodayUnnotifiedAlerts(@Param("alertDate") LocalDate alertDate);
 } 

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, Long> {
     List<CampaignStatus> findByCampaignAndIsActiveTrue(Campaign campaign);
@@ -18,6 +19,26 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     Optional<CampaignStatus> findByUserAndCampaignAndIsActiveTrue(User user, Campaign campaign);
     long countByCampaignAndStatusAndIsActiveTrue(Campaign campaign, CampaignStatusType status);
     Optional<CampaignStatus> findByUserAndCampaign(User user, Campaign campaign);
+
+    Page<CampaignStatus> findByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status, Pageable pageable);
+    long countByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status);
+    
+    /**
+     * APPLY 상태에 대한 세부 필터링 (기한 남은 공고 vs 기한 지난 공고)
+     * subFilter: "waiting" (기한 남은 공고), "completed" (기한 지난 공고)
+     */
+    @Query("SELECT cs FROM CampaignStatus cs " +
+           "JOIN FETCH cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND (:subFilter = 'waiting' AND c.applyEnd > :today " +
+           "     OR :subFilter = 'completed' AND c.applyEnd <= :today)")
+    Page<CampaignStatus> findByUserAndStatusAndIsActiveTrueWithSubFilter(
+        @Param("user") User user, 
+        @Param("status") CampaignStatusType status, 
+        @Param("subFilter") String subFilter,
+        @Param("today") LocalDate today,
+        Pageable pageable
+    );
     
     /**
      * 사용자의 활동 알림 대상 캠페인들 조회 (3일 이내 마감)

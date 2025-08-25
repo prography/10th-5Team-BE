@@ -49,24 +49,6 @@ public enum DeviceType {
         throw new IllegalArgumentException("지원하지 않는 디바이스 타입입니다: " + value);
     }
 
-    /**
-     * 디바이스 타입이 유효한지 확인합니다.
-     * @param value 디바이스 타입 문자열
-     * @return 유효 여부
-     */
-    public static boolean isValid(String value) {
-        if (value == null || value.trim().isEmpty()) {
-            return false;
-        }
-
-        for (DeviceType type : values()) {
-            if (type.value.equalsIgnoreCase(value.trim())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     /**
      * @deprecated from() 메소드를 사용하세요.

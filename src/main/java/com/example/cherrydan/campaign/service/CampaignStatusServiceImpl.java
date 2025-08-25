@@ -8,6 +8,10 @@ import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
+import com.example.cherrydan.common.response.PageListResponseDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.example.cherrydan.campaign.dto.CampaignStatusPopupItemDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
@@ -95,80 +99,12 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignStatusListResponseDTO getStatusListWithCountByUser(Long userId) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        List<CampaignStatusResponseDTO> apply = new ArrayList<>();
-        List<CampaignStatusResponseDTO> selected = new ArrayList<>();
-        List<CampaignStatusResponseDTO> notSelected = new ArrayList<>();
-        List<CampaignStatusResponseDTO> registered = new ArrayList<>();
-        List<CampaignStatusResponseDTO> ended = new ArrayList<>();
-        List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
-        for (CampaignStatus status : all) {
-            switch (status.getStatus()) {
-                case APPLY:
-                    apply.add(CampaignStatusResponseDTO.fromEntity(status));
-                    break;
-                case SELECTED:
-                    selected.add(CampaignStatusResponseDTO.fromEntity(status));
-                    break;
-                case NOT_SELECTED:
-                    notSelected.add(CampaignStatusResponseDTO.fromEntity(status));
-                    break;
-                case REGISTERED:
-                    registered.add(CampaignStatusResponseDTO.fromEntity(status));
-                    break;
-                case ENDED:
-                    ended.add(CampaignStatusResponseDTO.fromEntity(status));
-                    break;
-                default:
-                    break;
-            }
-        }
-        // 1. 발표일 기준 정렬
-        apply.sort(Comparator.comparing(
-            CampaignStatusResponseDTO::getReviewerAnnouncement,
-            Comparator.nullsLast(Comparator.reverseOrder())
-        ));
-        // 2. 콘텐츠 제출 종료일 기준 정렬
-        selected.sort(Comparator.comparing(
-            CampaignStatusResponseDTO::getContentSubmissionEnd,
-            Comparator.nullsLast(Comparator.reverseOrder())
-        ));
-        // 3. 콘텐츠 제출 종료일 기준 정렬
-        registered.sort(Comparator.comparing(
-            CampaignStatusResponseDTO::getContentSubmissionEnd,
-            Comparator.nullsLast(Comparator.reverseOrder())
-        ));
-        // 4. 결과 발표일 기준 정렬
-        ended.sort(Comparator.comparing(
-            CampaignStatusResponseDTO::getResultAnnouncement,
-            Comparator.nullsLast(Comparator.reverseOrder())
-        ));
-        Map<String, Long> count = new HashMap<>();
-        count.put("apply", (long) apply.size());
-        count.put("selected", (long) selected.size());
-        count.put("notSelected", (long) notSelected.size());
-        count.put("registered", (long) registered.size());
-        count.put("ended", (long) ended.size());
-        return CampaignStatusListResponseDTO.builder()
-                .apply(apply)
-                .selected(selected)
-                .notSelected(notSelected)
-                .registered(registered)
-                .ended(ended)
-                .count(count)
-                .build();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         List<CampaignStatusPopupItemDTO> apply = new ArrayList<>();
         List<CampaignStatusPopupItemDTO> selected = new ArrayList<>();
-        List<CampaignStatusPopupItemDTO> registered = new ArrayList<>();
+        List<CampaignStatusPopupItemDTO> reviewing = new ArrayList<>();
         List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
         for (CampaignStatus status : all) {
             try {
@@ -176,7 +112,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 switch (status.getStatus()) {
                     case APPLY: apply.add(dto); break;
                     case SELECTED: selected.add(dto); break;
-                    case REGISTERED: registered.add(dto); break;
+                    case REVIEWING: reviewing.add(dto); break;
                     default: break;
                 }
             } catch (BaseException e) {
@@ -192,17 +128,61 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
             .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
             .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
             .toList();
-        List<CampaignStatusPopupItemDTO> filteredRegistered = registered.stream()
+        List<CampaignStatusPopupItemDTO> filteredReviewing = reviewing.stream()
             .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
             .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
             .toList();
         return CampaignStatusPopupResponseDTO.builder()
                 .applyTotal(filteredApply.size())
                 .selectedTotal(filteredSelected.size())
-                .registeredTotal(filteredRegistered.size())
+                .reviewingTotal(filteredReviewing.size())
                 .apply(filteredApply.stream().limit(4).toList())
                 .selected(filteredSelected.stream().limit(4).toList())
-                .registered(filteredRegistered.stream().limit(4).toList())
+                .reviewing(filteredReviewing.stream().limit(4).toList())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, String subFilter, Pageable pageable) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        
+        Page<CampaignStatus> page;
+        
+        // APPLY 상태이고 subFilter가 있는 경우 세부 필터링 적용
+        if (statusType == CampaignStatusType.APPLY && subFilter != null && !subFilter.trim().isEmpty()) {
+            LocalDate today = LocalDate.now();
+            page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrueWithSubFilter(user, statusType, subFilter.trim(), today, pageable);
+        } else {
+            page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrue(user, statusType, pageable);
+        }
+        
+        List<CampaignStatusResponseDTO> content = page.getContent().stream()
+                .map(CampaignStatusResponseDTO::fromEntity)
+                .toList();
+        return PageListResponseDTO.<CampaignStatusResponseDTO>builder()
+                .content(content)
+                .page(page.getNumber())
+                .size(page.getSize())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .hasNext(page.hasNext())
+                .hasPrevious(page.hasPrevious())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public CampaignStatusCountResponseDTO getStatusCounts(Long userId) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        return CampaignStatusCountResponseDTO.builder()
+                .apply(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.APPLY))
+                .selected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.SELECTED))
+                .notSelected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.NOT_SELECTED))
+                .reviewing(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.REVIEWING))
+                .ended(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.ENDED))
                 .build();
     }
 }

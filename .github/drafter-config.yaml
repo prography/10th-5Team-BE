@@ -1,0 +1,33 @@
+name-template: 'v$RESOLVED_VERSION 🌈'
+tag-template: 'v$RESOLVED_VERSION'
+commitish: main
+categories:
+  - title: '🚀 Features'
+    labels: ['feature', 'enhancement']
+  - title: '🐛 Bug Fixes'
+    labels: ['fix', 'bugfix', 'bug']
+  - title: '🧰 Maintenance'
+    labels: ['chore']
+  - title: '📚 Documentation'
+    labels: ['docs']
+  - title: '🧪 Tests'
+    labels: ['test', 'testing']
+  - title: '🔧 CI/CD'
+    labels: ['ci', 'cd', 'workflow']
+  - title: '💡 Refactor'
+    labels: ['refactor']
+change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
+change-title-escapes: '\<*_&'
+version-resolver:
+    major:
+        labels: ['major']
+    minor:
+        labels: ['minor', 'feature']
+    patch:
+        labels: ['patch', 'fix']
+    default: patch
+exclude-labels:
+  - 'skip-release'
+template: |
+  ## What's Changed
+  $CHANGES

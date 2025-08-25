@@ -68,17 +68,33 @@ public class UserFCMToken extends BaseTimeEntity {
     private Boolean isActive;
 
     /**
+     * 알림 허용 상태 (사용자 설정)
+     */
+    @Column(name = "is_allowed")
+    private Boolean isAllowed;
+
+    /**
      * 마지막 사용 시간 (알림 전송 시 업데이트)
      */
     @Column(name = "last_used_at")
     private LocalDateTime lastUsedAt;
 
     /**
+     * FCM 토큰만 업데이트
+     * @param newFcmToken 새로운 FCM 토큰
+     */
+    public void updateFcmToken(String newFcmToken) {
+        if (newFcmToken != null && !newFcmToken.trim().isEmpty()) {
+            this.fcmToken = newFcmToken;
+        }
+    }
+
+    /**
      * FCM 토큰 및 디바이스 정보 업데이트
      * @param request FCM 토큰 요청 정보
      */
     public void updateToken(FCMTokenRequest request) {
-        if (request.getFcmToken() != null && !request.getFcmToken().trim().isEmpty()) {
+        if (request.getFcmToken() != null) {
             this.fcmToken = request.getFcmToken();
         }
         
@@ -96,6 +112,11 @@ public class UserFCMToken extends BaseTimeEntity {
         }
         if (request.getOsVersion() != null && !request.getOsVersion().trim().isEmpty()) {
             this.osVersion = request.getOsVersion();
+        }
+        
+        // 알림 허용 상태 업데이트
+        if (request.getIsAllowed() != null) {
+            this.isAllowed = request.getIsAllowed();
         }
     }
 
@@ -121,5 +142,13 @@ public class UserFCMToken extends BaseTimeEntity {
      */
     public void updateLastUsed() {
         this.lastUsedAt = LocalDateTime.now();
+    }
+
+    /**
+     * 알림 허용 상태 업데이트
+     * @param isAllowed 알림 허용 여부
+     */
+    public void updateAllowedStatus(Boolean isAllowed) {
+        this.isAllowed = isAllowed;
     }
 }

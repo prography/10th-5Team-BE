@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -18,12 +19,13 @@ public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Lo
      */
     @Query("SELECT aa FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isVisibleToUser = true ORDER BY aa.alertDate DESC")
     Page<ActivityAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId, Pageable pageable);
-    
+
+
     /**
-     * 알림 미발송된 활동 알림들 조회 (alertStage = 0인 발송 대기 중인 알림들)
+     * 당일 생성된 알림 미발송 활동 알림들 조회
      */
-    @Query("SELECT aa FROM ActivityAlert aa WHERE aa.alertStage = 0 AND aa.isVisibleToUser = true")
-    List<ActivityAlert> findUnnotifiedAlerts();
+    @Query("SELECT aa FROM ActivityAlert aa WHERE aa.alertStage = 0 AND aa.isVisibleToUser = true AND aa.alertDate = :alertDate")
+    List<ActivityAlert> findTodayUnnotifiedAlerts(@Param("alertDate") LocalDate alertDate);
 
     /**
      * 사용자와 캠페인으로 알림 존재 여부 확인

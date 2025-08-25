@@ -123,7 +123,8 @@ public class UserKeywordService {
     public void sendKeywordCampaignNotifications() {
         log.info("키워드 맞춤 알림 발송 시작");
         
-        List<KeywordCampaignAlert> unnotifiedAlerts = keywordAlertRepository.findUnnotifiedAlerts();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        List<KeywordCampaignAlert> unnotifiedAlerts = keywordAlertRepository.findTodayUnnotifiedAlerts(today);
         
         if (unnotifiedAlerts.isEmpty()) {
             log.info("발송할 키워드 알림이 없습니다.");
