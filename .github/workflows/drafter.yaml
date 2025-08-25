@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - develop
 
 jobs:
   update_release_draft:
@@ -20,4 +19,4 @@ jobs:
         with:
           config-name: drafter-config.yaml
         env:
-          GITHUB_TOKEN: ${{ secrets.ODDONG_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
