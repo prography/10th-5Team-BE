@@ -23,6 +23,7 @@ public class BookmarkResponseDTO {
     private String campaignDetailUrl;
     private String campaignImageUrl;
     private String campaignPlatformImageUrl;
+    private String subStatusLabel;
     private String benefit;
     private Integer applicantCount;
     private Integer recruitCount;
