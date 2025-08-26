@@ -75,15 +75,6 @@ public class FCMTokenService {
                 token.updateFcmToken(request.getFcmToken());
             }
             
-            // 활성화 상태 업데이트
-            if (request.getIsActive() != null) {
-                if (request.getIsActive()) {
-                    token.activate();
-                } else {
-                    token.deactivate();
-                }
-            }
-            
             // 알림 허용 상태 업데이트
             if (request.getIsAllowed() != null) {
                 token.updateAllowedStatus(request.getIsAllowed());

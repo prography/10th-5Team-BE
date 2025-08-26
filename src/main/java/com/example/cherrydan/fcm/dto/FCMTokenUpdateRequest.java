@@ -12,6 +12,5 @@ import lombok.*;
 public class FCMTokenUpdateRequest {
     private Long deviceId;
     private String fcmToken;
-    private Boolean isActive;
     private Boolean isAllowed;
 }
