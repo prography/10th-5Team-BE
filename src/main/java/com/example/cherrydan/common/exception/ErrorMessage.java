@@ -30,7 +30,7 @@ public enum ErrorMessage {
     OAUTH_USER_INFO_NOT_FOUND(BAD_REQUEST, "OAuth 사용자 정보를 가져올 수 없습니다."),
     OAUTH_PROVIDER_NOT_SUPPORTED(BAD_REQUEST, "지원하지 않는 OAuth 제공자입니다."),
     OAUTH_AUTHENTICATION_FAILED(UNAUTHORIZED, "OAuth 인증에 실패했습니다."),
-    OAUTH_EMAIL_NOT_FOUND(BAD_REQUEST, "OAuth2 제공자로부터 이메일을 찾을 수 없습니다."),
+    OAUTH_EMAIL_NOT_FOUND(UNAUTHORIZED, "OAuth2 제공자로부터 이메일을 찾을 수 없습니다."),
     OAUTH_USER_DELETED(UNAUTHORIZED, "탈퇴한 계정입니다. 계정 복구를 원하시면 고객센터에 문의해 주세요."),
     OAUTH_PROVIDER_CONFLICT(CONFLICT, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
     
