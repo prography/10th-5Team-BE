@@ -144,20 +144,10 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, String subFilter, Pageable pageable) {
+    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        
-        Page<CampaignStatus> page;
-        
-        // APPLY 상태이고 subFilter가 있는 경우 세부 필터링 적용
-        if (statusType == CampaignStatusType.APPLY && subFilter != null && !subFilter.trim().isEmpty()) {
-            LocalDate today = LocalDate.now();
-            page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrueWithSubFilter(user, statusType, subFilter.trim(), today, pageable);
-        } else {
-            page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrue(user, statusType, pageable);
-        }
-        
+        Page<CampaignStatus> page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrue(user, statusType, pageable);
         List<CampaignStatusResponseDTO> content = page.getContent().stream()
                 .map(CampaignStatusResponseDTO::fromEntity)
                 .toList();

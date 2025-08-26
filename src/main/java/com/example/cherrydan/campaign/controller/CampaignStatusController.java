@@ -32,11 +32,10 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 public class CampaignStatusController {
     private final CampaignStatusService campaignStatusService;
 
-    @Operation(summary = "내 체험단 상태별 목록 조회", description = "status 파라미터(APPLY/SELECTED/NOT_SELECTED/REVIEWING/ENDED) 기준 페이지네이션, APPLY 상태의 경우 subFilter(waiting/completed)로 기한 남은/지난 공고 필터링 가능")
+    @Operation(summary = "내 체험단 상태별 목록 조회", description = "status 파라미터(APPLY/SELECTED/NOT_SELECTED/REVIEWING/ENDED) 기준 페이지네이션")
     @GetMapping
     public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignStatusResponseDTO>>> getMyStatusesByType(
         @RequestParam(value = "status", defaultValue = "APPLY") String status,
-        @RequestParam(value = "subFilter", required = false) String subFilter,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @AuthenticationPrincipal UserDetailsImpl currentUser
@@ -47,17 +46,8 @@ public class CampaignStatusController {
         } catch (IllegalArgumentException e) {
             throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_INVALID);
         }
-
-        // APPLY 상태에서 subFilter가 주어졌다면 waiting/completed만 허용
-        if (statusType == CampaignStatusType.APPLY && subFilter != null && !subFilter.trim().isEmpty()) {
-            String sf = subFilter.trim().toLowerCase();
-            if (!sf.equals("waiting") && !sf.equals("completed")) {
-                throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_SUBFILTER_INVALID);
-            }
-        }
-
         Pageable pageable = PageRequest.of(page, size);
-        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByType(currentUser.getId(), statusType, subFilter, pageable);
+        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByType(currentUser.getId(), statusType, pageable);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 

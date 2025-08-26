@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import com.example.cherrydan.common.util.CloudfrontUtil;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.domain.CampaignStatus;
+import com.example.cherrydan.campaign.domain.CampaignStatusType;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -21,7 +22,8 @@ public class CampaignStatusResponseDTO {
     private Long campaignId;
     private Long userId;
     private String reviewerAnnouncementStatus;
-    private String statusLabel;
+    @Schema(description = "상태 보조 라벨 (예: APPLY의 경우 waiting/completed)")
+    private String subStatusLabel;
     private String title;
     private String benefit;
     private String detailUrl;
@@ -84,17 +86,26 @@ public class CampaignStatusResponseDTO {
         }
 
         String campaignPlatformImageUrl = CloudfrontUtil.getCampaignPlatformImageUrl(status.getCampaign().getSourceSite());
+
+        // 보조 라벨: APPLY 상태일 때 발표일 기준 open/close 구분
+        String subStatusLabel = null;
+        if (status.getStatus() == CampaignStatusType.APPLY) {
+            LocalDate ann = status.getCampaign().getReviewerAnnouncement();
+            if (ann != null) {
+                subStatusLabel = ann.isAfter(LocalDate.now()) ? "waiting" : "completed";
+            }
+        }
         return CampaignStatusResponseDTO.builder()
                 .id(status.getId())
                 .campaignId(status.getCampaign().getId())
                 .userId(status.getUser().getId())
-                .statusLabel(status.getStatus().getLabel())
                 .title(status.getCampaign().getTitle())
                 .detailUrl(status.getCampaign().getDetailUrl())
                 .imageUrl(status.getCampaign().getImageUrl())
                 .campaignPlatformImageUrl(campaignPlatformImageUrl)
                 .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
                 .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
+                .subStatusLabel(subStatusLabel)
                 .applicantCount(status.getCampaign().getApplicantCount())
                 .recruitCount(status.getCampaign().getRecruitCount())
                 .snsPlatforms(BookmarkResponseDTO.getPlatforms(status.getCampaign()))
