@@ -232,9 +232,10 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
     public ResponseEntity<ApiResponse<Void>> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException ex) {
-        logger.error("OAuth2AuthenticationProcessingException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        logger.error("OAuth2AuthenticationProcessingException: {}", errorMessage.getMessage());
+        return ResponseEntity.status(errorMessage.getHttpStatus())
+                .body(ApiResponse.error(errorMessage.getHttpStatus().value(), errorMessage.getMessage()));
     }
     
     /**
