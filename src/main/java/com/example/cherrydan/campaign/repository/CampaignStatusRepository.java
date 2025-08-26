@@ -28,34 +28,4 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
            "ORDER BY c.reviewerAnnouncement DESC")
     Page<CampaignStatus> findByUserAndStatusAndIsActiveTrue(@Param("user") User user, @Param("status") CampaignStatusType status, Pageable pageable);
     long countByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status);
-    
-    /**
-     * 사용자의 활동 알림 대상 캠페인들 조회 (3일 이내 마감)
-     */
-    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.isActive = true AND cs.user.id = :userId")
-    List<CampaignStatus> findActivityEligibleByUserId(@Param("userId") Long userId);
-    
-    /**
-     * 알림 미발송된 활동 대상 캠페인들 조회
-     */
-    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.isActive = true AND cs.activityNotified = false")
-    List<CampaignStatus> findUnnotifiedActivityStatuses();
-    
-    /**
-     * 특정 사용자의 활동 알림 대상 캠페인들 조회 (알림 발송용)
-     */
-    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.isActive = true AND cs.user.id = :userId AND cs.activityNotified = false")
-    List<CampaignStatus> findUnnotifiedActivityStatusesByUserId(@Param("userId") Long userId);
-
-    /**
-     * 사용자별로 isVisibleToUser = true인 활동 알림만 조회
-     */
-    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.isActive = true AND cs.user.id = :userId AND cs.isVisibleToUser = true")
-    List<CampaignStatus> findVisibleActivityByUserId(@Param("userId") Long userId);
-    
-    /**
-     * 사용자별로 isVisibleToUser = true인 활동 알림만 조회 (페이지네이션)
-     */
-    @Query("SELECT cs FROM CampaignStatus cs WHERE cs.isActive = true AND cs.user.id = :userId AND cs.isVisibleToUser = true")
-    Page<CampaignStatus> findVisibleActivityByUserId(@Param("userId") Long userId, Pageable pageable);
 } 
