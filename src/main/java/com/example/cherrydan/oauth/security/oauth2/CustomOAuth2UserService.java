@@ -179,7 +179,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             if (existingUser.getProvider() != null && !existingUser.getProvider().equals(provider)) {
                 throw new OAuth2AuthenticationProcessingException(
                         String.format("이미 %s 계정으로 가입되어 있습니다. %s 계정으로 로그인해 주세요.", 
-                        existingUser.getProvider(), existingUser.getProvider())
+                        existingUser.getProvider(), existingUser.getEmail())
                 );
             }
             
