@@ -1,18 +1,16 @@
 package com.example.cherrydan.campaign.service;
 
-import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
+import com.example.cherrydan.campaign.dto.*;
+
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
 import com.example.cherrydan.common.response.PageListResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 
 public interface CampaignStatusService {
-    CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO);
-    CampaignStatusResponseDTO updateStatus(CampaignStatusRequestDTO requestDTO);
-    void deleteStatus(Long campaignId, Long userId);
+    CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO, Long userId);
+    List<CampaignStatusResponseDTO> updateStatusBatch(CampaignStatusBatchRequestDTO requestDTO, Long userId);
+    void deleteStatusBatch(CampaignStatusDeleteRequestDTO requestDTO, Long userId);
     CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId);
     PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable);
     CampaignStatusCountResponseDTO getStatusCounts(Long userId);

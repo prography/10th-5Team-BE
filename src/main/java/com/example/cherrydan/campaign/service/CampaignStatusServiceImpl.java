@@ -3,16 +3,12 @@ package com.example.cherrydan.campaign.service;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
-import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
+import com.example.cherrydan.campaign.dto.*;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import com.example.cherrydan.campaign.dto.CampaignStatusPopupItemDTO;
+import java.util.ArrayList;
+import java.util.List;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
@@ -39,8 +35,8 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional
-    public CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO) {
-        User user = userRepository.findActiveById(requestDTO.getUserId())
+    public CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO, Long userId) {
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         Campaign campaign = campaignRepository.findById(requestDTO.getCampaignId())
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
@@ -66,35 +62,46 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional
-    public CampaignStatusResponseDTO updateStatus(CampaignStatusRequestDTO requestDTO) {
-        User user = userRepository.findActiveById(requestDTO.getUserId())
+    public List<CampaignStatusResponseDTO> updateStatusBatch(CampaignStatusBatchRequestDTO requestDTO, Long userId) {
+        User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Campaign campaign = campaignRepository.findById(requestDTO.getCampaignId())
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        CampaignStatus status = campaignStatusRepository.findByUserAndCampaign(user, campaign)
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        if (requestDTO.getIsActive() != null) {
-            status.setIsActive(requestDTO.getIsActive());
+        
+        List<CampaignStatusResponseDTO> results = new ArrayList<>();
+        
+        for (Long campaignId : requestDTO.getCampaignIds()) {
+            Campaign campaign = campaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
+            CampaignStatus status = campaignStatusRepository.findByUserAndCampaign(user, campaign)
+                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
+            
+            if (requestDTO.getIsActive() != null) {
+                status.setIsActive(requestDTO.getIsActive());
+            }
+            if (requestDTO.getStatus() != null) {
+                status.setStatus(requestDTO.getStatus());
+            }
+            CampaignStatus saved = campaignStatusRepository.save(status);
+            results.add(CampaignStatusResponseDTO.fromEntity(saved));
         }
-        if (requestDTO.getStatus() != null) {
-            status.setStatus(requestDTO.getStatus());
-        }
-        CampaignStatus saved = campaignStatusRepository.save(status);
-        return CampaignStatusResponseDTO.fromEntity(saved);
+        
+        return results;
     }
 
     @Override
     @Transactional
-    public void deleteStatus(Long campaignId, Long userId) {
+    public void deleteStatusBatch(CampaignStatusDeleteRequestDTO requestDTO, Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Campaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        Optional<CampaignStatus> status = campaignStatusRepository.findByUserAndCampaign(user, campaign);
-        if (status.isEmpty()) {
-            throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
+        
+        for (Long campaignId : requestDTO.getCampaignIds()) {
+            Campaign campaign = campaignRepository.findById(campaignId)
+                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
+            Optional<CampaignStatus> status = campaignStatusRepository.findByUserAndCampaign(user, campaign);
+            if (status.isEmpty()) {
+                throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
+            }
+            campaignStatusRepository.delete(status.get());
         }
-        campaignStatusRepository.delete(status.get());
     }
 
     @Override

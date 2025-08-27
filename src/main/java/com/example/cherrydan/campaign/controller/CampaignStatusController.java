@@ -24,6 +24,10 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import com.example.cherrydan.common.exception.CampaignException;
 import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.campaign.dto.CampaignStatusBatchRequestDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusDeleteRequestDTO;
+
+import java.util.List;
 
 @Tag(name = "CampaignStatus", description = "내 체험단 상태 관리 및 팝업 API")
 @RestController
@@ -66,29 +70,27 @@ public class CampaignStatusController {
         @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        requestDTO.setUserId(currentUser.getId());
-        CampaignStatusResponseDTO result = campaignStatusService.createOrRecoverStatus(requestDTO);
+        CampaignStatusResponseDTO result = campaignStatusService.createOrRecoverStatus(requestDTO, currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @Operation(summary = "내 체험단 상태 변경", description = "is_active or status 변경")
+    @Operation(summary = "내 체험단 상태 변경", description = "배치로 여러 캠페인 상태 변경")
     @PatchMapping
-    public ResponseEntity<ApiResponse<CampaignStatusResponseDTO>> updateStatus(
-        @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
+    public ResponseEntity<ApiResponse<List<CampaignStatusResponseDTO>>> updateStatus(
+        @RequestBody CampaignStatusBatchRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        requestDTO.setUserId(currentUser.getId());
-        CampaignStatusResponseDTO result = campaignStatusService.updateStatus(requestDTO);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        List<CampaignStatusResponseDTO> results = campaignStatusService.updateStatusBatch(requestDTO, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 
-    @Operation(summary = "내 체험단 상태 삭제", description = "campaignId만 받아서 삭제")
+    @Operation(summary = "내 체험단 상태 삭제", description = "campaignIds 리스트로 일괄 삭제")
     @DeleteMapping
     public ResponseEntity<ApiResponse<Void>> deleteStatus(
-        @Valid @RequestBody DeleteRequest request,
+        @Valid @RequestBody CampaignStatusDeleteRequestDTO request,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        campaignStatusService.deleteStatus(request.getCampaignId(), currentUser.getId());
+        campaignStatusService.deleteStatusBatch(request, currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success());
     }
 
@@ -99,12 +101,5 @@ public class CampaignStatusController {
     ) {
         CampaignStatusPopupResponseDTO result = campaignStatusService.getPopupStatusByUser(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(result));
-    }
-
-    public static class DeleteRequest {
-        @NotNull(message = "캠페인 ID는 필수입니다.")
-        private Long campaignId;
-
-        public Long getCampaignId() { return campaignId; }
     }
 } 

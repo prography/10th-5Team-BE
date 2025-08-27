@@ -32,7 +32,7 @@ public enum ErrorMessage {
     OAUTH_AUTHENTICATION_FAILED(UNAUTHORIZED, "OAuth 인증에 실패했습니다."),
     OAUTH_EMAIL_NOT_FOUND(UNAUTHORIZED, "OAuth2 제공자로부터 이메일을 찾을 수 없습니다."),
     OAUTH_USER_DELETED(UNAUTHORIZED, "탈퇴한 계정입니다. 계정 복구를 원하시면 고객센터에 문의해 주세요."),
-    OAUTH_PROVIDER_CONFLICT(CONFLICT, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
+    OAUTH_PROVIDER_CONFLICT(UNAUTHORIZED, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
     
     // Apple 관련 에러
     APPLE_IDENTITY_TOKEN_INVALID(UNAUTHORIZED, "Apple Identity Token이 유효하지 않습니다."),
