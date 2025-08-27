@@ -11,6 +11,11 @@ public class OAuth2AuthenticationProcessingException extends AuthenticationExcep
         this.errorMessage = errorMessage;
     }
 
+    public OAuth2AuthenticationProcessingException(String message) {
+        super(message);
+        this.errorMessage = null;
+    }
+
     public ErrorMessage getErrorMessage() {
         return errorMessage;
     }

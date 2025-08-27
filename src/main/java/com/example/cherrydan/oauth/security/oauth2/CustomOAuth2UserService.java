@@ -177,7 +177,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             
             // 같은 제공자가 아니면 오류 발생
             if (existingUser.getProvider() != null && !existingUser.getProvider().equals(provider)) {
-                throw new OAuth2AuthenticationProcessingException(ErrorMessage.OAUTH_PROVIDER_CONFLICT);
+                throw new OAuth2AuthenticationProcessingException(
+                        String.format("이미 %s 계정으로 가입되어 있습니다. %s 계정으로 로그인해 주세요.", 
+                        existingUser.getProvider(), existingUser.getProvider())
+                );
             }
             
             // 정보 업데이트 후 반환
