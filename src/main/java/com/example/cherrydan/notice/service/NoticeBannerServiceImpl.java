@@ -15,12 +15,12 @@ public class NoticeBannerServiceImpl implements NoticeBannerService {
 
     @Override
     public List<NoticeBannerResponseDTO> getActiveBanners() {
-        List<NoticeBanner> banners = noticeBannerRepository.findByIsActiveTrue();
+        List<NoticeBanner> banners = noticeBannerRepository.findByIsActiveTrueOrderByPriorityAsc();
         return banners.stream().map(banner -> NoticeBannerResponseDTO.builder()
                 .id(banner.getId())
                 .title(banner.getTitle())
                 .subTitle(banner.getSubTitle())
-                .imageUrl(banner.getImageUrl())
+                .backgroundColor(banner.getBackgroundColor())
                 .bannerType(banner.getBannerType())
                 .linkType(banner.getLinkType())
                 .targetId(banner.getTargetId())
