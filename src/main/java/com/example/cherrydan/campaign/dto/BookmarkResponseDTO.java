@@ -19,16 +19,16 @@ public class BookmarkResponseDTO {
     private Long id;
     private Long campaignId;
     private Long userId;
-    private String campaignTitle;
-    private String campaignDetailUrl;
-    private String campaignImageUrl;
-    private String campaignPlatformImageUrl;
+    private String reviewerAnnouncementStatus;
     private String subStatusLabel;
+    private String title;
     private String benefit;
+    private String detailUrl;
+    private String imageUrl;
+    private String campaignPlatformImageUrl;
     private Integer applicantCount;
     private Integer recruitCount;
     private List<String> snsPlatforms;
-    private String reviewerAnnouncementStatus;
     private String campaignSite;
 
     public static BookmarkResponseDTO fromEntity(Bookmark bookmark) {
@@ -38,9 +38,9 @@ public class BookmarkResponseDTO {
                 .id(bookmark.getId())
                 .userId(bookmark.getUser().getId())
                 .campaignId(campaign.getId())
-                .campaignTitle(campaign.getTitle())
-                .campaignDetailUrl(campaign.getDetailUrl())
-                .campaignImageUrl(campaign.getImageUrl())
+                .title(campaign.getTitle())
+                .detailUrl(campaign.getDetailUrl())
+                .imageUrl(campaign.getImageUrl())
                 .campaignPlatformImageUrl(campaignPlatformImageUrl)
                 .benefit(campaign.getBenefit())
                 .applicantCount(campaign.getApplicantCount())
