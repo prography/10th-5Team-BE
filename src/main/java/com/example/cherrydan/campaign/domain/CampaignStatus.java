@@ -9,7 +9,12 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 @Entity
-@Table(name = "campaign_status")
+@Table(
+    name = "campaign_status",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "campaign_id"})
+    }
+)
 @Getter
 @Setter
 @Builder
@@ -33,7 +38,7 @@ public class CampaignStatus extends BaseTimeEntity {
 
     @Builder.Default
     @Column(nullable = false)
-    private Boolean isActive = true; // 이건 캠페인이 종료되면 false로 할 듯
+    private Boolean isActive = true;
     
     /**
      * 활동 알림 발송 여부
