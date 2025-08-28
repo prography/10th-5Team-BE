@@ -24,10 +24,10 @@ public class CampaignStatusResponseDTO {
     private String reviewerAnnouncementStatus;
     @Schema(description = "상태 보조 라벨 (예: APPLY의 경우 waiting/completed)")
     private String subStatusLabel;
-    private String title;
+    private String campaignTitle;
     private String benefit;
-    private String detailUrl;
-    private String imageUrl;
+    private String campaignDetailUrl;
+    private String campaignImageUrl;
     private String campaignPlatformImageUrl;
     private int applicantCount;
     private int recruitCount;
@@ -99,9 +99,9 @@ public class CampaignStatusResponseDTO {
                 .id(status.getId())
                 .campaignId(status.getCampaign().getId())
                 .userId(status.getUser().getId())
-                .title(status.getCampaign().getTitle())
-                .detailUrl(status.getCampaign().getDetailUrl())
-                .imageUrl(status.getCampaign().getImageUrl())
+                .campaignTitle(status.getCampaign().getTitle())
+                .campaignDetailUrl(status.getCampaign().getDetailUrl())
+                .campaignImageUrl(status.getCampaign().getImageUrl())
                 .campaignPlatformImageUrl(campaignPlatformImageUrl)
                 .reviewerAnnouncement(status.getCampaign().getReviewerAnnouncement())
                 .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
