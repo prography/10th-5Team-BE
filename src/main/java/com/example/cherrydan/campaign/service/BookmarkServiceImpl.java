@@ -2,6 +2,7 @@ package com.example.cherrydan.campaign.service;
 
 import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.domain.Campaign;
+import com.example.cherrydan.campaign.dto.BookmarkDeleteDTO;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
@@ -71,12 +72,11 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional
-    public void deleteBookmark(Long userId, Long campaignId) {
+    public void deleteBookmark(Long userId, BookmarkDeleteDTO request) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Campaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        bookmarkRepository.deleteByUserAndCampaign(user, campaign);
+        
+        bookmarkRepository.deleteByUserAndCampaignIds(user, request.getCampaignIds());
     }
 
     public PageListResponseDTO<BookmarkResponseDTO> getOpenBookmarks(Long userId, Pageable pageable) {
