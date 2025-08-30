@@ -78,7 +78,7 @@ public class CampaignStatusController {
     @Operation(summary = "내 체험단 상태 변경", description = "배치로 여러 캠페인 상태 변경")
     @PatchMapping
     public ResponseEntity<ApiResponse<List<CampaignStatusResponseDTO>>> updateStatus(
-        @RequestBody CampaignStatusBatchRequestDTO requestDTO,
+        @Valid @RequestBody CampaignStatusBatchRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         List<CampaignStatusResponseDTO> results = campaignStatusService.updateStatusBatch(requestDTO, currentUser.getId());

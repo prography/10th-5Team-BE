@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import jakarta.validation.constraints.NotEmpty;
 import java.util.List;
 
 @Getter
@@ -12,6 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @Schema(description = "캠페인 상태 배치 삭제 요청")
 public class CampaignStatusDeleteRequestDTO {
+
+    @NotEmpty(message = "캠페인 ID 목록은 필수입니다.")
     @Schema(description = "삭제할 캠페인 ID 목록", example = "[1, 2, 3]", required = true)
     private List<Long> campaignIds;
 }
