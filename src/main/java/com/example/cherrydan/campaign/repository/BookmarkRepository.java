@@ -6,6 +6,7 @@ import com.example.cherrydan.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
@@ -45,4 +46,11 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
            "AND b.campaign.id IN :campaignIds " +
            "AND b.isActive = true")
     Set<Long> findBookmarkedCampaignIds(@Param("userId") Long userId, @Param("campaignIds") List<Long> campaignIds);
+
+    /**
+     * 특정 사용자의 여러 캠페인 북마크를 벌크 삭제
+     */
+    @Modifying
+    @Query("DELETE FROM Bookmark b WHERE b.user = :user AND b.campaign.id IN :campaignIds")
+    void deleteByUserAndCampaignIds(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds);
 } 

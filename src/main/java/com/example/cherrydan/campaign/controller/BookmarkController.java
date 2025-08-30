@@ -1,5 +1,6 @@
 package com.example.cherrydan.campaign.controller;
 
+import com.example.cherrydan.campaign.dto.BookmarkDeleteDTO;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
 import com.example.cherrydan.common.response.ApiResponse;
@@ -80,10 +81,10 @@ public class BookmarkController {
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
     @DeleteMapping("/{campaignId}/bookmark")
     public ResponseEntity<ApiResponse<EmptyResponse>> deleteBookmark(
-            @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
+            @RequestBody BookmarkDeleteDTO request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        bookmarkService.deleteBookmark(currentUser.getId(), campaignId);
+        bookmarkService.deleteBookmark(currentUser.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("북마크 삭제 성공"));
     }
 } 

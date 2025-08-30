@@ -66,25 +66,20 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
-        List<CampaignStatusResponseDTO> results = new ArrayList<>();
-        
-        for (Long campaignId : requestDTO.getCampaignIds()) {
-            Campaign campaign = campaignRepository.findById(campaignId)
-                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-            CampaignStatus status = campaignStatusRepository.findByUserAndCampaign(user, campaign)
-                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-            
+        if (requestDTO.getStatus() != null) {
             if (requestDTO.getIsActive() != null) {
-                status.setIsActive(requestDTO.getIsActive());
+                campaignStatusRepository.updateStatusAndActiveBatch(user, requestDTO.getCampaignIds(), 
+                                                                   requestDTO.getIsActive(), requestDTO.getStatus());
+            } else {
+                campaignStatusRepository.updateStatusOnlyBatch(user, requestDTO.getCampaignIds(), 
+                                                              requestDTO.getStatus());
             }
-            if (requestDTO.getStatus() != null) {
-                status.setStatus(requestDTO.getStatus());
-            }
-            CampaignStatus saved = campaignStatusRepository.save(status);
-            results.add(CampaignStatusResponseDTO.fromEntity(saved));
         }
         
-        return results;
+        List<CampaignStatus> updatedStatuses = campaignStatusRepository.findByUserAndCampaignIds(user, requestDTO.getCampaignIds());
+        return updatedStatuses.stream()
+                .map(CampaignStatusResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -93,15 +88,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
-        for (Long campaignId : requestDTO.getCampaignIds()) {
-            Campaign campaign = campaignRepository.findById(campaignId)
-                    .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-            Optional<CampaignStatus> status = campaignStatusRepository.findByUserAndCampaign(user, campaign);
-            if (status.isEmpty()) {
-                throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
-            }
-            campaignStatusRepository.delete(status.get());
-        }
+        campaignStatusRepository.deleteByUserAndCampaignIds(user, requestDTO.getCampaignIds());
     }
 
     @Override
