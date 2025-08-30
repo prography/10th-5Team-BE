@@ -66,8 +66,15 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
-        campaignStatusRepository.updateStatusBatch(user, requestDTO.getCampaignIds(), 
-                                                  requestDTO.getIsActive(), requestDTO.getStatus());
+        if (requestDTO.getStatus() != null) {
+            if (requestDTO.getIsActive() != null) {
+                campaignStatusRepository.updateStatusAndActiveBatch(user, requestDTO.getCampaignIds(), 
+                                                                   requestDTO.getIsActive(), requestDTO.getStatus());
+            } else {
+                campaignStatusRepository.updateStatusOnlyBatch(user, requestDTO.getCampaignIds(), 
+                                                              requestDTO.getStatus());
+            }
+        }
         
         List<CampaignStatus> updatedStatuses = campaignStatusRepository.findByUserAndCampaignIds(user, requestDTO.getCampaignIds());
         return updatedStatuses.stream()

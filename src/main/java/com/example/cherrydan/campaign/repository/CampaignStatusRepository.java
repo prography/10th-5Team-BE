@@ -31,13 +31,22 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     long countByUserAndStatusAndIsActiveTrue(User user, CampaignStatusType status);
 
     /**
-     * 특정 사용자의 여러 캠페인 상태를 벌크 업데이트
+     * 특정 사용자의 여러 캠페인 상태를 벌크 업데이트 (isActive와 status 둘 다)
      */
     @Modifying(clearAutomatically = true)
     @Query("UPDATE CampaignStatus cs SET cs.isActive = :isActive, cs.status = :status " +
            "WHERE cs.user = :user AND cs.campaign.id IN :campaignIds")
-    void updateStatusBatch(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds, 
-                          @Param("isActive") Boolean isActive, @Param("status") CampaignStatusType status);
+    void updateStatusAndActiveBatch(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds, 
+                                   @Param("isActive") Boolean isActive, @Param("status") CampaignStatusType status);
+
+    /**
+     * 특정 사용자의 여러 캠페인 상태를 벌크 업데이트 (status만)
+     */
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE CampaignStatus cs SET cs.status = :status " +
+           "WHERE cs.user = :user AND cs.campaign.id IN :campaignIds")
+    void updateStatusOnlyBatch(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds, 
+                              @Param("status") CampaignStatusType status);
 
     /**
      * 특정 사용자의 여러 캠페인 상태를 벌크 삭제
