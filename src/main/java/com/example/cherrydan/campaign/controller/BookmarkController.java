@@ -79,7 +79,7 @@ public class BookmarkController {
     }
 
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
-    @DeleteMapping("/{campaignId}/bookmark")
+    @DeleteMapping("/bookmark")
     public ResponseEntity<ApiResponse<EmptyResponse>> deleteBookmark(
             @RequestBody BookmarkDeleteDTO request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
