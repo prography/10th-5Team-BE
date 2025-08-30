@@ -1,5 +1,7 @@
 package com.example.cherrydan.campaign.dto;
 
+import com.example.cherrydan.campaign.domain.CampaignStatus;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -11,9 +13,8 @@ public class CampaignStatusPopupItemDTO {
     private String imageUrl;
     private String reviewerAnnouncementStatus;
     private String benefit;
-    private String statusLabel;
 
-    public static CampaignStatusPopupItemDTO fromEntity(com.example.cherrydan.campaign.domain.CampaignStatus status) {
+    public static CampaignStatusPopupItemDTO fromEntity(CampaignStatus status) {
         String reviewerAnnouncementStatus = null;
         switch (status.getStatus()) {
             case APPLY:
@@ -21,9 +22,6 @@ public class CampaignStatusPopupItemDTO {
                 break;
             case SELECTED:
                 reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "selected");
-                break;
-            case NOT_SELECTED:
-                reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "not_selected");
                 break;
             case REVIEWING:
                 reviewerAnnouncementStatus = CampaignStatusResponseDTO.getStatusMessage(status.getCampaign().getContentSubmissionEnd(), "reviewing");
@@ -40,7 +38,6 @@ public class CampaignStatusPopupItemDTO {
                 .imageUrl(status.getCampaign().getImageUrl())
                 .reviewerAnnouncementStatus(reviewerAnnouncementStatus)
                 .benefit(status.getCampaign().getBenefit())
-                .statusLabel(status.getStatus().getLabel())
                 .build();
     }
 } 

@@ -1,6 +1,7 @@
 package com.example.cherrydan.campaign.controller;
 
 import com.example.cherrydan.campaign.dto.BookmarkDeleteDTO;
+import com.example.cherrydan.campaign.dto.BookmarkCancelDTO;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.service.BookmarkService;
 import com.example.cherrydan.common.response.ApiResponse;
@@ -24,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
+import jakarta.validation.Valid;
 
 @Tag(name = "Bookmark", description = "캠페인 북마크(찜) 관련 API")
 @RestController
@@ -42,13 +44,13 @@ public class BookmarkController {
         return ResponseEntity.ok(ApiResponse.success("북마크 추가 성공"));
     }
 
-    @Operation(summary = "북마크 취소", description = "캠페인 북마크(찜)를 취소합니다. (is_active=0)")
-    @PatchMapping("/{campaignId}/bookmark")
+    @Operation(summary = "북마크 취소", description = "여러 캠페인 북마크(찜)를 한 번에 취소합니다. (is_active=0)")
+    @PatchMapping("/bookmark")
     public ResponseEntity<ApiResponse<EmptyResponse>> cancelBookmark(
-            @Parameter(description = "캠페인 ID", required = true) @PathVariable Long campaignId,
+            @Parameter(description = "북마크 취소 요청", required = true) @Valid @RequestBody BookmarkCancelDTO request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        bookmarkService.cancelBookmark(currentUser.getId(), campaignId);
+        bookmarkService.cancelBookmarks(currentUser.getId(), request);
         return ResponseEntity.ok(ApiResponse.success("북마크 취소 성공"));
     }
 
@@ -81,7 +83,7 @@ public class BookmarkController {
     @Operation(summary = "북마크 완전 삭제", description = "캠페인 북마크(찜) 정보를 완전히 삭제합니다.")
     @DeleteMapping("/bookmark")
     public ResponseEntity<ApiResponse<EmptyResponse>> deleteBookmark(
-            @RequestBody BookmarkDeleteDTO request,
+            @Parameter(description = "북마크 삭제 요청", required = true) @Valid @RequestBody BookmarkDeleteDTO request,
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         bookmarkService.deleteBookmark(currentUser.getId(), request);

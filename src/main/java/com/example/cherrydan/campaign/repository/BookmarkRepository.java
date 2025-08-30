@@ -28,6 +28,11 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(Long userId, LocalDate date, Pageable pageable);
 
     /**
+     * 특정 사용자의 여러 캠페인 ID에 대한 북마크를 조회
+     */
+    List<Bookmark> findByUserAndCampaignIdIn(User user, List<Long> campaignIds);
+
+    /**
      * 특정 날짜에 마감되는 활성 캠페인의 북마크들을 조회 (페치 조인 포함)
      */
     @Query("SELECT b FROM Bookmark b " +
