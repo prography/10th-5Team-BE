@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import org.springframework.data.domain.PageImpl;
 import com.example.cherrydan.common.response.PageListResponseDTO;
+import com.example.cherrydan.campaign.dto.BookmarkCancelDTO;
 
 @Service
 @RequiredArgsConstructor
@@ -59,24 +60,28 @@ public class BookmarkServiceImpl implements BookmarkService {
 
     @Override
     @Transactional
-    public void cancelBookmark(Long userId, Long campaignId) {
-        User user = userRepository.findActiveById(userId)
-                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Campaign campaign = campaignRepository.findById(campaignId)
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        Bookmark bookmark = bookmarkRepository.findByUserAndCampaign(user, campaign)
-                .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
-        bookmark.setIsActive(false);
-        bookmarkRepository.save(bookmark);
-    }
-
-    @Override
-    @Transactional
     public void deleteBookmark(Long userId, BookmarkDeleteDTO request) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
         bookmarkRepository.deleteByUserAndCampaignIds(user, request.getCampaignIds());
+    }
+
+    @Override
+    @Transactional
+    public void cancelBookmarks(Long userId, BookmarkCancelDTO request) {
+        User user = userRepository.findActiveById(userId)
+                .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        
+        try {
+            List<Bookmark> bookmarks = bookmarkRepository.findByUserAndCampaignIdIn(user, request.getCampaignIds());
+            for (Bookmark bookmark : bookmarks) {
+                bookmark.setIsActive(false);
+            }
+            bookmarkRepository.saveAll(bookmarks);
+        } catch (Exception e) {
+            throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
+        }
     }
 
     public PageListResponseDTO<BookmarkResponseDTO> getOpenBookmarks(Long userId, Pageable pageable) {
