@@ -6,6 +6,7 @@ import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -86,12 +87,12 @@ public class CampaignStatusController {
 
     @Operation(summary = "내 체험단 상태 삭제", description = "campaignIds 리스트로 일괄 삭제")
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> deleteStatus(
+    public ResponseEntity<ApiResponse<EmptyResponse>> deleteStatus(
         @Valid @RequestBody CampaignStatusDeleteRequestDTO request,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
         campaignStatusService.deleteStatusBatch(request, currentUser.getId());
-        return ResponseEntity.ok(ApiResponse.success());
+        return ResponseEntity.ok(ApiResponse.success("체험단 상태 삭제 성공"));
     }
 
     @Operation(summary = "내 체험단 노출 팝업 조회", description = "지원한 공고/선정 결과/리뷰 작성 중 상태 중 기간이 지난 데이터만 최대 4개씩, 각 상태별 총 개수와 함께 반환")
