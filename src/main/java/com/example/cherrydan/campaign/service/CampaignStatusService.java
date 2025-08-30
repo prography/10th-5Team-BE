@@ -11,7 +11,7 @@ public interface CampaignStatusService {
     CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO, Long userId);
     List<CampaignStatusResponseDTO> updateStatusBatch(CampaignStatusBatchRequestDTO requestDTO, Long userId);
     void deleteStatusBatch(CampaignStatusDeleteRequestDTO requestDTO, Long userId);
-    CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId);
+    CampaignStatusPopupByTypeResponseDTO getPopupStatusByType(Long userId, CampaignStatusType statusType);
     PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable);
     CampaignStatusCountResponseDTO getStatusCounts(Long userId);
 } 

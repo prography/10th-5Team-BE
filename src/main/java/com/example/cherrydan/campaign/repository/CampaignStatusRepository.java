@@ -61,4 +61,19 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     @Query("SELECT cs FROM CampaignStatus cs JOIN FETCH cs.campaign " +
            "WHERE cs.user = :user AND cs.campaign.id IN :campaignIds")
     List<CampaignStatus> findByUserAndCampaignIds(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds);
+
+    @Query("SELECT cs FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND (" +
+           "  (:status = 0 AND c.reviewerAnnouncement IS NOT NULL AND c.reviewerAnnouncement <= :today) OR " +
+           "  (:status = 1 AND c.contentSubmissionEnd IS NOT NULL AND c.contentSubmissionEnd <= :today) OR " +
+           "  (:status = 3 AND c.contentSubmissionEnd IS NOT NULL AND c.contentSubmissionEnd <= :today) OR " +
+           "  (:status = 4 AND c.resultAnnouncement IS NOT NULL AND c.resultAnnouncement <= :today)" +
+           ") " +
+           "ORDER BY " +
+           "  CASE WHEN :status = 0 THEN c.reviewerAnnouncement END DESC, " +
+           "  CASE WHEN :status = 1 THEN c.contentSubmissionEnd END DESC, " +
+           "  CASE WHEN :status = 3 THEN c.contentSubmissionEnd END DESC, " +
+           "  CASE WHEN :status = 4 THEN c.resultAnnouncement END DESC")
+    List<CampaignStatus> findTop4ByUserAndStatusAndExpired(@Param("user") User user, @Param("status") CampaignStatusType status, @Param("today") LocalDate today);
 } 

@@ -93,46 +93,28 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignStatusPopupResponseDTO getPopupStatusByUser(Long userId) {
+    public CampaignStatusPopupByTypeResponseDTO getPopupStatusByType(Long userId, CampaignStatusType statusType) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        List<CampaignStatusPopupItemDTO> apply = new ArrayList<>();
-        List<CampaignStatusPopupItemDTO> selected = new ArrayList<>();
-        List<CampaignStatusPopupItemDTO> reviewing = new ArrayList<>();
-        List<CampaignStatus> all = campaignStatusRepository.findByUserAndIsActiveTrue(user);
-        for (CampaignStatus status : all) {
+        
+        LocalDate today = LocalDate.now();
+        List<CampaignStatus> statuses = campaignStatusRepository.findTop4ByUserAndStatusAndExpired(user, statusType, today);
+
+        List<CampaignStatusPopupItemDTO> items = new ArrayList<>();
+        
+        for (CampaignStatus status : statuses) {
             try {
                 CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromEntity(status);
-                switch (status.getStatus()) {
-                    case APPLY: apply.add(dto); break;
-                    case SELECTED: selected.add(dto); break;
-                    case REVIEWING: reviewing.add(dto); break;
-                    default: break;
-                }
+                items.add(dto);
             } catch (BaseException e) {
-                // 캠페인 정보가 없는 데이터는 무시
+                continue;
             }
         }
-        LocalDate today = LocalDate.now();
-        List<CampaignStatusPopupItemDTO> filteredApply = apply.stream()
-            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
-            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
-            .toList();
-        List<CampaignStatusPopupItemDTO> filteredSelected = selected.stream()
-            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
-            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
-            .toList();
-        List<CampaignStatusPopupItemDTO> filteredReviewing = reviewing.stream()
-            .filter(dto -> dto.getReviewerAnnouncementStatus() != null)
-            .sorted(Comparator.comparing(CampaignStatusPopupItemDTO::getReviewerAnnouncementStatus))
-            .toList();
-        return CampaignStatusPopupResponseDTO.builder()
-                .applyTotal(filteredApply.size())
-                .selectedTotal(filteredSelected.size())
-                .reviewingTotal(filteredReviewing.size())
-                .apply(filteredApply.stream().limit(4).toList())
-                .selected(filteredSelected.stream().limit(4).toList())
-                .reviewing(filteredReviewing.stream().limit(4).toList())
+        
+        return CampaignStatusPopupByTypeResponseDTO.builder()
+                .statusType(statusType)
+                .items(items)
+                .totalCount(items.size())
                 .build();
     }
 
