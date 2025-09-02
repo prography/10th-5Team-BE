@@ -158,7 +158,6 @@ public class CampaignServiceImpl implements CampaignService {
         );
         
         long totalElements = campaignRepository.countByKeywordAndCreatedDate(fullTextKeyword, date);
-        
         // N+1 문제 해결: 벌크 조회로 북마크 여부 확인
         List<Long> campaignIds = campaigns.stream()
             .map(Campaign::getId)

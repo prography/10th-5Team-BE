@@ -43,11 +43,18 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
 
     // 키워드 맞춤형 캠페인 FULLTEXT 검색 (지정 날짜 기준 전일)
     @Query(value = """
-        SELECT * FROM campaigns 
-        WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE)
-        AND is_active = 1 
-        AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
-        ORDER BY created_at DESC
+        SELECT
+          c.*
+        FROM (
+          SELECT
+            id
+          FROM campaigns FORCE INDEX(campaigns_created_at_is_active_IDX)
+          WHERE created_at >=  DATE(:date - INTERVAL 1 DAY) AND created_at < DATE(:date)
+            AND is_active = 1
+        ) AS filtered
+        STRAIGHT_JOIN campaigns AS c ON c.id = filtered.id
+        WHERE MATCH(c.title) AGAINST(:keyword IN BOOLEAN MODE)
+        ORDER BY c.id DESC
         LIMIT :offset, :limit
         """, nativeQuery = true)
     List<Campaign> findByKeywordFullText(
@@ -59,10 +66,17 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     
     // 지정 날짜 기준 전일 생성된 키워드 맞춤형 캠페인 개수
     @Query(value = """
-        SELECT COUNT(*) FROM campaigns 
-        WHERE MATCH(title) AGAINST(:keyword IN BOOLEAN MODE)
-        AND is_active = 1 
-        AND DATE(created_at) = DATE(:date - INTERVAL 1 DAY)
+        SELECT
+          COUNT(*)
+        FROM (
+          SELECT
+            id
+          FROM campaigns FORCE INDEX(campaigns_created_at_is_active_IDX)
+          WHERE created_at >=  DATE(:date - INTERVAL 1 DAY) AND created_at < DATE(:date)
+            AND is_active = 1
+        ) AS filtered
+        STRAIGHT_JOIN campaigns AS c ON c.id = filtered.id
+        WHERE MATCH(c.title) AGAINST(:keyword IN BOOLEAN MODE)
         """, nativeQuery = true)
     long countByKeywordAndCreatedDate(@Param("keyword") String keyword, @Param("date") LocalDate date);
 } 
