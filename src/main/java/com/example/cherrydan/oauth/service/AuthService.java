@@ -2,10 +2,9 @@ package com.example.cherrydan.oauth.service;
 
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
-
+import com.example.cherrydan.oauth.domain.RefreshToken;
 import com.example.cherrydan.oauth.dto.RefreshTokenDTO;
 import com.example.cherrydan.oauth.dto.TokenDTO;
-import com.example.cherrydan.oauth.model.RefreshToken;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.user.domain.User;
 import lombok.RequiredArgsConstructor;

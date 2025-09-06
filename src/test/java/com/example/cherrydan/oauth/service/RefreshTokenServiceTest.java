@@ -2,13 +2,14 @@ package com.example.cherrydan.oauth.service;
 
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.RefreshTokenException;
-import com.example.cherrydan.oauth.model.RefreshToken;
+import com.example.cherrydan.oauth.domain.AuthProvider;
+import com.example.cherrydan.oauth.domain.RefreshToken;
 import com.example.cherrydan.oauth.repository.RefreshTokenRepository;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.Gender;
 import com.example.cherrydan.user.domain.Role;
-import com.example.cherrydan.oauth.model.AuthProvider;
+
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.security.SignatureException;
@@ -81,7 +82,7 @@ class RefreshTokenServiceTest {
         void saveNewRefreshToken_Success() {
             // Given
             String newTokenValue = "new.refresh.token";
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, newTokenValue))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty());
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
@@ -90,7 +91,7 @@ class RefreshTokenServiceTest {
             refreshTokenService.saveOrUpdateRefreshToken(testUser, newTokenValue);
 
             // Then
-            verify(refreshTokenRepository).findByUserIdAndRefreshToken(USER_ID, newTokenValue);
+            verify(refreshTokenRepository).findByUserId(USER_ID);
             verify(refreshTokenRepository).save(argThat(token -> 
                 token.getRefreshToken().equals(newTokenValue) && 
                 token.getUser().equals(testUser)
@@ -108,18 +109,16 @@ class RefreshTokenServiceTest {
                     .user(testUser)
                     .build();
             
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, updatedTokenValue))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.of(existingToken));
-            given(refreshTokenRepository.save(any(RefreshToken.class)))
-                    .willReturn(existingToken);
 
             // When
             refreshTokenService.saveOrUpdateRefreshToken(testUser, updatedTokenValue);
 
             // Then
-            verify(refreshTokenRepository).findByUserIdAndRefreshToken(USER_ID, updatedTokenValue);
+            verify(refreshTokenRepository).findByUserId(USER_ID);
             assertThat(existingToken.getRefreshToken()).isEqualTo(updatedTokenValue);
-            verify(refreshTokenRepository).save(any(RefreshToken.class));
+            verify(refreshTokenRepository, never()).save(any(RefreshToken.class));
         }
 
         @Test
@@ -137,7 +136,7 @@ class RefreshTokenServiceTest {
         @DisplayName("null 토큰 값으로 저장 시도 - 처리됨")
         void saveRefreshTokenWithNullValue_Handled() {
             // Given
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(eq(USER_ID), isNull()))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty());
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
@@ -468,8 +467,9 @@ class RefreshTokenServiceTest {
             String firstToken = "first.token";
             String secondToken = "second.token";
 
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(eq(USER_ID), anyString()))
-                    .willReturn(Optional.empty());
+            given(refreshTokenRepository.findByUserId(USER_ID))
+                    .willReturn(Optional.empty())
+                    .willReturn(Optional.of(testRefreshToken));
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
 
@@ -478,7 +478,8 @@ class RefreshTokenServiceTest {
             refreshTokenService.saveOrUpdateRefreshToken(testUser, secondToken);
 
             // Then
-            verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
+            verify(refreshTokenRepository, times(2)).findByUserId(USER_ID);
+            verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
         }
     }
 
@@ -491,7 +492,7 @@ class RefreshTokenServiceTest {
         void handleVeryLongTokenValue() {
             // Given
             String longToken = "a".repeat(1000); // 1000자 토큰
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, longToken))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty());
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
@@ -510,7 +511,7 @@ class RefreshTokenServiceTest {
         void handleTokenWithSpecialCharacters() {
             // Given
             String specialToken = "token.with-special_chars!@#$%^&*()";
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, specialToken))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty());
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
@@ -525,7 +526,7 @@ class RefreshTokenServiceTest {
         void handleTokenWithUnicodeCharacters() {
             // Given
             String unicodeToken = "토큰.with.한글.and.emoji.😀";
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, unicodeToken))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty());
             given(refreshTokenRepository.save(any(RefreshToken.class)))
                     .willReturn(testRefreshToken);
@@ -542,7 +543,7 @@ class RefreshTokenServiceTest {
             String concurrentToken = "concurrent.token";
             
             // 첫 번째 호출에서는 토큰이 없음
-            given(refreshTokenRepository.findByUserIdAndRefreshToken(USER_ID, concurrentToken))
+            given(refreshTokenRepository.findByUserId(USER_ID))
                     .willReturn(Optional.empty())
                     .willReturn(Optional.of(testRefreshToken)); // 두 번째 호출에서는 토큰 존재
             
@@ -554,7 +555,8 @@ class RefreshTokenServiceTest {
             refreshTokenService.saveOrUpdateRefreshToken(testUser, concurrentToken);
 
             // Then
-            verify(refreshTokenRepository, times(2)).save(any(RefreshToken.class));
+            verify(refreshTokenRepository, times(2)).findByUserId(USER_ID);
+            verify(refreshTokenRepository, times(1)).save(any(RefreshToken.class));
         }
     }
 }

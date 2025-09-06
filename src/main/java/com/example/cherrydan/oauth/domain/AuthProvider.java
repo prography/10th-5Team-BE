@@ -1,4 +1,4 @@
-package com.example.cherrydan.oauth.model;
+package com.example.cherrydan.oauth.domain;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 

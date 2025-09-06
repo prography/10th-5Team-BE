@@ -1,4 +1,4 @@
-package com.example.cherrydan.oauth.model;
+package com.example.cherrydan.oauth.domain;
 
 import com.example.cherrydan.common.entity.BaseTimeEntity;
 import com.example.cherrydan.user.domain.User;

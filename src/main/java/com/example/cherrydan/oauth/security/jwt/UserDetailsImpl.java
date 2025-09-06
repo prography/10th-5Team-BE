@@ -1,6 +1,6 @@
 package com.example.cherrydan.oauth.security.jwt;
 
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 import com.example.cherrydan.user.domain.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
