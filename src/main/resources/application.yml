@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: local # 기본 프로파일을 local로 설정, 배포 시 prod로 변경
+    active: dev # 기본 프로파일을 local로 설정, 배포 시 prod로 변경
   lifecycle:
     timeout-per-shutdown-phase: 30s
 
