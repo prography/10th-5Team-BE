@@ -1,7 +1,7 @@
 package com.example.cherrydan.user.domain;
 
 import com.example.cherrydan.common.entity.BaseTimeEntity;
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 import com.example.cherrydan.utils.MaskingUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

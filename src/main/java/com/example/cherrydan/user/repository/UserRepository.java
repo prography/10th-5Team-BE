@@ -1,6 +1,6 @@
 package com.example.cherrydan.user.repository;
 
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 import com.example.cherrydan.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @Table(name = "user_login_history")
 @Entity
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = false)
