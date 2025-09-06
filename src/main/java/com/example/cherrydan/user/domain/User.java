@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,15 +88,26 @@ public class User extends BaseTimeEntity {
     // 소프트 삭제
     public void softDelete() {
         this.isActive = false;
+        this.setDeletedAt(LocalDateTime.now());
     }
 
     // 계정 복구
     public void restore() {
         this.isActive = true;
+        this.setDeletedAt(null);
     }
 
     // 활성 상태 확인
     public boolean isDeleted() {
         return !this.isActive;
+    }
+    
+    // 30일 이내 복구 가능 여부 확인
+    public boolean isRestorableWithin30Days() {
+        if (this.getDeletedAt() == null) {
+            return false;
+        }
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        return this.getDeletedAt().isAfter(thirtyDaysAgo);
     }
 }

@@ -23,7 +23,7 @@ public class AuthService {
 
     private final RefreshTokenService refreshTokenService;
     private final JwtTokenProvider tokenProvider;
-    private final UserLoginHistoryRepository userLoginHistoryRepository;
+    private final UserLoginHistoryService userLoginHistoryService;
 
     @Transactional
     public TokenDTO refreshToken(RefreshTokenDTO refreshToken) {
@@ -38,8 +38,7 @@ public class AuthService {
         // 기존 RefreshToken 엔티티의 토큰값만 업데이트
         refreshTokenEntity.setRefreshToken(newTokens.getRefreshToken());
 
-        // 로그인 히스토리 저장
-        saveLoginHistory(user.getId());
+        userLoginHistoryService.recordLogin(user.getId());
 
         log.info("토큰 갱신 완료: 사용자 ID = {}", user.getId());
 
@@ -50,19 +49,6 @@ public class AuthService {
     public void logout(Long userId) {
         refreshTokenService.deleteRefreshTokenByUserId(userId);
         log.info("사용자 {} 로그아웃 완료", userId);
-    }
-
-    private void saveLoginHistory(Long id) {
-        try{
-            UserLoginHistory loginHistory = UserLoginHistory.builder()
-                    .userId(id)
-                    .loginDate(LocalDateTime.now())
-                    .build();
-            userLoginHistoryRepository.save(loginHistory);
-        } catch (Exception e) {
-            log.error("로그인 히스토리 저장 중 에러 발생: {}", e.getMessage());
-            throw new AuthException(ErrorMessage.INTERNAL_SERVER_ERROR);
-        }
     }
 }
 

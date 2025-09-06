@@ -30,7 +30,7 @@ import java.util.Map;
 public class OAuthFacade {
     
     private final List<OAuthStrategy> strategies;
-    private final OAuthDomainService oAuthDomainService;
+    private final OAuthUserProcessingService oAuthDomainService;
     private final UserLoginHistoryService loginHistoryService;
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;

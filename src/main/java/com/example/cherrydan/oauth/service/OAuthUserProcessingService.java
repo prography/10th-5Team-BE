@@ -27,7 +27,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class OAuthDomainService {
+public class OAuthUserProcessingService {
     
     private final UserRepository userRepository;
     private final FCMTokenService fcmTokenService;
@@ -71,10 +71,11 @@ public class OAuthDomainService {
      * 사용자 조회 또는 생성
      * 비즈니스 규칙:
      * 1. 이메일로 기존 사용자 조회
-     * 2. 삭제된 사용자는 로그인 거부
-     * 3. 다른 제공자로 가입된 경우 오류
-     * 4. 기존 사용자면 정보 업데이트
-     * 5. 신규 사용자면 생성
+     * 2. 삭제된 사용자가 30일 이내면 계정 복구
+     * 3. 삭제된 사용자가 30일 초과면 로그인 거부
+     * 4. 다른 제공자로 가입된 경우 오류
+     * 5. 기존 사용자면 정보 업데이트
+     * 6. 신규 사용자면 생성
      */
     private User findOrCreateUser(OAuth2UserInfo userInfo, AuthProvider provider) {
         String email = userInfo.getEmail();
@@ -83,10 +84,17 @@ public class OAuthDomainService {
         if (userOptional.isPresent()) {
             User existingUser = userOptional.get();
             
-            // 삭제된 사용자 검증
+            // 삭제된 사용자 처리
             if (existingUser.isDeleted()) {
-                log.warn("Deleted user attempted to login: email={}", email);
-                throw new OAuth2AuthenticationProcessingException(ErrorMessage.OAUTH_USER_DELETED);
+                // 30일 이내 삭제된 사용자는 복구
+                if (existingUser.isRestorableWithin30Days()) {
+                    log.info("Restoring deleted user within 30 days: email={}", email);
+                    existingUser.restore();
+                } else {
+                    // 30일 초과한 경우 로그인 거부
+                    log.error("Permanently deleted user attempted to login: email={}", email);
+                    throw new OAuth2AuthenticationProcessingException(ErrorMessage.OAUTH_USER_DELETED);
+                }
             }
             
             // 제공자 일치 검증

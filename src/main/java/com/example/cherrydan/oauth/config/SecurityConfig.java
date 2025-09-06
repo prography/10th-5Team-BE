@@ -1,9 +1,6 @@
 package com.example.cherrydan.oauth.config;
 
 import com.example.cherrydan.oauth.security.jwt.JwtAuthenticationFilter;
-import com.example.cherrydan.oauth.security.oauth2.CustomOAuth2UserService;
-import com.example.cherrydan.oauth.security.oauth2.OAuth2AuthenticationFailureHandler;
-import com.example.cherrydan.oauth.security.oauth2.OAuth2AuthenticationSuccessHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,9 +21,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
-    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
-    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -47,8 +41,6 @@ public class SecurityConfig {
                         // Apple 테스트 경로 허용
                         .requestMatchers("/api/auth/apple/**","/api/auth/naver/**","/api/auth/kakao/**","/api/auth/google/**").permitAll()
                         .requestMatchers("/apple-login-test.html").permitAll()
-                        // OAuth2 관련 경로
-                        .requestMatchers("/api/oauth2/**", "/api/login/oauth2/**").permitAll()
                         // 캠페인 관련 경로
                         .requestMatchers("/api/campaigns/**").permitAll()
                         // 공지사항/홈 광고 배너 관련 경로
@@ -58,13 +50,6 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
-                )
-                .oauth2Login(oauth2 -> oauth2
-                        .authorizationEndpoint(endpoint -> endpoint.baseUri("/api/oauth2/authorization"))
-                        .redirectionEndpoint(endpoint -> endpoint.baseUri("/api/login/oauth2/code/*"))
-                        .userInfoEndpoint(endpoint -> endpoint.userService(customOAuth2UserService))
-                        .successHandler(oAuth2AuthenticationSuccessHandler)
-                        .failureHandler(oAuth2AuthenticationFailureHandler)
                 )
                 // JWT 필터 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
