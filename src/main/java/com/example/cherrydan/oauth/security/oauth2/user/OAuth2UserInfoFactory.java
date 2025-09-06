@@ -2,7 +2,7 @@ package com.example.cherrydan.oauth.security.oauth2.user;
 
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.OAuthException;
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 
 import java.util.Map;
 
