@@ -20,6 +20,7 @@ public class BookmarkResponseDTO {
     private Long campaignId;
     private Long userId;
     private String reviewerAnnouncementStatus;
+    @Schema(description = "상태 보조 라벨 (형식 통일을 위한 placeholder 필드, 항상 null)", nullable = true)
     private String subStatusLabel;
     private String campaignTitle;
     private String benefit;
