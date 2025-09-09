@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import com.example.cherrydan.common.util.CloudfrontUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Builder
