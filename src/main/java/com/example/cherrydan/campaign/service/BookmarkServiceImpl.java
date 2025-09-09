@@ -4,7 +4,6 @@ import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.dto.BookmarkDeleteDTO;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
-import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.user.domain.User;
