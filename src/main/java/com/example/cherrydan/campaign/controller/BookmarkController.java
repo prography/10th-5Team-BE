@@ -24,7 +24,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import com.example.cherrydan.common.response.PageListResponseDTO;
-import com.example.cherrydan.campaign.dto.BookmarkSplitResponseDTO;
 import jakarta.validation.Valid;
 
 @Tag(name = "Bookmark", description = "캠페인 북마크(찜) 관련 API")
