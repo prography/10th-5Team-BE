@@ -17,7 +17,8 @@ public class NoticeBannerResponseDTO {
     private String backgroundColor;
     private String bannerType; // NOTICE, EVENT, AD 등
     private String linkType;   // INTERNAL, EXTERNAL
+    @Schema(description = "내부 이동용(상세 id)", nullable = true)
     private Long targetId;     // 내부 이동용(상세 id)
-    private String targetUrl;  // 외부 이동용(광고 url)
-    private LocalDateTime updatedAt;
+    @Schema(description = "외부 이동용 URL", nullable = true)
+    private String targetUrl;  // 외부 이동용 URL
 } 

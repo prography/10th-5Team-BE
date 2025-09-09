@@ -139,3 +139,9 @@ management:
       enabled: true
     livenessstate:
       enabled: true
+
+springdoc:
+  swagger-ui:
+    doc-expansion: list
+    defaultModelsExpandDepth: -1
+    defaultModelExpandDepth: 5
