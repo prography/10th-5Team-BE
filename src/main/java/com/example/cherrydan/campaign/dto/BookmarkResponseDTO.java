@@ -47,7 +47,7 @@ public class BookmarkResponseDTO {
                 .applicantCount(campaign.getApplicantCount())
                 .recruitCount(campaign.getRecruitCount())
                 .snsPlatforms(getPlatforms(campaign))
-                .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
+                .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getApplyEnd()))
                 .campaignSite(getCampaignSiteLabel(campaign.getSourceSite()))
                 .build();
     }
@@ -75,7 +75,7 @@ public class BookmarkResponseDTO {
         } else if (days < 0) {
             return "모집이 종료되었어요";
         } else {
-            return "오늘이 마감일!";
+            return "D-Day";
         }
     }
 
