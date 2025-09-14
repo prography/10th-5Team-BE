@@ -1,6 +1,7 @@
 package com.example.cherrydan.activity.repository;
 
 import com.example.cherrydan.activity.domain.ActivityAlert;
+import com.example.cherrydan.activity.domain.ActivityAlertType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Long> {
@@ -19,6 +21,12 @@ public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Lo
      */
     @Query("SELECT aa FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isVisibleToUser = true ORDER BY aa.alertDate DESC")
     Page<ActivityAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId, Pageable pageable);
+
+    /**
+     * 사용자의 활동 알림 개수 조회
+     */
+    @Query("SELECT COUNT(aa) FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isVisibleToUser = true")
+    Long countByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId);
 
 
     /**
