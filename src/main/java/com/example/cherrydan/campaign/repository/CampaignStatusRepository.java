@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.campaign.domain.CampaignType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -76,4 +77,73 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
            "  CASE WHEN :status = 3 THEN c.contentSubmissionEnd END DESC, " +
            "  CASE WHEN :status = 4 THEN c.resultAnnouncement END DESC")
     List<CampaignStatus> findTop4ByUserAndStatusAndExpired(@Param("user") User user, @Param("status") CampaignStatusType status, @Param("today") LocalDate today);
+    
+    /**
+     * 결과 발표일 APPLY 상태 조회 (페이징, 알림 허용 사용자만)
+     */
+    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+           "JOIN FETCH cs.campaign c " +
+           "JOIN FETCH cs.user u " +
+           "JOIN UserFCMToken ud ON ud.userId = u.id " +
+           "WHERE cs.status = :status " +
+           "AND c.reviewerAnnouncement = :date " +
+           "AND cs.isActive = true " +
+           "AND u.isActive = true " +
+           "AND ud.isAllowed = true " +
+           "AND ud.isActive = true")
+    Page<CampaignStatus> findByStatusAndReviewerAnnouncementDate(
+        @Param("status") CampaignStatusType status, 
+        @Param("date") LocalDate date,
+        Pageable pageable);
+    
+    /**
+     * SELECTED + REGION 타입 방문 마감 조회 (페이징, 알림 허용 사용자만)
+     */
+    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+           "JOIN FETCH cs.campaign c " +
+           "JOIN FETCH cs.user u " +
+           "JOIN UserFCMToken ud ON ud.userId = u.id " +
+           "WHERE cs.status = :selectedStatus " +
+           "AND c.campaignType = :regionType " +
+           "AND c.contentSubmissionEnd = :visitEndDate " +
+           "AND cs.isActive = true " +
+           "AND u.isActive = true " +
+           "AND ud.isAllowed = true " +
+           "AND ud.isActive = true")
+    Page<CampaignStatus> findSelectedRegionCampaignsByVisitEndDate(
+        @Param("visitEndDate") LocalDate visitEndDate,
+        Pageable pageable,
+        @Param("selectedStatus") CampaignStatusType selectedStatus,
+        @Param("regionType") CampaignType regionType);
+
+    default Page<CampaignStatus> findSelectedRegionCampaignsByVisitEndDate(
+        LocalDate visitEndDate, Pageable pageable) {
+        return findSelectedRegionCampaignsByVisitEndDate(visitEndDate, pageable, 
+            CampaignStatusType.SELECTED, CampaignType.REGION);
+    }
+    
+    /**
+     * REVIEWING 상태 리뷰 마감 조회 (페이징, 알림 허용 사용자만)
+     */
+    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+           "JOIN FETCH cs.campaign c " +
+           "JOIN FETCH cs.user u " +
+           "JOIN UserFCMToken ud ON ud.userId = u.id " +
+           "WHERE cs.status = :reviewingStatus " +
+           "AND c.contentSubmissionEnd = :reviewEndDate " +
+           "AND cs.isActive = true " +
+           "AND u.isActive = true " +
+           "AND ud.isAllowed = true " +
+           "AND ud.isActive = true")
+    Page<CampaignStatus> findReviewingCampaignsByReviewEndDate(
+        @Param("reviewEndDate") LocalDate reviewEndDate,
+        Pageable pageable,
+        @Param("reviewingStatus") CampaignStatusType reviewingStatus);
+    
+    // 오버로딩 메서드 (파라미터 간소화)
+    default Page<CampaignStatus> findReviewingCampaignsByReviewEndDate(
+        LocalDate reviewEndDate, Pageable pageable) {
+        return findReviewingCampaignsByReviewEndDate(reviewEndDate, pageable, 
+            CampaignStatusType.REVIEWING);
+    }
 } 

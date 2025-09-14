@@ -33,17 +33,6 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     List<Bookmark> findByUserAndCampaignIdIn(User user, List<Long> campaignIds);
 
     /**
-     * 특정 날짜에 마감되는 활성 캠페인의 북마크들을 조회 (페치 조인 포함)
-     */
-    @Query("SELECT b FROM Bookmark b " +
-           "JOIN FETCH b.campaign c " +
-           "JOIN FETCH b.user u " +
-           "WHERE b.isActive = true " +
-           "AND c.isActive = true " +
-           "AND c.applyEnd = :applyEndDate")
-    List<Bookmark> findActiveBookmarksWithCampaignAndUserByApplyEndDate(@Param("applyEndDate") LocalDate applyEndDate);
-
-    /**
      * 특정 사용자가 북마크한 캠페인 ID들을 벌크 조회 (N+1 문제 해결)
      */
     @Query("SELECT b.campaign.id FROM Bookmark b " +
@@ -58,4 +47,19 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Modifying
     @Query("DELETE FROM Bookmark b WHERE b.user = :user AND b.campaign.id IN :campaignIds")
     void deleteByUserAndCampaignIds(@Param("user") User user, @Param("campaignIds") List<Long> campaignIds);
+
+    /**
+     * 마감 D-1, D-day 북마크 조회 (페이징, 알림 허용 사용자만)
+     */
+    @Query("SELECT DISTINCT b FROM Bookmark b " +
+           "JOIN FETCH b.campaign c " +
+           "JOIN FETCH b.user u " +
+           "JOIN UserFCMToken ud ON ud.userId = u.id " +
+           "WHERE c.applyEnd = :applyEndDate " +
+           "AND b.isActive = true " +
+           "AND c.isActive = true " +
+           "AND u.isActive = true " +
+           "AND ud.isAllowed = true " +
+           "AND ud.isActive = true")
+    Page<Bookmark> findActiveBookmarksByApplyEndDate(@Param("applyEndDate") LocalDate applyEndDate, Pageable pageable);
 } 
