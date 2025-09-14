@@ -13,6 +13,9 @@ import java.time.LocalDate;
     indexes = {
         @Index(name = "idx_user_visible_alert_date", columnList = "user_id, is_visible_to_user, alert_date"),
         @Index(name = "idx_alert_stage_visible", columnList = "alert_stage, is_visible_to_user")
+    },
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_activity_alert", columnNames = {"user_id", "campaign_id", "alert_type", "alert_date"})
     })
 @Getter
 @NoArgsConstructor
@@ -34,6 +37,10 @@ public class ActivityAlert extends BaseTimeEntity {
 
     @Column(name = "alert_date", nullable = false)
     private LocalDate alertDate;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "alert_type", nullable = false, length = 50)
+    private ActivityAlertType alertType;
 
     @Column(name = "alert_stage", nullable = false)
     @Builder.Default
@@ -51,11 +58,15 @@ public class ActivityAlert extends BaseTimeEntity {
         this.alertStage = 1;
     }
 
-    public boolean isNotified() {
-        return alertStage > 0;
-    }
-
     public void markAsRead() {
         this.isRead = true;
+    }
+    
+    public String getNotificationTitle() {
+        return alertType.getTitle();
+    }
+    
+    public String getNotificationBody() {
+        return alertType.getBodyTemplate(campaign.getTitle());
     }
 }
