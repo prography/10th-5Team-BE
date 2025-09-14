@@ -28,8 +28,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class KeywordProcessingService {
-    
-    private final KeywordCampaignAlertRepository keywordAlertRepository;
     private final CampaignServiceImpl campaignService;
     private final NotificationService notificationService;
 
