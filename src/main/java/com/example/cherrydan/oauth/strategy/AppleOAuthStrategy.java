@@ -1,4 +1,4 @@
-package com.example.cherrydan.oauthNew.strategy;
+package com.example.cherrydan.oauth.strategy;
 
 import com.example.cherrydan.common.exception.AuthException;
 import com.example.cherrydan.common.exception.ErrorMessage;
