@@ -29,6 +29,7 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.CampaignException;
 import com.example.cherrydan.campaign.domain.LocalCategory;
 import com.example.cherrydan.campaign.domain.ProductCategory;
+import com.example.cherrydan.user.repository.KeywordCampaignAlertRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class CampaignServiceImpl implements CampaignService {
 
     private final CampaignRepository campaignRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final KeywordCampaignAlertRepository keywordCampaignAlertRepository;
 
     @Override
     public PageListResponseDTO<CampaignResponseDTO> getCampaigns(CampaignType type, String sort, Pageable pageable, Long userId) {
@@ -164,6 +166,9 @@ public class CampaignServiceImpl implements CampaignService {
             .collect(Collectors.toList());
         
         Set<Long> bookmarkedCampaignIds = bookmarkRepository.findBookmarkedCampaignIds(userId, campaignIds);
+        
+        // 키워드 알림 읽음 처리
+        keywordCampaignAlertRepository.markAsReadByUserAndKeyword(userId, keyword.trim(), date);
         
         List<CampaignResponseDTO> content = campaigns.stream()
             .map(campaign -> {
