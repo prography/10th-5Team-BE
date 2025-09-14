@@ -22,4 +22,16 @@ public class AsyncConfig {
         executor.initialize();
         return executor;
     }
+    
+    @Bean("alertTaskExecutor")
+    public Executor alertTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);      // 순차 처리 (t2.micro 최적화)
+        executor.setMaxPoolSize(2);       // 최대 2개까지만
+        executor.setQueueCapacity(10);    // 큐 크기 축소
+        executor.setThreadNamePrefix("alert-batch-");
+        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+        return executor;
+    }
 }
