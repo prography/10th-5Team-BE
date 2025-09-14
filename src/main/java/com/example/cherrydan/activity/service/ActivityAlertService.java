@@ -3,6 +3,7 @@ package com.example.cherrydan.activity.service;
 import com.example.cherrydan.activity.domain.ActivityAlert;
 import com.example.cherrydan.activity.dto.ActivityAlertResponseDTO;
 import com.example.cherrydan.activity.repository.ActivityAlertRepository;
+import com.example.cherrydan.activity.strategy.AlertStrategy;
 import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
@@ -22,6 +23,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -31,58 +33,23 @@ import java.util.stream.Collectors;
 public class ActivityAlertService {
     
     private final ActivityAlertRepository activityAlertRepository;
-    private final BookmarkRepository bookmarkRepository;
     private final UserRepository userRepository;
     private final ActivityProcessingService activityProcessingService;
+    private final List<AlertStrategy> alertStrategies;
 
     /**
-     * 활동 알림 대상 업데이트 (북마크된 캠페인 중 apply_end가 3일 남은 것들)
+     * 활동 알림 대상 업데이트 (모든 Strategy 실행)
      */
     @Transactional
     public void updateActivityAlerts() {
-        
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        LocalDate threeDaysLater = today.plusDays(3);
+
+        alertStrategies.forEach(strategy -> 
+            activityProcessingService.processBatchAlertsAsync(strategy, today)
+        );
         
-        // 3일 후 마감되는 활성 캠페인의 북마크들을 조회 (페치 조인으로 N+1 문제 해결)
-        List<Bookmark> activeBookmarks = bookmarkRepository
-                .findActiveBookmarksWithCampaignAndUserByApplyEndDate(threeDaysLater);
-        
-        if (activeBookmarks.isEmpty()) {
-            log.info("3일 후 마감되는 북마크된 캠페인이 없습니다.");
-            return;
-        }
-        
-        
-        // 캠페인별로 그룹핑해서 효율적으로 처리
-        Map<Campaign, List<Bookmark>> campaignGroups = activeBookmarks.stream()
-                .collect(Collectors.groupingBy(Bookmark::getCampaign));
-        
-        // 모든 캠페인에 대해 비동기 처리 시작 (예외 처리 포함)
-        List<CompletableFuture<List<ActivityAlert>>> safeFutures = campaignGroups.entrySet().stream()
-            .map(entry -> activityProcessingService.processCampaignAsync(entry.getKey(), entry.getValue(), today)
-                .exceptionally(throwable -> {
-                    log.error("캠페인 '{}' 처리 실패: {}", entry.getKey().getTitle(), throwable.getMessage());
-                    return new ArrayList<>();
-                }))
-            .toList();
-        
-        // 모든 비동기 작업 완료 대기
-        CompletableFuture.allOf(safeFutures.toArray(new CompletableFuture[0])).join();
-        
-        // 결과 수집
-        List<ActivityAlert> alertsToSave = safeFutures.stream()
-            .map(CompletableFuture::join)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-        
-        // 벌크 저장으로 성능 최적화
-        if (!alertsToSave.isEmpty()) {
-            activityAlertRepository.saveAll(alertsToSave);
-            log.info("벌크 저장 완료: {}개 활동 알림", alertsToSave.size());
-        }
-        
-        log.info("=== 활동 알림 업데이트 작업 완료: 총 {}개 알림 생성 ===", alertsToSave.size());
+        log.info("활동 알림 생성 작업 시작 - {} 개 전략 실행", alertStrategies.size());
+        // 메서드 즉시 반환
     }
 
     /**
@@ -147,6 +114,15 @@ public class ActivityAlertService {
         return activityAlertRepository.findByUserIdAndIsVisibleToUserTrue(userId, pageable)
                 .map(ActivityAlertResponseDTO::fromEntity);
     }
+
+    /**
+     * 사용자의 활동 알림 개수 조회 (페이지네이션)
+     */
+    @Transactional(readOnly = true)
+    public Long getUserActivityAlertsCount(Long userId) {
+        return activityAlertRepository.countByUserIdAndIsVisibleToUserTrue(userId);
+    }
+
 
     /**
      * 활동 알림 삭제 (배열)
