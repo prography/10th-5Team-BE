@@ -58,6 +58,18 @@ public class ActivityController {
     }
 
     @Operation(
+        summary = "북마크 기반 활동 알림 개수 조회",
+        description = "사용자의 북마크 기반 활동 알림 개수를 조회합니다."
+    )
+    @GetMapping("/bookmark-alerts/count")
+    public ApiResponse<Long> getBookmarkActivityAlertsCount(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl currentUser
+    ) {
+        Long alertsCount = activityAlertService.getUserActivityAlertsCount(currentUser.getId());
+        return ApiResponse.success("북마크 활동 알림 개수 조회 성공", alertsCount);
+    }
+
+    @Operation(
         summary = "북마크 기반 활동 알림 삭제",
         description = "선택한 북마크 기반 활동 알림들을 삭제합니다. 본인의 알림이 아닌 경우 403 에러를 반환합니다."
     )
