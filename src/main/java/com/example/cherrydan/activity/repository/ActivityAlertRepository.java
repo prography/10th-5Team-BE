@@ -39,6 +39,15 @@ public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Lo
     List<ActivityAlert> findTodayUnnotifiedAlerts(@Param("alertDate") LocalDate alertDate);
 
     /**
+     * 당일 생성된 알림 미발송 활동 알림들 페이징 조회 (Campaign과 User를 Fetch Join으로 함께 조회)
+     */
+    @Query("SELECT aa FROM ActivityAlert aa " +
+           "JOIN FETCH aa.campaign c " +
+           "JOIN FETCH aa.user u " +
+           "WHERE aa.alertStage = 0 AND aa.isVisibleToUser = true AND aa.alertDate = :alertDate")
+    Page<ActivityAlert> findTodayUnnotifiedAlertsWithPaging(@Param("alertDate") LocalDate alertDate, Pageable pageable);
+
+    /**
      * 사용자와 캠페인으로 알림 존재 여부 확인
      */
     @Query("SELECT COUNT(aa) > 0 FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.campaign.id = :campaignId AND aa.isVisibleToUser = true")

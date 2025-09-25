@@ -5,37 +5,40 @@ import com.example.cherrydan.activity.dto.ActivityAlertResponseDTO;
 import com.example.cherrydan.activity.repository.ActivityAlertRepository;
 import com.example.cherrydan.activity.strategy.AlertStrategy;
 import com.example.cherrydan.campaign.domain.Bookmark;
-import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
+import com.example.cherrydan.fcm.dto.NotificationRequest;
+import com.example.cherrydan.fcm.dto.NotificationResultDto;
+import com.example.cherrydan.fcm.service.NotificationService;
 import com.example.cherrydan.user.dto.AlertIdsRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ActivityAlertService {
-    
+
     private final ActivityAlertRepository activityAlertRepository;
     private final UserRepository userRepository;
     private final ActivityProcessingService activityProcessingService;
     private final List<AlertStrategy> alertStrategies;
+    private final NotificationService notificationService;
+
+    private static final int BATCH_SIZE = 500;
 
     /**
      * 활동 알림 대상 업데이트 (모든 Strategy 실행)
@@ -57,53 +60,88 @@ public class ActivityAlertService {
      */
     @Transactional
     public void sendActivityNotifications() {
-        
+
         LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
-        List<ActivityAlert> unnotifiedAlerts = activityAlertRepository.findTodayUnnotifiedAlerts(today);
-        
-        if (unnotifiedAlerts.isEmpty()) {
-            log.info("발송할 활동 알림이 없습니다.");
-            return;
-        }
-        
-        // 캠페인별로 그룹핑 (같은 캠페인 = 같은 메시지)
-        Map<Campaign, List<ActivityAlert>> groupedByCampaign = unnotifiedAlerts.stream()
-                .collect(Collectors.groupingBy(ActivityAlert::getCampaign));
-        
-        // 캠페인별 병렬 알림 발송 (예외 처리 포함)
-        List<CompletableFuture<List<ActivityAlert>>> futures = groupedByCampaign.entrySet().stream()
-            .map(entry -> activityProcessingService.sendActivityNotificationAsync(entry.getKey(), entry.getValue())
-                .exceptionally(throwable -> {
-                    log.error("캠페인 '{}' 알림 발송 실패: {}", entry.getKey().getTitle(), throwable.getMessage());
-                    return new ArrayList<>();
-                }))
-            .toList();
-        
-        // 모든 비동기 작업 완료 대기
-        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-        
-        // 결과 수집
-        List<ActivityAlert> allAlertsToUpdate = futures.stream()
-            .map(CompletableFuture::join)
-            .flatMap(List::stream)
-            .collect(Collectors.toList());
-        
-        int totalSentCount = allAlertsToUpdate.size();
-        
-        // 성공한 알림들 상태 업데이트
-        if (totalSentCount > 0) {
+
+        // 페이징 설정
+        Pageable pageable = PageRequest.of(0, BATCH_SIZE);
+        Page<ActivityAlert> page;
+        int totalSentCount = 0;
+        int totalProcessed = 0;
+
+        log.info("=== 활동 알림 발송 시작 ===");
+
+        // 페이지 단위로 처리
+        do {
+            page = activityAlertRepository.findTodayUnnotifiedAlertsWithPaging(today, pageable);
+
+            if (page.isEmpty()) {
+                log.info("발송할 활동 알림이 없습니다.");
+                break;
+            }
+
+            // 배치 처리 및 즉시 상태 업데이트
+            int batchSentCount = processBatchNotifications(page.getContent());
+            totalSentCount += batchSentCount;
+            totalProcessed += page.getNumberOfElements();
+
+            log.info("배치 처리 완료: {} / {} 건 발송 성공", batchSentCount, page.getNumberOfElements());
+
+            // 다음 페이지로 이동
+            pageable = page.nextPageable();
+
+        } while (page.hasNext());
+
+        log.info("=== 활동 알림 발송 완료: 총 {} / {} 건 발송 ===", totalSentCount, totalProcessed);
+    }
+
+    /**
+     * 배치 단위 알림 발송 및 상태 업데이트
+     * @return 성공적으로 발송된 알림 개수
+     */
+    private int processBatchNotifications(List<ActivityAlert> batch) {
+        int successCount = 0;
+
+        for (ActivityAlert alert : batch) {
             try {
-                allAlertsToUpdate.forEach(ActivityAlert::markAsNotified);
-                activityAlertRepository.saveAll(allAlertsToUpdate);
-                
-                log.info("알림 상태 벌크 업데이트 완료: 성공한 알림 {}개", allAlertsToUpdate.size());
-                
+                // 개별 알림 발송 (ActivityAlert가 이미 모든 정보를 가지고 있음)
+                NotificationRequest request = NotificationRequest.builder()
+                    .title(alert.getNotificationTitle())
+                    .body(alert.getNotificationBody())
+                    .data(Map.of(
+                        "type", "activity_alert",
+                        "alert_type", alert.getAlertType().name(),
+                        "campaign_id", String.valueOf(alert.getCampaign().getId()),
+                        "campaign_title", alert.getCampaign().getTitle(),
+                        "action", "open_activity_page"
+                    ))
+                    .priority("high")
+                    .build();
+
+                // 사용자에게 발송
+                NotificationResultDto result = notificationService.sendNotificationToUsers(
+                    List.of(alert.getUser().getId()), request);
+
+                if (result.getSuccessCount() > 0) {
+                    // 성공 시 즉시 상태 업데이트
+                    alert.markAsNotified();
+                    activityAlertRepository.save(alert);
+                    successCount++;
+
+                    log.debug("알림 발송 성공: userId={}, alertType={}, campaignId={}",
+                        alert.getUser().getId(), alert.getAlertType(), alert.getCampaign().getId());
+                } else {
+                    log.debug("알림 발송 실패: userId={}, alertType={}, campaignId={}",
+                        alert.getUser().getId(), alert.getAlertType(), alert.getCampaign().getId());
+                }
+
             } catch (Exception e) {
-                log.error("알림 상태 업데이트 실패: {}", e.getMessage());
+                log.error("알림 발송 중 오류: userId={}, alertId={}, error={}",
+                    alert.getUser().getId(), alert.getId(), e.getMessage());
             }
         }
-        
-        log.info("=== 활동 알림 발송 완료: 총 {}건 발송 ===", totalSentCount);
+
+        return successCount;
     }
 
     /**

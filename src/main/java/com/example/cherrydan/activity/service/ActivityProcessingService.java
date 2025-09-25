@@ -38,51 +38,52 @@ public class ActivityProcessingService {
      * 배치 처리 방식으로 알림 생성
      */
     @Async("alertTaskExecutor")
+    @Transactional
     public CompletableFuture<Void> processBatchAlertsAsync(
             AlertStrategy strategy, LocalDate today) {
-        
+
         String strategyName = strategy.getClass().getSimpleName();
         List<ActivityAlert> batch = new ArrayList<>(BATCH_SIZE);
         int totalProcessed = 0;
         int totalSkipped = 0;
         long startTime = System.currentTimeMillis();
-        
+
         try {
             log.info("[{}] 배치 처리 시작", strategyName);
-            
+
             // Iterator 패턴으로 스트리밍 처리
             Iterator<ActivityAlert> iterator = strategy.generateAlertsIterator(today);
-            
+
             while (iterator.hasNext()) {
                 batch.add(iterator.next());
-                
+
                 if (batch.size() >= BATCH_SIZE) {
                     BatchResult result = saveBatchWithDuplicateHandling(batch);
                     totalProcessed += result.processed();
                     totalSkipped += result.skipped();
                     batch.clear();
-                    
-                    log.debug("[{}] 배치 저장: {} 건 처리, {} 건 스킵", 
+
+                    log.debug("[{}] 배치 저장: {} 건 처리, {} 건 스킵",
                         strategyName, result.processed(), result.skipped());
                 }
             }
-            
+
             // 남은 배치 처리
             if (!batch.isEmpty()) {
                 BatchResult result = saveBatchWithDuplicateHandling(batch);
                 totalProcessed += result.processed();
                 totalSkipped += result.skipped();
             }
-            
+
             long elapsed = System.currentTimeMillis() - startTime;
 
             log.info("[{}] 완료: {} 건 처리, {} 건 중복 스킵 (소요시간: {}ms)",
                 strategyName, totalProcessed, totalSkipped, elapsed);
-            
+
         } catch (Exception e) {
             log.error("[{}] 실패: {}", strategyName, e.getMessage(), e);
         }
-        
+
         return CompletableFuture.completedFuture(null);
     }
     
@@ -93,7 +94,6 @@ public class ActivityProcessingService {
         int skipped = 0;
         
         try {
-            // 벌크 저장 시도 (alertStage = 0으로 저장 - 아웃박스)
             activityAlertRepository.saveAllAndFlush(batch);
             processed = batch.size();
             
