@@ -1,6 +1,7 @@
 package com.example.cherrydan.common.util;
 
 import com.example.cherrydan.activity.domain.ActivityAlert;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,6 +14,7 @@ import java.util.function.Function;
  * 페이징 기반 ActivityAlert Iterator
  * 메모리 효율적인 대량 데이터 처리를 위한 유틸리티
  */
+@Slf4j
 public class PagedAlertIterator<T> implements Iterator<ActivityAlert> {
     
     private final Function<Pageable, Page<T>> pageLoader;
@@ -33,9 +35,9 @@ public class PagedAlertIterator<T> implements Iterator<ActivityAlert> {
         if (!hasMorePages) {
             return;
         }
-        System.out.println("Loading page: " + currentPage);
+        log.info("Loading page: {}", currentPage);
         Page<T> page = pageLoader.apply(PageRequest.of(currentPage++, PAGE_SIZE));
-        System.out.println("Loaded pages: " + page.getTotalPages() + ", Current page size: " + page.getNumberOfElements());
+        log.info("Loaded pages: {}, Current page size: {}", page.getTotalPages(), page.getNumberOfElements());
         currentIterator = page.getContent().iterator();
         hasMorePages = page.hasNext();
     }
