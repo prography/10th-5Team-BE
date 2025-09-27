@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -54,6 +55,8 @@ public class UserKeywordController {
             - ?sort=alertDate,desc&sort=id,asc (복수 정렬)
             - ?sort=alertDate,desc (단일 정렬, 기본값)
             - ?sort=alertDate,asc (오래된 순)
+            
+            sort : 정렬 기준 (예: alertDate,desc) -> 선택사항
             
             **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """,
@@ -125,8 +128,11 @@ public class UserKeywordController {
             - ?page=0&size=20&keyword=고기
             - ?page=1&size=10&keyword=서울
             
-            **정렬**: 캠페인 생성 시각 내림차순 (고정)
-            **검색**: MySQL FULLTEXT 검색 사용 (ngram 파서)
+            page : 페이지 번호 
+            
+            size : 페이지 크기 (한 페이지당 캠페인 수)
+            
+            sort : 정렬 기준 (예: reviewerAnnouncement,desc) -> 선택사항
             
             **주의:** 이는 Request Body가 아닌 **Query Parameter**입니다.
             """,
