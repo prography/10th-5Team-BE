@@ -2,7 +2,6 @@ package com.example.cherrydan.campaign.controller;
 
 import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
 import com.example.cherrydan.common.response.EmptyResponse;
