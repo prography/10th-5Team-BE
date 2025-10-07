@@ -163,21 +163,22 @@ public class ActivityAlertService {
 
 
     /**
-     * 활동 알림 삭제 (배열)
+     * 활동 알림 삭제 (소프트 삭제)
      */
     @Transactional
     public void deleteActivityAlert(Long userId, List<Long> alertIds) {
         List<ActivityAlert> alerts = activityAlertRepository.findAllById(alertIds);
-        
+
         // 모든 알림이 해당 사용자의 것인지 확인
         for (ActivityAlert alert : alerts) {
             if (!alert.getUser().getId().equals(userId)) {
                 throw new UserException(ErrorMessage.ACTIVITY_ALERT_ACCESS_DENIED);
             }
+            alert.hide();
         }
-        
-        activityAlertRepository.deleteAll(alerts);
-        log.info("활동 알림 삭제 완료: userId={}, count={}", userId, alertIds.size());
+
+        activityAlertRepository.saveAll(alerts);
+        log.info("활동 알림 숨김 처리 완료: userId={}, count={}", userId, alertIds.size());
     }
 
     /**

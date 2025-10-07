@@ -47,7 +47,7 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
         // 발송 완료 상태로 변경 (간단!)
         this.alertStage = 1;
     }
-    
+
     public boolean isNotified() {
         return alertStage > 0;
     }
@@ -57,5 +57,12 @@ public class KeywordCampaignAlert extends BaseTimeEntity {
      */
     public void markAsRead() {
         this.isRead = true;
+    }
+
+    /**
+     * 숨김 처리 (소프트 삭제)
+     */
+    public void hide() {
+        this.isVisibleToUser = false;
     }
 } 

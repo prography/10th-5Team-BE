@@ -190,21 +190,22 @@ public class UserKeywordService {
     }
 
     /**
-     * 맞춤형 알림 삭제 (배열)
+     * 맞춤형 알림 삭제 (소프트 삭제)
      */
     @Transactional
     public void deleteKeywordAlert(Long userId, List<Long> alertIds) {
         List<KeywordCampaignAlert> alerts = keywordAlertRepository.findAllById(alertIds);
-        
+
         // 모든 알림이 해당 사용자의 것인지 확인
         for (KeywordCampaignAlert alert : alerts) {
             if (!alert.getUser().getId().equals(userId)) {
                 throw new UserException(ErrorMessage.USER_KEYWORD_ACCESS_DENIED);
             }
+            alert.hide();
         }
-        
-        keywordAlertRepository.deleteAll(alerts);
-        log.info("키워드 알림 삭제 완료: userId={}, count={}", userId, alertIds.size());
+
+        keywordAlertRepository.saveAll(alerts);
+        log.info("키워드 알림 숨김 처리 완료: userId={}, count={}", userId, alertIds.size());
     }
 
     /**
