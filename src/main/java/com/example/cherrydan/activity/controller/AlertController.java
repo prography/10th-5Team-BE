@@ -30,7 +30,7 @@ public class AlertController {
     public ResponseEntity<ApiResponse<UnreadAlertCountResponseDTO>> getUnreadAlertCount(
             @Parameter(hidden = true) @AuthenticationPrincipal UserDetailsImpl user
     ) {
-        UnreadAlertCountResponseDTO result = alertService.getUnreadAlertCount(user.getUserId());
+        UnreadAlertCountResponseDTO result = alertService.getUnreadAlertCount(user.getId());
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 }
