@@ -34,32 +34,32 @@ public class SnsController {
 
     @Operation(summary = "OAuth 인증 URL 생성")
     @GetMapping("/oauth/{platform}/auth-url")
-    public ApiResponse<String> getAuthUrl(@PathVariable("platform") String platform) {
+    public ResponseEntity<ApiResponse<String>> getAuthUrl(@PathVariable("platform") String platform) {
         SnsPlatform snsPlatform = SnsPlatform.fromPlatformCode(platform);
         String authUrl = snsOAuthService.getAuthUrl(snsPlatform);
-        return ApiResponse.success(snsPlatform.getDisplayName() + " 인증 URL 생성 성공", authUrl);
+        return ResponseEntity.ok(ApiResponse.success(snsPlatform.getDisplayName() + " 인증 URL 생성 성공", authUrl));
     }
 
     @Operation(summary = "OAuth 콜백 처리")
     @GetMapping("/oauth/{platform}/callback")
-    public Mono<ApiResponse<SnsConnectionResponse>> handleOAuthCallback(
+    public Mono<ResponseEntity<ApiResponse<SnsConnectionResponse>>> handleOAuthCallback(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @PathVariable("platform") String platform,
             @RequestParam("code") String code) {
         SnsPlatform snsPlatform = SnsPlatform.fromPlatformCode(platform);
         User user = userService.getUserById(userDetails.getId());
-        
+
         return snsOAuthService.connect(user, code, snsPlatform)
-                .map(response -> ApiResponse.success(snsPlatform.getDisplayName() + " 연동이 완료되었습니다.", response));
+                .map(response -> ResponseEntity.ok(ApiResponse.success(snsPlatform.getDisplayName() + " 연동이 완료되었습니다.", response)));
     }
 
     @Operation(summary = "사용자 SNS 연동 목록 조회")
     @GetMapping("/connections")
-    public ApiResponse<List<SnsConnectionResponse>> getConnections(
+    public ResponseEntity<ApiResponse<List<SnsConnectionResponse>>> getConnections(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         User user = userService.getUserById(userDetails.getId());
         List<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user);
-        return ApiResponse.success("SNS 연동 목록 조회 성공", response);
+        return ResponseEntity.ok(ApiResponse.success("SNS 연동 목록 조회 성공", response));
     }
 
     @Operation(summary = "SNS 연동 해제")
