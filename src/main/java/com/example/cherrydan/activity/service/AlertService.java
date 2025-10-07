@@ -21,13 +21,13 @@ public class AlertService {
      */
     @Transactional(readOnly = true)
     public UnreadAlertCountResponseDTO getUnreadAlertCount(Long userId) {
-        long activityCount = activityAlertRepository.countUnreadByUserId(userId);
-        long keywordCount = keywordCampaignAlertRepository.countUnreadByUserId(userId);
+        Long activityCount = activityAlertRepository.countUnreadByUserId(userId);
+        Long keywordCount = keywordCampaignAlertRepository.countUnreadByUserId(userId);
 
         return UnreadAlertCountResponseDTO.builder()
-                .totalCount((int) (activityCount + keywordCount))
-                .activityAlertCount((int) activityCount)
-                .keywordAlertCount((int) keywordCount)
+                .totalCount(activityCount + keywordCount)
+                .activityAlertCount(activityCount)
+                .keywordAlertCount(keywordCount)
                 .build();
     }
 }
