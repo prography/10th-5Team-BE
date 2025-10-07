@@ -52,4 +52,10 @@ public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Lo
      */
     @Query("SELECT COUNT(aa) > 0 FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.campaign.id = :campaignId AND aa.isVisibleToUser = true")
     boolean existsByUserIdAndCampaignId(@Param("userId") Long userId, @Param("campaignId") Long campaignId);
+
+    /**
+     * 사용자의 미읽은 활동 알림 개수 조회
+     */
+    @Query("SELECT COUNT(aa) FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isRead = false AND aa.isVisibleToUser = true")
+    long countUnreadByUserId(@Param("userId") Long userId);
 }

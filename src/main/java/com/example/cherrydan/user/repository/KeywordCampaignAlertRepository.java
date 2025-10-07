@@ -34,4 +34,10 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
     @Query("UPDATE KeywordCampaignAlert kca SET kca.isRead = true WHERE kca.user.id = :userId AND kca.alertDate = :date AND kca.keyword = :keyword AND kca.isRead = false")
     @org.springframework.data.jpa.repository.Modifying
     void markAsReadByUserAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("date") LocalDate date);
+
+    /**
+     * 사용자의 미읽은 키워드 알림 개수 조회
+     */
+    @Query("SELECT COUNT(kca) FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isRead = false AND kca.isVisibleToUser = true")
+    long countUnreadByUserId(@Param("userId") Long userId);
 } 
