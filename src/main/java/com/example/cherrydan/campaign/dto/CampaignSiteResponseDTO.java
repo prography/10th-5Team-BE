@@ -15,18 +15,23 @@ import com.example.cherrydan.common.util.CloudfrontUtil;
 public class CampaignSiteResponseDTO {
 
     @Deprecated
-    @Schema(description = "기존 플랫폼 한글명(deprecated(v1.0.2까지))", deprecated = true)
+    @Schema(description = "기존 플랫폼 한글명(deprecated)", deprecated = true, nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String siteNameKr;
 
     @Deprecated
-    @Schema(description = "기존 플랫폼 영문명(deprecated(v1.0.2까지))", deprecated = true)
+    @Schema(description = "기존 플랫폼 영문명(deprecated)", deprecated = true, nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String siteNameEn;
 
     @Deprecated
-    @Schema(description = "기존 플랫폼 CDN URL(deprecated(v1.0.2까지))", deprecated = true)
+    @Schema(description = "기존 플랫폼 CDN URL(deprecated)", deprecated = true, nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String cdnUrl;
 
+    @Schema(description = "캠페인 플랫폼 이미지 URL", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteUrl;
+
+    @Schema(description = "캠페인 플랫폼 한글명", example = "레뷰", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteKr;
+
+    @Schema(description = "캠페인 플랫폼 영문 코드", example = "revu", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteEn;
 } 

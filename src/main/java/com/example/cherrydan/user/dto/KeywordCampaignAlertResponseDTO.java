@@ -15,20 +15,20 @@ import java.time.LocalDate;
 @Builder
 @Schema(description = "키워드 캠페인 알림 응답 DTO")
 public class KeywordCampaignAlertResponseDTO {
-    
-    @Schema(description = "알림 ID", example = "1")
+
+    @Schema(description = "알림 ID", example = "1", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
-    
-    @Schema(description = "매칭된 키워드", example = "뷰티")
+
+    @Schema(description = "매칭된 키워드", example = "뷰티", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String keyword;
-    
-    @Schema(description = "읽음 상태", example = "false")
+
+    @Schema(description = "읽음 상태", example = "false", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean isRead;
 
-    @Schema(description = "매칭된 캠페인 수", example = "10")
+    @Schema(description = "매칭된 캠페인 수", example = "10", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private Integer campaignCount;
 
-    @Schema(description = "알림 날짜", example = "2024-07-21")
+    @Schema(description = "알림 날짜", example = "2024-07-21", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDate alertDate;
     
     /**

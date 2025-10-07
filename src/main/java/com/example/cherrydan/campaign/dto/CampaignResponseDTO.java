@@ -17,19 +17,35 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @Builder
 public class CampaignResponseDTO {
+    @Schema(description = "캠페인 ID", example = "1", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
+
+    @Schema(description = "캠페인 제목", example = "[양주] 리치마트 양주점_피드&릴스", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String title;
+
+    @Schema(description = "캠페인 상세 URL", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String detailUrl;
+
+    @Schema(description = "혜택 정보", example = "5만원 상당 체험권 제공", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String benefit;
+
+    @Schema(description = "마감 상태 메시지", example = "신청 마감 3일 전", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String reviewerAnnouncementStatus;
+
+    @Schema(description = "신청자 수", example = "150", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer applicantCount;
+
+    @Schema(description = "모집 인원", example = "10", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Integer recruitCount;
 
     @Deprecated
-    @Schema(description = "플랫폼 이름(deprecated(v1.0.2까지))", deprecated = true)
+    @Schema(description = "플랫폼 이름(deprecated)", deprecated = true, nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     @JsonProperty("campaignSite")
     private String sourceSite;
+
+    @Schema(description = "캠페인 이미지 URL", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String imageUrl;
+
     @JsonIgnore private Boolean youtube;
     @JsonIgnore private Boolean shorts;
     @JsonIgnore private Boolean insta;
@@ -39,16 +55,27 @@ public class CampaignResponseDTO {
     @JsonIgnore private Boolean tiktok;
     @JsonIgnore private Boolean thread;
     @JsonIgnore private Boolean etc;
+
+    @Schema(description = "북마크 여부", example = "false", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private Boolean isBookmarked;
 
     @Deprecated
-    @Schema(description = "기존 플랫폼 이미지 URL(deprecated(v1.0.2까지))", deprecated = true)
+    @Schema(description = "기존 플랫폼 이미지 URL(deprecated)", deprecated = true, nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String campaignPlatformImageUrl;
-    
+
+    @Schema(description = "캠페인 플랫폼 이미지 URL", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteUrl;
+
+    @Schema(description = "캠페인 플랫폼 한글명", example = "레뷰", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteKr;
+
+    @Schema(description = "캠페인 플랫폼 영문 코드", example = "revu", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private String campaignSiteEn;
+
+    @Schema(description = "캠페인 타입", example = "DELIVERY", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private CampaignType campaignType;
+
+    @Schema(description = "경쟁률", example = "15.0", nullable = true, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Float competitionRate;
 
     @JsonProperty("snsPlatforms")
