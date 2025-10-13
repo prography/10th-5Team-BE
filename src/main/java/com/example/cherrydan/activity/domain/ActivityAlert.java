@@ -61,11 +61,15 @@ public class ActivityAlert extends BaseTimeEntity {
     public void markAsRead() {
         this.isRead = true;
     }
-    
+
+    public void hide() {
+        this.isVisibleToUser = false;
+    }
+
     public String getNotificationTitle() {
         return alertType.getTitle();
     }
-    
+
     public String getNotificationBody() {
         return alertType.getBodyTemplate(campaign.getTitle());
     }

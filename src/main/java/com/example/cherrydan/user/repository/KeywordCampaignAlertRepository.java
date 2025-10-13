@@ -4,6 +4,7 @@ import com.example.cherrydan.user.domain.KeywordCampaignAlert;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDate;
@@ -32,6 +33,12 @@ public interface KeywordCampaignAlertRepository extends JpaRepository<KeywordCam
      * 사용자가 키워드로 캠페인 조회시 해당 키워드 알림을 읽음 처리
      */
     @Query("UPDATE KeywordCampaignAlert kca SET kca.isRead = true WHERE kca.user.id = :userId AND kca.alertDate = :date AND kca.keyword = :keyword AND kca.isRead = false")
-    @org.springframework.data.jpa.repository.Modifying
+    @Modifying
     void markAsReadByUserAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, @Param("date") LocalDate date);
+
+    /**
+     * 사용자의 미읽은 키워드 알림 개수 조회
+     */
+    @Query("SELECT COUNT(kca) FROM KeywordCampaignAlert kca WHERE kca.user.id = :userId AND kca.isRead = false AND kca.isVisibleToUser = true")
+    Long countUnreadByUserId(@Param("userId") Long userId);
 } 
