@@ -19,6 +19,8 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+    private static final String INVALID_TOKEN_MESSAGE = "유효하지 않은 토큰입니다.";
+
     private final ObjectMapper objectMapper;
 
     @Override
@@ -32,7 +34,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
         ApiResponse<Void> errorResponse = ApiResponse.error(
                 HttpStatus.UNAUTHORIZED.value(),
-                "유효하지 않은 토큰입니다."
+                INVALID_TOKEN_MESSAGE
         );
 
         response.getWriter().write(objectMapper.writeValueAsString(errorResponse));
