@@ -1,5 +1,6 @@
 package com.example.cherrydan.oauth.config;
 
+import com.example.cherrydan.oauth.security.jwt.CustomAuthenticationEntryPoint;
 import com.example.cherrydan.oauth.security.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -46,10 +48,16 @@ public class SecurityConfig {
                         // 공지사항/홈 광고 배너 관련 경로
                         .requestMatchers("/api/noticeboard/**").permitAll()
                         .requestMatchers("/api/mypage/version").permitAll()
+                        // sns 연동 콜백
+                        .requestMatchers("/api/v1/sns/oauth/**").permitAll()
                         // 헬스 체크 관련
                         .requestMatchers("/actuator/**").permitAll()
                         // 나머지는 인증 필요
                         .anyRequest().authenticated()
+                )
+                // 인증 실패 시 커스텀 EntryPoint 사용
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
                 )
                 // JWT 필터 추가
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

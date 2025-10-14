@@ -94,6 +94,7 @@ public class JwtTokenProvider {
             throw e;
         } catch (UnsupportedJwtException e) {
             log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+            throw e;
         } catch (MalformedJwtException e) {
             log.error("잘못된 형식의 JWT 토큰입니다: {}", e.getMessage());
             throw e;
