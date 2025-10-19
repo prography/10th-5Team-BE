@@ -49,3 +49,6 @@ src/main/resources/.env
 ### Firebase ###
 firebase-service-account.json
 **/firebase-service-account*.json
+
+### Static Test Files ###
+src/main/resources/static/
