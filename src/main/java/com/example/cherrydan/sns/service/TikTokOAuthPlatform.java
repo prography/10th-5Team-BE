@@ -2,11 +2,15 @@ package com.example.cherrydan.sns.service;
 
 import com.example.cherrydan.sns.config.SnsOAuthProperties;
 import com.example.cherrydan.sns.domain.SnsPlatform;
+import com.example.cherrydan.sns.dto.TokenResponse;
 import com.example.cherrydan.sns.dto.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
@@ -23,7 +27,6 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@org.springframework.context.annotation.Profile({"local", "dev", "test"})
 public class TikTokOAuthPlatform extends AbstractOAuthPlatform {
 
     // 임시로 Map에 저장 (실제로는 Redis나 세션 사용해야 함)
@@ -39,13 +42,13 @@ public class TikTokOAuthPlatform extends AbstractOAuthPlatform {
     }
 
     @Override
-    public String generateAuthUrl() {
+    public String generateAuthUrl(String state) {
         SnsOAuthProperties.PlatformConfig config = getPlatformConfig();
         
         // PKCE용 code verifier와 challenge 생성
         String codeVerifier = generateCodeVerifier();
         String codeChallenge = generateCodeChallenge(codeVerifier);
-        String state = generateRandomState();
+//        String state = generateRandomState();
         
         // state를 키로 하여 codeVerifier 저장
         codeVerifierStore.put(state, codeVerifier);
@@ -63,14 +66,14 @@ public class TikTokOAuthPlatform extends AbstractOAuthPlatform {
     }
 
     @Override
-    public Mono<com.example.cherrydan.sns.dto.TokenResponse> getAccessToken(String code) {
+    public Mono<TokenResponse> getAccessToken(String code) {
         // TikTok OAuth에서는 state 파라미터를 받아와야 하지만, 
         // 현재 구조상 어려우므로 임시로 테스트 환경에서는 우회
         log.warn("TikTok OAuth는 PKCE가 필요하지만 현재 구조상 제한이 있습니다.");
         
         // 실제 TikTok API 호출 시도
         SnsOAuthProperties.PlatformConfig config = getPlatformConfig();
-        org.springframework.util.MultiValueMap<String, String> formData = new org.springframework.util.LinkedMultiValueMap<>();
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("client_key", config.getClientId());
         formData.add("client_secret", config.getClientSecret());
         formData.add("grant_type", "authorization_code");
@@ -86,10 +89,10 @@ public class TikTokOAuthPlatform extends AbstractOAuthPlatform {
 
         return webClient.post()
                 .uri(config.getTokenUrl())
-                .contentType(org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .bodyValue(formData)
                 .retrieve()
-                .bodyToMono(com.example.cherrydan.sns.dto.TokenResponse.class)
+                .bodyToMono(TokenResponse.class)
                 .doOnError(error -> log.error("TikTok 토큰 획득 실패: {}", error.getMessage()));
     }
 

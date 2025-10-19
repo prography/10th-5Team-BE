@@ -13,9 +13,10 @@ public interface OAuthPlatform {
     
     /**
      * OAuth 인증 URL을 생성합니다.
+     * @param state OAuth state 파라미터 (CSRF 방지 및 사용자 식별용)
      * @return 인증 URL
      */
-    String generateAuthUrl();
+    String generateAuthUrl(String state);
     
     /**
      * 인증 코드를 사용하여 액세스 토큰을 획득합니다.
