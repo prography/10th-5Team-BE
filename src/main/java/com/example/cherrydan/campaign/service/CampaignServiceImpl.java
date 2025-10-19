@@ -4,7 +4,6 @@ import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
-import com.example.cherrydan.common.aop.PerformanceMonitor;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignResponseDTO;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
@@ -147,7 +146,6 @@ public class CampaignServiceImpl implements CampaignService {
      * 특정 키워드로 맞춤형 캠페인 목록 조회 (FULLTEXT 인덱스 활용)
      */
     @Override
-    @PerformanceMonitor
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
         
         // Boolean 모드로 변경: +키워드* 형태로 검색
@@ -181,7 +179,6 @@ public class CampaignServiceImpl implements CampaignService {
     }
     
     @Override
-    @PerformanceMonitor
     public long getDailyCampaignCountByKeyword(String keyword, LocalDate date) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return 0;

@@ -87,8 +87,8 @@ public class OAuthUserProcessingService {
             // 삭제된 사용자 처리
             if (existingUser.isDeleted()) {
                 // 30일 이내 삭제된 사용자는 복구
-                if (existingUser.isRestorableWithin30Days()) {
-                    log.info("Restoring deleted user within 30 days: email={}", email);
+                if (existingUser.isRestorableWithin1Year()) {
+                    log.info("Restoring deleted user within 1 years: email={}", email);
                     existingUser.restore();
                 } else {
                     // 30일 초과한 경우 로그인 거부
