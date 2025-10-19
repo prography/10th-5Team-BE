@@ -183,13 +183,22 @@ public class GlobalExceptionHandler {
     /**
      * JWT 유효성 검증 실패 예외 처리
      */
-    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class, IllegalArgumentException.class})
+    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class})
     public ResponseEntity<ApiResponse<Void>> handleJwtValidationException(Exception ex) {
         logger.error("Invalid JWT token: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "유효하지 않은 토큰입니다."));
     }
 
+    /**
+     * IllegalArgumentException 예외 처리
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("Invalid argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
 
     /**
      * 유효성 검사 실패 예외 처리
