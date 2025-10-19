@@ -1,6 +1,7 @@
 package com.example.cherrydan.notification.scheduler;
 
 import com.example.cherrydan.activity.service.ActivityAlertService;
+import com.example.cherrydan.user.service.UserDataCleanupService;
 import com.example.cherrydan.user.service.UserKeywordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,9 +16,10 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class NotificationScheduler {
-    
+
     private final ActivityAlertService activityAlertService;
     private final UserKeywordService userKeywordService;
+    private final UserDataCleanupService userDataCleanupService;
     
     
     /**
@@ -79,14 +81,31 @@ public class NotificationScheduler {
     @Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul")
     public void sendActivityNotifications() {
         log.info("=== 활동 알림 발송 작업 시작 ===");
-        
+
         try {
             activityAlertService.sendActivityNotifications();
-            
+
             log.info("=== 활동 알림 발송 작업 완료 ===");
-            
+
         } catch (Exception e) {
             log.error("활동 알림 발송 작업 실패: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 매일 새벽 2시 실행 - 1년 경과한 소프트 딜리트 유저의 연관 데이터 삭제
+     */
+    @Scheduled(cron = "0 0 2 * * ?", zone = "Asia/Seoul")
+    public void cleanupExpiredUserData() {
+        log.info("=== 1년 경과 유저 데이터 삭제 작업 시작 ===");
+
+        try {
+            userDataCleanupService.cleanupExpiredUserData();
+
+            log.info("=== 1년 경과 유저 데이터 삭제 작업 완료 ===");
+
+        } catch (Exception e) {
+            log.error("1년 경과 유저 데이터 삭제 작업 실패: {}", e.getMessage(), e);
         }
     }
 } 

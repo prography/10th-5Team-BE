@@ -143,7 +143,11 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     // 오버로딩 메서드 (파라미터 간소화)
     default Page<CampaignStatus> findReviewingCampaignsByReviewEndDate(
         LocalDate reviewEndDate, Pageable pageable) {
-        return findReviewingCampaignsByReviewEndDate(reviewEndDate, pageable, 
+        return findReviewingCampaignsByReviewEndDate(reviewEndDate, pageable,
             CampaignStatusType.REVIEWING);
     }
+
+    @Modifying
+    @Query("DELETE FROM CampaignStatus cs WHERE cs.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 } 
