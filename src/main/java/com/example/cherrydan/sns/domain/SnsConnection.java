@@ -35,12 +35,6 @@ public class SnsConnection extends BaseTimeEntity {
 
     private String snsUrl;
 
-    @Lob
-    private String accessToken;
-
-    @Lob
-    private String refreshToken;
-
     @Column(name = "platform_user_id")
     private String platformUserId;
 
@@ -51,21 +45,9 @@ public class SnsConnection extends BaseTimeEntity {
     @Builder.Default
     private Boolean isActive = true;
 
-    @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
-
-    public void updateSnsInfo(String snsUserId, String snsUrl, String accessToken, String refreshToken, LocalDateTime expiresAt) {
+    public void updateSnsInfo(String snsUserId, String snsUrl) {
         this.snsUserId = snsUserId;
         this.snsUrl = snsUrl;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.expiresAt = expiresAt;
-    }
-
-    public void updateTokens(String accessToken, String refreshToken, LocalDateTime expiresAt) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.expiresAt = expiresAt;
     }
 
     public void setPlatformUserId(String platformUserId) {
@@ -82,9 +64,5 @@ public class SnsConnection extends BaseTimeEntity {
 
     public void deactivate() {
         this.isActive = false;
-    }
-
-    public boolean isExpired() {
-        return expiresAt != null && expiresAt.isBefore(LocalDateTime.now());
     }
 } 
