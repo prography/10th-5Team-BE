@@ -107,7 +107,7 @@ public class User extends BaseTimeEntity {
         if (this.getDeletedAt() == null) {
             return false;
         }
-        LocalDateTime oneYearAgo = LocalDateTime.now().minusDays(365);
+        LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
         return this.getDeletedAt().isAfter(oneYearAgo);
     }
 }
