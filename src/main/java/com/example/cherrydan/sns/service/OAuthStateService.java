@@ -2,17 +2,16 @@ package com.example.cherrydan.sns.service;
 
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.OAuthStateException;
+import com.example.cherrydan.common.util.JwtSecretKeyProvider;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -25,7 +24,7 @@ public class OAuthStateService {
     private static final long STATE_VALIDITY_IN_MINUTES = 5;
 
     public OAuthStateService(@Value("${jwt.secret}") String secret) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.secretKey = JwtSecretKeyProvider.createSecretKey(secret);
     }
 
     public String createState(Long userId) {
