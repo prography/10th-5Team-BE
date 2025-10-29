@@ -33,7 +33,12 @@ public class UserDataCleanupService {
         int successCount = 0;
 
         for (User user : expiredUsers) {
-            successCount += userRelatedDataDeletionService.deleteUserRelatedData(user.getId());
+            try {
+                userRelatedDataDeletionService.deleteUserRelatedData(user.getId());
+                successCount++;
+            } catch (Exception e) {
+                log.error("유저 ID {}의 연관 데이터 삭제 실패: {}", user.getId(), e.getMessage(), e);
+            }
         }
 
         log.info("1년 경과 유저 데이터 삭제 완료 - 성공: {}건, 총: {}건", successCount, expiredUsers.size());

@@ -28,24 +28,18 @@ public class UserRelatedDataDeletionService {
     private final UserFCMTokenRepository userFCMTokenRepository;
 
     @Transactional
-    public Long deleteUserRelatedData(Long userId) {
-        try {
-            log.info("유저 ID {}의 연관 데이터 삭제 시작", userId);
+    public void deleteUserRelatedData(Long userId) {
+        log.info("유저 ID {}의 연관 데이터 삭제 시작", userId);
 
-            snsConnectionRepository.deleteByUserId(userId);
-            campaignStatusRepository.deleteByUserId(userId);
-            inquiryRepository.deleteByUserId(userId);
-            bookmarkRepository.deleteByUserId(userId);
-            activityAlertRepository.deleteByUserId(userId);
-            keywordCampaignAlertRepository.deleteByUserId(userId);
-            refreshTokenRepository.deleteByUserId(userId);
-            userFCMTokenRepository.deleteByUserId(userId);
+        snsConnectionRepository.deleteByUserId(userId);
+        campaignStatusRepository.deleteByUserId(userId);
+        inquiryRepository.deleteByUserId(userId);
+        bookmarkRepository.deleteByUserId(userId);
+        activityAlertRepository.deleteByUserId(userId);
+        keywordCampaignAlertRepository.deleteByUserId(userId);
+        refreshTokenRepository.deleteByUserId(userId);
+        userFCMTokenRepository.deleteByUserId(userId);
 
-            log.info("유저 ID {}의 모든 연관 데이터 삭제 완료", userId);
-            return 1L;
-        } catch (Exception e) {
-            log.error("유저 ID {}의 데이터 삭제 중 오류 발생: {}", userId, e.getMessage());
-            return 0L;
-        }
+        log.info("유저 ID {}의 모든 연관 데이터 삭제 완료", userId);
     }
 }
