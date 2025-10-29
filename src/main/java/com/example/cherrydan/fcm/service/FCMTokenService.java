@@ -107,10 +107,10 @@ public class FCMTokenService {
     @Transactional
     public void registerOrUpdateToken(FCMTokenRequest request) {
         try {
-            
+
             Optional<UserFCMToken> existingToken = tokenRepository
                     .findByUserIdAndDeviceModelAndIsActiveTrue(request.getUserId(), request.getDeviceModel());
-            
+
             UserFCMToken token;
             if (existingToken.isPresent()) {
                 token = existingToken.get();
@@ -131,7 +131,7 @@ public class FCMTokenService {
                 tokenRepository.save(token);
                 log.info("새 FCM 토큰 등록 - 사용자: {}, 디바이스: {}", request.getUserId(), request.getDeviceModel());
             }
-            
+
         } catch (IllegalArgumentException e) {
             log.error("잘못된 디바이스 타입: {}", request.getDeviceType());
         } catch (FCMException e) {
@@ -139,5 +139,27 @@ public class FCMTokenService {
         } catch (Exception e) {
             log.error("서버 내부 에러 발생 {}", e.getMessage());
         }
+    }
+
+    /**
+     * 사용자의 모든 FCM 토큰 비활성화 (소프트 삭제)
+     * 사용자 탈퇴 시 호출
+     */
+    @Transactional
+    public void deactivateUserTokens(Long userId) {
+        List<UserFCMToken> tokens = tokenRepository.findByUserId(userId);
+        tokens.forEach(UserFCMToken::deactivate);
+        log.info("사용자 {}의 모든 FCM 토큰 비활성화 완료: {} 개", userId, tokens.size());
+    }
+
+    /**
+     * 사용자의 모든 FCM 토큰 활성화
+     * 사용자 복구 시 호출
+     */
+    @Transactional
+    public void activateUserTokens(Long userId) {
+        List<UserFCMToken> tokens = tokenRepository.findByUserId(userId);
+        tokens.forEach(UserFCMToken::activate);
+        log.info("사용자 {}의 모든 FCM 토큰 활성화 완료: {} 개", userId, tokens.size());
     }
 }

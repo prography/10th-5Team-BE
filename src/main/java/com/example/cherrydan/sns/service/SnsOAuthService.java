@@ -9,6 +9,7 @@ import com.example.cherrydan.sns.dto.TokenResponse;
 import com.example.cherrydan.sns.dto.UserInfo;
 import com.example.cherrydan.sns.repository.SnsConnectionRepository;
 import com.example.cherrydan.user.domain.User;
+import com.example.cherrydan.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,22 @@ public class SnsOAuthService {
 
     private final SnsConnectionRepository snsConnectionRepository;
     private final Map<SnsPlatform, OAuthPlatform> oauthPlatforms;
+    private final OAuthStateService oAuthStateService;
+    private final UserService userService;
+
+    /**
+     * OAuth 콜백을 처리합니다.
+     * State 파싱, 사용자 조회, SNS 연동을 한 번에 처리합니다.
+     * @param code OAuth 인증 코드
+     * @param state OAuth state (userId 암호화)
+     * @param platform SNS 플랫폼
+     * @return 연동 결과
+     */
+    public Mono<SnsConnectionResponse> handleCallback(String code, String state, SnsPlatform platform) {
+        Long userId = oAuthStateService.parseState(state);
+        User user = userService.getUserById(userId);
+        return connect(user, code, platform);
+    }
 
     /**
      * OAuth 인증을 통해 SNS 플랫폼과 연동합니다.
@@ -55,11 +72,9 @@ public class SnsOAuthService {
                 .flatMap(tokenResponse -> oauthPlatform.getUserInfo(tokenResponse.getAccessToken())
                         .map(userInfo -> {
                             SnsConnection connection = createOrUpdateConnection(
-                                    user, platform, userInfo.getId(), userInfo.getUrl(),
-                                    tokenResponse.getAccessToken(), tokenResponse.getRefreshToken(),
-                                    calculateExpiresAt(tokenResponse.getExpiresIn())
+                                    user, platform, userInfo.getId(), userInfo.getUrl()
                             );
-                            
+
                             log.info("{} 연동 완료: user={}, userId={}", platform, user.getId(), userInfo.getId());
                             return SnsConnectionResponse.from(connection);
                         }))
@@ -70,13 +85,25 @@ public class SnsOAuthService {
     }
 
     /**
-     * OAuth 인증 URL을 생성합니다.
+     * OAuth 인증 URL을 생성합니다 (userId로 state 자동 생성).
      * @param platform SNS 플랫폼
+     * @param userId 사용자 ID
      * @return 인증 URL
      */
-    public String getAuthUrl(SnsPlatform platform) {
+    public String getAuthUrlWithState(SnsPlatform platform, Long userId) {
+        String state = oAuthStateService.createState(userId);
+        return getAuthUrl(platform, state);
+    }
+
+    /**
+     * OAuth 인증 URL을 생성합니다.
+     * @param platform SNS 플랫폼
+     * @param state OAuth state 파라미터 (CSRF 방지 및 사용자 식별용)
+     * @return 인증 URL
+     */
+    public String getAuthUrl(SnsPlatform platform, String state) {
         OAuthPlatform oauthPlatform = getOAuthPlatform(platform);
-        return oauthPlatform.generateAuthUrl();
+        return oauthPlatform.generateAuthUrl(state);
     }
 
     /**
@@ -151,31 +178,15 @@ public class SnsOAuthService {
      * @param platform SNS 플랫폼
      * @param snsUserId SNS 사용자 ID
      * @param snsUrl SNS URL
-     * @param accessToken 액세스 토큰
-     * @param refreshToken 리프레시 토큰
-     * @param expiresAt 만료 시간
      * @return SNS 연동 정보
      */
-    private SnsConnection createOrUpdateConnection(User user, SnsPlatform platform, String snsUserId, 
-                                                 String snsUrl, String accessToken, String refreshToken, 
-                                                 LocalDateTime expiresAt) {
+    private SnsConnection createOrUpdateConnection(User user, SnsPlatform platform, String snsUserId, String snsUrl) {
         SnsConnection connection = snsConnectionRepository.findByUserAndPlatformIgnoreActive(user, platform)
                 .orElseGet(() -> SnsConnection.builder().user(user).platform(platform).build());
-        
-        connection.updateSnsInfo(snsUserId, snsUrl, accessToken, refreshToken, expiresAt);
-        connection.setIsActive(true);
-        
-        return snsConnectionRepository.save(connection);
-    }
 
-    /**
-     * 토큰 만료 시간을 계산합니다.
-     * @param expiresIn 만료 시간(초)
-     * @return 만료 시간
-     */
-    private LocalDateTime calculateExpiresAt(Integer expiresIn) {
-        return expiresIn != null ? 
-                LocalDateTime.now().plusSeconds(expiresIn) : 
-                LocalDateTime.now().plusYears(1); // 기본값 1년
+        connection.updateSnsInfo(snsUserId, snsUrl);
+        connection.setIsActive(true);
+
+        return snsConnectionRepository.save(connection);
     }
 } 

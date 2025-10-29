@@ -120,6 +120,7 @@ public class ActivityProcessingService {
      */
     @Async("keywordTaskExecutor")
     @Transactional
+    @Deprecated
     public CompletableFuture<List<ActivityAlert>> processCampaignAsync(
             Campaign campaign, List<Bookmark> bookmarks, LocalDate today) {
         
@@ -173,6 +174,7 @@ public class ActivityProcessingService {
      */
     @Async("keywordTaskExecutor")
     @Transactional
+    @Deprecated
     public CompletableFuture<List<ActivityAlert>> sendActivityNotificationAsync(
             Campaign campaign, List<ActivityAlert> alerts) {
         

@@ -62,4 +62,8 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
            "AND ud.isAllowed = true " +
            "AND ud.isActive = true")
     Page<Bookmark> findActiveBookmarksByApplyEndDate(@Param("applyEndDate") LocalDate applyEndDate, Pageable pageable);
+
+    @Modifying
+    @Query("DELETE FROM Bookmark b WHERE b.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 } 

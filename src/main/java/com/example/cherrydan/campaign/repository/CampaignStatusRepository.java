@@ -81,35 +81,41 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     /**
      * 결과 발표일 APPLY 상태 조회 (페이징, 알림 허용 사용자만)
      */
-    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+    @Query("SELECT cs FROM CampaignStatus cs " +
            "JOIN FETCH cs.campaign c " +
            "JOIN FETCH cs.user u " +
-           "JOIN UserFCMToken ud ON ud.userId = u.id " +
            "WHERE cs.status = :status " +
            "AND c.reviewerAnnouncement = :date " +
            "AND cs.isActive = true " +
            "AND u.isActive = true " +
-           "AND ud.isAllowed = true " +
-           "AND ud.isActive = true")
+           "AND EXISTS (" +
+           "  SELECT 1 FROM UserFCMToken ud " +
+           "  WHERE ud.userId = u.id " +
+           "  AND ud.isAllowed = true " +
+           "  AND ud.isActive = true" +
+           ")")
     Page<CampaignStatus> findByStatusAndReviewerAnnouncementDate(
-        @Param("status") CampaignStatusType status, 
+        @Param("status") CampaignStatusType status,
         @Param("date") LocalDate date,
         Pageable pageable);
     
     /**
      * SELECTED + REGION 타입 방문 마감 조회 (페이징, 알림 허용 사용자만)
      */
-    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+    @Query("SELECT cs FROM CampaignStatus cs " +
            "JOIN FETCH cs.campaign c " +
            "JOIN FETCH cs.user u " +
-           "JOIN UserFCMToken ud ON ud.userId = u.id " +
            "WHERE cs.status = :selectedStatus " +
            "AND c.campaignType = :regionType " +
            "AND c.contentSubmissionEnd = :visitEndDate " +
            "AND cs.isActive = true " +
            "AND u.isActive = true " +
-           "AND ud.isAllowed = true " +
-           "AND ud.isActive = true")
+           "AND EXISTS (" +
+           "  SELECT 1 FROM UserFCMToken ud " +
+           "  WHERE ud.userId = u.id " +
+           "  AND ud.isAllowed = true " +
+           "  AND ud.isActive = true" +
+           ")")
     Page<CampaignStatus> findSelectedRegionCampaignsByVisitEndDate(
         @Param("visitEndDate") LocalDate visitEndDate,
         Pageable pageable,
@@ -125,16 +131,19 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     /**
      * REVIEWING 상태 리뷰 마감 조회 (페이징, 알림 허용 사용자만)
      */
-    @Query("SELECT DISTINCT cs FROM CampaignStatus cs " +
+    @Query("SELECT cs FROM CampaignStatus cs " +
            "JOIN FETCH cs.campaign c " +
            "JOIN FETCH cs.user u " +
-           "JOIN UserFCMToken ud ON ud.userId = u.id " +
            "WHERE cs.status = :reviewingStatus " +
            "AND c.contentSubmissionEnd = :reviewEndDate " +
            "AND cs.isActive = true " +
            "AND u.isActive = true " +
-           "AND ud.isAllowed = true " +
-           "AND ud.isActive = true")
+           "AND EXISTS (" +
+           "  SELECT 1 FROM UserFCMToken ud " +
+           "  WHERE ud.userId = u.id " +
+           "  AND ud.isAllowed = true " +
+           "  AND ud.isActive = true" +
+           ")")
     Page<CampaignStatus> findReviewingCampaignsByReviewEndDate(
         @Param("reviewEndDate") LocalDate reviewEndDate,
         Pageable pageable,
@@ -143,7 +152,11 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     // 오버로딩 메서드 (파라미터 간소화)
     default Page<CampaignStatus> findReviewingCampaignsByReviewEndDate(
         LocalDate reviewEndDate, Pageable pageable) {
-        return findReviewingCampaignsByReviewEndDate(reviewEndDate, pageable, 
+        return findReviewingCampaignsByReviewEndDate(reviewEndDate, pageable,
             CampaignStatusType.REVIEWING);
     }
+
+    @Modifying
+    @Query("DELETE FROM CampaignStatus cs WHERE cs.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 } 

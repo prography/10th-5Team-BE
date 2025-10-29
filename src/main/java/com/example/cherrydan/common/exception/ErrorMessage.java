@@ -33,6 +33,9 @@ public enum ErrorMessage {
     OAUTH_EMAIL_NOT_FOUND(UNAUTHORIZED, "OAuth2 제공자로부터 이메일을 찾을 수 없습니다."),
     OAUTH_USER_DELETED(UNAUTHORIZED, "탈퇴한 계정입니다. 계정 복구를 원하시면 고객센터에 문의해 주세요."),
     OAUTH_PROVIDER_CONFLICT(UNAUTHORIZED, "이미 다른 소셜 계정으로 가입된 이메일입니다."),
+    OAUTH_STATE_EXPIRED(UNAUTHORIZED, "OAuth state가 만료되었습니다."),
+    OAUTH_STATE_INVALID(UNAUTHORIZED, "유효하지 않은 OAuth state입니다."),
+    OAUTH_STATE_PARSE_FAILED(UNAUTHORIZED, "OAuth state 파싱에 실패했습니다."),
     
     // Apple 관련 에러
     APPLE_IDENTITY_TOKEN_INVALID(UNAUTHORIZED, "Apple Identity Token이 유효하지 않습니다."),
@@ -94,6 +97,7 @@ public enum ErrorMessage {
     INVALID_ACTION(BAD_REQUEST, "잘못된 액션입니다. 'up' 또는 'down'을 입력해주세요."),
 
     // SNS 연동 관련 에러
+    SNS_PLATFORM_CODE_EMPTY(BAD_REQUEST, "플랫폼 코드가 비어있습니다."),
     SNS_PLATFORM_NOT_SUPPORTED(BAD_REQUEST, "지원하지 않는 SNS 플랫폼입니다."),
     SNS_CONNECTION_NOT_FOUND(NOT_FOUND, "SNS 연동 정보를 찾을 수 없습니다."),
     SNS_TOKEN_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 액세스 토큰 획득에 실패했습니다."),

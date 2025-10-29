@@ -30,7 +30,8 @@ public class Inquiry extends BaseTimeEntity {
     @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "content", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "content")
     private String content;
 
     @Enumerated(EnumType.STRING)
@@ -38,7 +39,8 @@ public class Inquiry extends BaseTimeEntity {
     @Builder.Default
     private InquiryStatus status = InquiryStatus.PENDING;
 
-    @Column(name = "admin_reply", columnDefinition = "TEXT")
+    @Lob
+    @Column(name = "admin_reply")
     private String adminReply;
 
     @Column(name = "admin_id")

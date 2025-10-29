@@ -101,13 +101,13 @@ public class User extends BaseTimeEntity {
     public boolean isDeleted() {
         return !this.isActive;
     }
-    
-    // 30일 이내 복구 가능 여부 확인
-    public boolean isRestorableWithin30Days() {
+
+    // 1년 이내 복구 가능 여부 확인
+    public boolean isRestorableWithin1Year() {
         if (this.getDeletedAt() == null) {
             return false;
         }
-        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
-        return this.getDeletedAt().isAfter(thirtyDaysAgo);
+        LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
+        return this.getDeletedAt().isAfter(oneYearAgo);
     }
 }
