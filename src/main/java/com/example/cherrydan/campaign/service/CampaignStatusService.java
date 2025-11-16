@@ -12,7 +12,7 @@ public interface CampaignStatusService {
     CampaignStatusResponseDTO createOrRecoverStatus(CampaignStatusRequestDTO requestDTO, Long userId);
     List<CampaignStatusResponseDTO> updateStatusBatch(CampaignStatusBatchRequestDTO requestDTO, Long userId);
     void deleteStatusBatch(CampaignStatusDeleteRequestDTO requestDTO, Long userId);
-    CampaignStatusPopupByTypeResponseDTO getPopupStatusByType(Long userId, CampaignStatusType statusType);
+    CampaignStatusPopupByTypeResponseDTO getPopupStatusByBookmark(Long userId);
     PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByCase(Long userId, CampaignStatusCase statusCase, Pageable pageable);
     CampaignStatusCountResponseDTO getStatusCounts(Long userId);
 } 

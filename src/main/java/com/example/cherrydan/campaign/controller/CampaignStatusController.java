@@ -3,7 +3,6 @@ package com.example.cherrydan.campaign.controller;
 import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
-import com.example.cherrydan.campaign.domain.CampaignStatusType;
 import com.example.cherrydan.campaign.domain.CampaignStatusCase;
 import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
@@ -27,7 +26,6 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.campaign.dto.CampaignStatusBatchRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusDeleteRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusPopupByTypeResponseDTO;
-import io.swagger.v3.oas.annotations.Parameter;
 
 import java.util.List;
 
@@ -99,21 +97,12 @@ public class CampaignStatusController {
         return ResponseEntity.ok(ApiResponse.success("체험단 상태 삭제 성공"));
     }
 
-    @Operation(summary = "내 체험단 노출 팝업 조회", description = "지정된 상태의 기간이 지난 데이터만 최대 4개씩 반환")
+    @Operation(summary = "내 체험단 노출 팝업 조회", description = "활성 관심공고 전체 반환 (마감일 순으로 정렬)")
     @GetMapping("/popup")
     public ResponseEntity<ApiResponse<CampaignStatusPopupByTypeResponseDTO>> getPopupStatus(
-            @Parameter(description = "상태 타입 (APPLY, SELECTED, REVIEWING, ENDED)", required = true) 
-            @RequestParam String status,
             @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        CampaignStatusType statusType;
-        try {
-            statusType = CampaignStatusType.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_INVALID);
-        }
-        
-        CampaignStatusPopupByTypeResponseDTO result = campaignStatusService.getPopupStatusByType(currentUser.getId(), statusType);
+        CampaignStatusPopupByTypeResponseDTO result = campaignStatusService.getPopupStatusByBookmark(currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success("팝업 상태 조회 성공", result));
     }
 } 

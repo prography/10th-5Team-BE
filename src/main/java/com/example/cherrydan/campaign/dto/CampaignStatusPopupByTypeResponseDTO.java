@@ -10,9 +10,7 @@ import java.util.List;
 @Builder
 @Schema(description = "특정 상태의 내 체험단 팝업용 응답 DTO")
 public class CampaignStatusPopupByTypeResponseDTO {
-    @Schema(description = "상태 타입", example = "APPLY", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
-    private CampaignStatusType statusType;
-
+    
     @Schema(description = "총 개수", example = "4", nullable = false, requiredMode = Schema.RequiredMode.REQUIRED)
     private long totalCount;
 

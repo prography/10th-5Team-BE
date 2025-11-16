@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
 import com.example.cherrydan.campaign.domain.CampaignStatusCase;
+import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.dto.*;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
+import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.user.domain.User;
@@ -33,6 +35,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     private final CampaignStatusRepository campaignStatusRepository;
     private final CampaignRepository campaignRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Override
     @Transactional
@@ -94,26 +97,26 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignStatusPopupByTypeResponseDTO getPopupStatusByType(Long userId, CampaignStatusType statusType) {
+    public CampaignStatusPopupByTypeResponseDTO getPopupStatusByBookmark(Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
         LocalDate today = LocalDate.now();
-        List<CampaignStatus> statuses = campaignStatusRepository.findTop4ByUserAndStatusAndExpired(user, statusType, today);
+        List<Bookmark> bookmarks = bookmarkRepository.findActiveBookmarksByUserForPopup(user.getId(), today);
 
         List<CampaignStatusPopupItemDTO> items = new ArrayList<>();
         
-        for (CampaignStatus status : statuses) {
+        for (Bookmark bookmark : bookmarks) {
             try {
-                CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromEntity(status);
+                CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromBookmark(bookmark);
                 items.add(dto);
             } catch (BaseException e) {
+                // 에러 발생 시 해당 항목은 건너뛰고 계속 진행
                 continue;
             }
         }
         
         return CampaignStatusPopupByTypeResponseDTO.builder()
-                .statusType(statusType)
                 .items(items)
                 .totalCount(items.size())
                 .build();
@@ -126,31 +129,17 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
         LocalDate today = LocalDate.now();
-        Page<Long> idPage;
+        CampaignStatusType statusType = statusCase.toStatusType();
         
         // 1단계: ID만 페이징해서 가져오기
-        switch (statusCase) {
-            case APPLIED_WAITING:
-                idPage = campaignStatusRepository.findIdsByUserAndAppliedWaiting(user, CampaignStatusType.APPLY, today, pageable);
-                break;
-            case APPLIED_COMPLETED:
-                idPage = campaignStatusRepository.findIdsByUserAndAppliedCompleted(user, CampaignStatusType.APPLY, today, pageable);
-                break;
-            case RESULT_SELECTED:
-                idPage = campaignStatusRepository.findIdsByUserAndResultSelected(user, CampaignStatusType.SELECTED, today, pageable);
-                break;
-            case RESULT_NOT_SELECTED:
-                idPage = campaignStatusRepository.findIdsByUserAndResultNotSelected(user, CampaignStatusType.NOT_SELECTED, today, pageable);
-                break;
-            case REVIEW_IN_PROGRESS:
-                idPage = campaignStatusRepository.findIdsByUserAndReviewInProgress(user, CampaignStatusType.REVIEWING, today, pageable);
-                break;
-            case REVIEW_COMPLETED:
-                idPage = campaignStatusRepository.findIdsByUserAndReviewCompleted(user, CampaignStatusType.ENDED, pageable);
-                break;
-            default:
-                throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
-        }
+        Page<Long> idPage = switch (statusCase) {
+            case APPLIED_WAITING -> campaignStatusRepository.findIdsByUserAndAppliedWaiting(user, statusType, today, pageable);
+            case APPLIED_COMPLETED -> campaignStatusRepository.findIdsByUserAndAppliedCompleted(user, statusType, today, pageable);
+            case RESULT_SELECTED -> campaignStatusRepository.findIdsByUserAndResultSelected(user, statusType, today, pageable);
+            case RESULT_NOT_SELECTED -> campaignStatusRepository.findIdsByUserAndResultNotSelected(user, statusType, today, pageable);
+            case REVIEW_IN_PROGRESS -> campaignStatusRepository.findIdsByUserAndReviewInProgress(user, statusType, today, pageable);
+            case REVIEW_COMPLETED -> campaignStatusRepository.findIdsByUserAndReviewCompleted(user, statusType, pageable);
+        };
         
         // ID가 없으면 빈 리스트 반환
         if (idPage.getContent().isEmpty()) {
@@ -201,12 +190,12 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
         
         LocalDate today = LocalDate.now();
         return CampaignStatusCountResponseDTO.builder()
-                .appliedWaiting(campaignStatusRepository.countByUserAndAppliedWaiting(user, CampaignStatusType.APPLY, today))
-                .appliedCompleted(campaignStatusRepository.countByUserAndAppliedCompleted(user, CampaignStatusType.APPLY, today))
-                .resultSelected(campaignStatusRepository.countByUserAndResultSelected(user, CampaignStatusType.SELECTED, today))
-                .resultNotSelected(campaignStatusRepository.countByUserAndResultNotSelected(user, CampaignStatusType.NOT_SELECTED, today))
-                .reviewInProgress(campaignStatusRepository.countByUserAndReviewInProgress(user, CampaignStatusType.REVIEWING, today))
-                .reviewCompleted(campaignStatusRepository.countByUserAndReviewCompleted(user, CampaignStatusType.ENDED))
+                .appliedWaiting(campaignStatusRepository.countByUserAndAppliedWaiting(user, CampaignStatusCase.APPLIED_WAITING.toStatusType(), today))
+                .appliedCompleted(campaignStatusRepository.countByUserAndAppliedCompleted(user, CampaignStatusCase.APPLIED_COMPLETED.toStatusType(), today))
+                .resultSelected(campaignStatusRepository.countByUserAndResultSelected(user, CampaignStatusCase.RESULT_SELECTED.toStatusType(), today))
+                .resultNotSelected(campaignStatusRepository.countByUserAndResultNotSelected(user, CampaignStatusCase.RESULT_NOT_SELECTED.toStatusType(), today))
+                .reviewInProgress(campaignStatusRepository.countByUserAndReviewInProgress(user, CampaignStatusCase.REVIEW_IN_PROGRESS.toStatusType(), today))
+                .reviewCompleted(campaignStatusRepository.countByUserAndReviewCompleted(user, CampaignStatusCase.REVIEW_COMPLETED.toStatusType()))
                 .build();
     }
 }

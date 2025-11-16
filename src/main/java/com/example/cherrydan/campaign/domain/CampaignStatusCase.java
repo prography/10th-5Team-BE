@@ -40,5 +40,18 @@ public enum CampaignStatusCase {
         }
         throw new IllegalArgumentException("Invalid CampaignStatusCase code: " + code);
     }
+
+    /**
+     * CampaignStatusCase를 CampaignStatusType으로 변환
+     */
+    public CampaignStatusType toStatusType() {
+        return switch (this) {
+            case APPLIED_WAITING, APPLIED_COMPLETED -> CampaignStatusType.APPLY;
+            case RESULT_SELECTED -> CampaignStatusType.SELECTED;
+            case RESULT_NOT_SELECTED -> CampaignStatusType.NOT_SELECTED;
+            case REVIEW_IN_PROGRESS -> CampaignStatusType.REVIEWING;
+            case REVIEW_COMPLETED -> CampaignStatusType.ENDED;
+        };
+    }
 }
 
