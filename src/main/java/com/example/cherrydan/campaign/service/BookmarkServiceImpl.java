@@ -2,6 +2,7 @@ package com.example.cherrydan.campaign.service;
 
 import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.domain.Campaign;
+import com.example.cherrydan.campaign.domain.BookmarkCase;
 import com.example.cherrydan.campaign.dto.BookmarkDeleteDTO;
 import com.example.cherrydan.campaign.dto.BookmarkResponseDTO;
 import com.example.cherrydan.campaign.repository.BookmarkRepository;
@@ -83,13 +84,29 @@ public class BookmarkServiceImpl implements BookmarkService {
         }
     }
 
-    public PageListResponseDTO<BookmarkResponseDTO> getOpenBookmarks(Long userId, Pageable pageable) {
-        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(userId, LocalDate.now(), pageable);
-        return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
-    }
-
-    public PageListResponseDTO<BookmarkResponseDTO> getClosedBookmarks(Long userId, Pageable pageable) {
-        Page<Bookmark> bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(userId, LocalDate.now(), pageable);
+    @Override
+    @Transactional(readOnly = true)
+    public PageListResponseDTO<BookmarkResponseDTO> getBookmarksByCase(Long userId, BookmarkCase bookmarkCase, Pageable pageable) {
+        LocalDate today = LocalDate.now();
+        LocalDate startDate = today.minusMonths(1);
+        Page<Bookmark> bookmarks;
+        
+        switch (bookmarkCase) {
+            case LIKED_OPEN:
+                bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(userId, today, pageable);
+                break;
+            case LIKED_CLOSED:
+                bookmarks = bookmarkRepository.findByUserIdAndIsActiveTrueAndCampaign_ApplyEndBetween(
+                                    userId,
+                                    startDate,
+                                    today,
+                                    pageable
+                            );
+                break;
+            default:
+                throw new BaseException(ErrorMessage.RESOURCE_NOT_FOUND);
+        }
+        
         return PageListResponseDTO.from(bookmarks.map(BookmarkResponseDTO::fromEntity));
     }
 } 
