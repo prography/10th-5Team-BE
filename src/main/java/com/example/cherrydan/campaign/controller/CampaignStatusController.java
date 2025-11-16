@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.campaign.domain.CampaignStatusCase;
 import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.PageRequest;
@@ -37,22 +38,25 @@ import java.util.List;
 public class CampaignStatusController {
     private final CampaignStatusService campaignStatusService;
 
-    @Operation(summary = "내 체험단 상태별 목록 조회", description = "status 파라미터(APPLY/SELECTED/NOT_SELECTED/REVIEWING/ENDED) 기준 페이지네이션")
+    @Operation(summary = "내 체험단 상태별 목록 조회", 
+               description = "case 파라미터(appliedCompleted/appliedWaiting/resultSelected/resultNotSelected/reviewInProgress/reviewCompleted) 기준 페이지네이션")
     @GetMapping
-    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignStatusResponseDTO>>> getMyStatusesByType(
-        @RequestParam(value = "status", defaultValue = "APPLY") String status,
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignStatusResponseDTO>>> getMyStatusesByCase(
+        @RequestParam(value = "case", defaultValue = "appliedCompleted") String caseParam,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        CampaignStatusType statusType;
+        CampaignStatusCase statusCase;
+
+        System.out.println("caseParam: " + caseParam);
         try {
-            statusType = CampaignStatusType.valueOf(status.trim().toUpperCase());
+            statusCase = CampaignStatusCase.fromCode(caseParam.trim());
         } catch (IllegalArgumentException e) {
             throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_INVALID);
         }
         Pageable pageable = PageRequest.of(page, size);
-        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByType(currentUser.getId(), statusType, pageable);
+        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByCase(currentUser.getId(), statusCase, pageable);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
