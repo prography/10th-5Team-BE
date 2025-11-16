@@ -4,6 +4,7 @@ import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.campaign.domain.CampaignStatusCase;
 import com.example.cherrydan.campaign.domain.CampaignType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -159,4 +160,150 @@ public interface CampaignStatusRepository extends JpaRepository<CampaignStatus, 
     @Modifying
     @Query("DELETE FROM CampaignStatus cs WHERE cs.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * 새로운 케이스별 조회 메서드들
+     */
+    
+    /**
+     * appliedWaiting: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.reviewerAnnouncement >= :today " +
+           "ORDER BY c.reviewerAnnouncement DESC")
+    Page<Long> findIdsByUserAndAppliedWaiting(@Param("user") User user, 
+                                                @Param("status") CampaignStatusType status,
+                                                @Param("today") LocalDate today,
+                                                Pageable pageable);
+    
+    /**
+     * appliedCompleted: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.reviewerAnnouncement < :today " +
+           "ORDER BY c.reviewerAnnouncement DESC")
+    Page<Long> findIdsByUserAndAppliedCompleted(@Param("user") User user,
+                                                @Param("status") CampaignStatusType status,
+                                                @Param("today") LocalDate today,
+                                                Pageable pageable);
+    
+    /**
+     * resultSelected: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd >= :today " +
+           "ORDER BY c.contentSubmissionEnd DESC")
+    Page<Long> findIdsByUserAndResultSelected(@Param("user") User user,
+                                              @Param("status") CampaignStatusType status,
+                                              @Param("today") LocalDate today,
+                                              Pageable pageable);
+    
+    /**
+     * resultNotSelected: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd < :today " +
+           "ORDER BY c.contentSubmissionEnd DESC")
+    Page<Long> findIdsByUserAndResultNotSelected(@Param("user") User user,
+                                                  @Param("status") CampaignStatusType status,
+                                                  @Param("today") LocalDate today,
+                                                  Pageable pageable);
+    
+    /**
+     * reviewInProgress: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd >= :today " +
+           "ORDER BY c.contentSubmissionEnd DESC")
+    Page<Long> findIdsByUserAndReviewInProgress(@Param("user") User user,
+                                                @Param("status") CampaignStatusType status,
+                                                @Param("today") LocalDate today,
+                                                Pageable pageable);
+    
+    /**
+     * reviewCompleted: ID만 페이징 조회 (1단계)
+     */
+    @Query("SELECT cs.id FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "ORDER BY c.resultAnnouncement DESC")
+    Page<Long> findIdsByUserAndReviewCompleted(@Param("user") User user,
+                                               @Param("status") CampaignStatusType status,
+                                               Pageable pageable);
+    
+    /**
+     * ID 리스트로 CampaignStatus 조회 (2단계) - N+1 문제 방지를 위해 JOIN FETCH 사용
+     * ID 순서를 유지하기 위해 순서대로 조회
+     */
+    @Query("SELECT cs FROM CampaignStatus cs " +
+           "JOIN FETCH cs.campaign c " +
+           "JOIN FETCH cs.user u " +
+           "WHERE cs.id IN :ids")
+    List<CampaignStatus> findByIdsWithFetch(@Param("ids") List<Long> ids);
+
+    /**
+     * 새로운 케이스별 카운트 메서드들
+     */
+    
+    /**
+     * appliedWaiting 카운트: APPLY 상태 + reviewer_announcement >= 오늘
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.reviewerAnnouncement >= :today")
+    long countByUserAndAppliedWaiting(@Param("user") User user,
+                                      @Param("status") CampaignStatusType status,
+                                      @Param("today") LocalDate today);
+    
+    /**
+     * appliedCompleted 카운트: APPLY 상태 + reviewer_announcement < 오늘
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.reviewerAnnouncement < :today")
+    long countByUserAndAppliedCompleted(@Param("user") User user,
+                                        @Param("status") CampaignStatusType status,
+                                        @Param("today") LocalDate today);
+    
+    /**
+     * resultSelected 카운트: SELECTED 상태 + content_submission_end >= 오늘
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd >= :today")
+    long countByUserAndResultSelected(@Param("user") User user,
+                                      @Param("status") CampaignStatusType status,
+                                      @Param("today") LocalDate today);
+    
+    /**
+     * resultNotSelected 카운트: NOT_SELECTED 상태 + content_submission_end < 오늘
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd < :today")
+    long countByUserAndResultNotSelected(@Param("user") User user,
+                                        @Param("status") CampaignStatusType status,
+                                        @Param("today") LocalDate today);
+    
+    /**
+     * reviewInProgress 카운트: REVIEWING 상태 + content_submission_end >= 오늘
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs JOIN cs.campaign c " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true " +
+           "AND c.contentSubmissionEnd >= :today")
+    long countByUserAndReviewInProgress(@Param("user") User user,
+                                       @Param("status") CampaignStatusType status,
+                                       @Param("today") LocalDate today);
+    
+    /**
+     * reviewCompleted 카운트: ENDED 상태
+     */
+    @Query("SELECT COUNT(cs) FROM CampaignStatus cs " +
+           "WHERE cs.user = :user AND cs.status = :status AND cs.isActive = true")
+    long countByUserAndReviewCompleted(@Param("user") User user,
+                                      @Param("status") CampaignStatusType status);
 } 

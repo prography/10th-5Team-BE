@@ -23,9 +23,13 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     boolean existsByUserIdAndCampaignIdAndIsActiveTrue(Long userId, Long campaignId);
     List<Bookmark> findAllByUserIdAndIsActiveTrue(Long userId);
     
-    // 원격에서 추가된 메서드들 (ReviewerAnnouncement -> ApplyEnd로 변경)
     Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndGreaterThanEqual(Long userId, LocalDate date, Pageable pageable);
-    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndLessThan(Long userId, LocalDate date, Pageable pageable);
+    Page<Bookmark> findByUserIdAndIsActiveTrueAndCampaign_ApplyEndBetween(
+        Long userId,
+        LocalDate startDate,
+        LocalDate endDate,
+        Pageable pageable
+    );
 
     /**
      * 특정 사용자의 여러 캠페인 ID에 대한 북마크를 조회
@@ -66,4 +70,18 @@ public interface BookmarkRepository extends JpaRepository<Bookmark, Long> {
     @Modifying
     @Query("DELETE FROM Bookmark b WHERE b.user.id = :userId")
     void deleteByUserId(@Param("userId") Long userId);
+    
+    /**
+     * 팝업용: 사용자의 활성 관심공고 전체 조회
+     * 마감일이 오늘 이후인 것만 조회하여 마감일 순으로 정렬
+     */
+    @Query("SELECT b FROM Bookmark b " +
+           "JOIN FETCH b.campaign c " +
+           "JOIN FETCH b.user u " +
+           "WHERE b.user.id = :userId " +
+           "AND b.isActive = true " +
+           "AND c.isActive = true " +
+           "AND c.applyEnd >= :today " +
+           "ORDER BY c.applyEnd DESC")
+    List<Bookmark> findActiveBookmarksByUserForPopup(@Param("userId") Long userId, @Param("today") LocalDate today);
 } 

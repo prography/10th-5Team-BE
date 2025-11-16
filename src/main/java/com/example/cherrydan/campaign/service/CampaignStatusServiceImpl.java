@@ -3,6 +3,8 @@ package com.example.cherrydan.campaign.service;
 import com.example.cherrydan.campaign.domain.Campaign;
 import com.example.cherrydan.campaign.domain.CampaignStatus;
 import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.campaign.domain.CampaignStatusCase;
+import com.example.cherrydan.campaign.domain.Bookmark;
 import com.example.cherrydan.campaign.dto.*;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.Page;
@@ -11,6 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.example.cherrydan.campaign.repository.CampaignRepository;
 import com.example.cherrydan.campaign.repository.CampaignStatusRepository;
+import com.example.cherrydan.campaign.repository.BookmarkRepository;
 import com.example.cherrydan.campaign.domain.CampaignPlatformType;
 import com.example.cherrydan.campaign.domain.SnsPlatformType;
 import com.example.cherrydan.user.domain.User;
@@ -32,6 +35,7 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     private final CampaignStatusRepository campaignStatusRepository;
     private final CampaignRepository campaignRepository;
     private final UserRepository userRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Override
     @Transactional
@@ -93,26 +97,26 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public CampaignStatusPopupByTypeResponseDTO getPopupStatusByType(Long userId, CampaignStatusType statusType) {
+    public CampaignStatusPopupByTypeResponseDTO getPopupStatusByBookmark(Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         
         LocalDate today = LocalDate.now();
-        List<CampaignStatus> statuses = campaignStatusRepository.findTop4ByUserAndStatusAndExpired(user, statusType, today);
+        List<Bookmark> bookmarks = bookmarkRepository.findActiveBookmarksByUserForPopup(user.getId(), today);
 
         List<CampaignStatusPopupItemDTO> items = new ArrayList<>();
         
-        for (CampaignStatus status : statuses) {
+        for (Bookmark bookmark : bookmarks) {
             try {
-                CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromEntity(status);
+                CampaignStatusPopupItemDTO dto = CampaignStatusPopupItemDTO.fromBookmark(bookmark);
                 items.add(dto);
             } catch (BaseException e) {
+                // 에러 발생 시 해당 항목은 건너뛰고 계속 진행
                 continue;
             }
         }
         
         return CampaignStatusPopupByTypeResponseDTO.builder()
-                .statusType(statusType)
                 .items(items)
                 .totalCount(items.size())
                 .build();
@@ -120,21 +124,61 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByType(Long userId, CampaignStatusType statusType, Pageable pageable) {
+    public PageListResponseDTO<CampaignStatusResponseDTO> getStatusesByCase(Long userId, CampaignStatusCase statusCase, Pageable pageable) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
-        Page<CampaignStatus> page = campaignStatusRepository.findByUserAndStatusAndIsActiveTrue(user, statusType, pageable);
-        List<CampaignStatusResponseDTO> content = page.getContent().stream()
+        
+        LocalDate today = LocalDate.now();
+        CampaignStatusType statusType = statusCase.toStatusType();
+        
+        // 1단계: ID만 페이징해서 가져오기
+        Page<Long> idPage = switch (statusCase) {
+            case APPLIED_WAITING -> campaignStatusRepository.findIdsByUserAndAppliedWaiting(user, statusType, today, pageable);
+            case APPLIED_COMPLETED -> campaignStatusRepository.findIdsByUserAndAppliedCompleted(user, statusType, today, pageable);
+            case RESULT_SELECTED -> campaignStatusRepository.findIdsByUserAndResultSelected(user, statusType, today, pageable);
+            case RESULT_NOT_SELECTED -> campaignStatusRepository.findIdsByUserAndResultNotSelected(user, statusType, today, pageable);
+            case REVIEW_IN_PROGRESS -> campaignStatusRepository.findIdsByUserAndReviewInProgress(user, statusType, today, pageable);
+            case REVIEW_COMPLETED -> campaignStatusRepository.findIdsByUserAndReviewCompleted(user, statusType, pageable);
+        };
+        
+        // ID가 없으면 빈 리스트 반환
+        if (idPage.getContent().isEmpty()) {
+            return PageListResponseDTO.<CampaignStatusResponseDTO>builder()
+                    .content(List.of())
+                    .page(idPage.getNumber())
+                    .size(idPage.getSize())
+                    .totalElements(idPage.getTotalElements())
+                    .totalPages(idPage.getTotalPages())
+                    .hasNext(idPage.hasNext())
+                    .hasPrevious(idPage.hasPrevious())
+                    .build();
+        }
+        
+        // 2단계: ID 리스트로 JOIN FETCH하여 실제 데이터 가져오기 (N+1 문제 방지)
+        List<CampaignStatus> statuses = campaignStatusRepository.findByIdsWithFetch(idPage.getContent());
+        
+        // ID 순서를 유지하기 위해 Map으로 변환 후 정렬
+        Map<Long, CampaignStatus> statusMap = statuses.stream()
+                .collect(Collectors.toMap(CampaignStatus::getId, status -> status));
+        
+        // ID 순서대로 정렬
+        List<CampaignStatus> orderedStatuses = idPage.getContent().stream()
+                .map(statusMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        
+        List<CampaignStatusResponseDTO> content = orderedStatuses.stream()
                 .map(CampaignStatusResponseDTO::fromEntity)
                 .toList();
+        
         return PageListResponseDTO.<CampaignStatusResponseDTO>builder()
                 .content(content)
-                .page(page.getNumber())
-                .size(page.getSize())
-                .totalElements(page.getTotalElements())
-                .totalPages(page.getTotalPages())
-                .hasNext(page.hasNext())
-                .hasPrevious(page.hasPrevious())
+                .page(idPage.getNumber())
+                .size(idPage.getSize())
+                .totalElements(idPage.getTotalElements())
+                .totalPages(idPage.getTotalPages())
+                .hasNext(idPage.hasNext())
+                .hasPrevious(idPage.hasPrevious())
                 .build();
     }
 
@@ -143,12 +187,15 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
     public CampaignStatusCountResponseDTO getStatusCounts(Long userId) {
         User user = userRepository.findActiveById(userId)
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
+        
+        LocalDate today = LocalDate.now();
         return CampaignStatusCountResponseDTO.builder()
-                .apply(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.APPLY))
-                .selected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.SELECTED))
-                .notSelected(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.NOT_SELECTED))
-                .reviewing(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.REVIEWING))
-                .ended(campaignStatusRepository.countByUserAndStatusAndIsActiveTrue(user, CampaignStatusType.ENDED))
+                .appliedWaiting(campaignStatusRepository.countByUserAndAppliedWaiting(user, CampaignStatusCase.APPLIED_WAITING.toStatusType(), today))
+                .appliedCompleted(campaignStatusRepository.countByUserAndAppliedCompleted(user, CampaignStatusCase.APPLIED_COMPLETED.toStatusType(), today))
+                .resultSelected(campaignStatusRepository.countByUserAndResultSelected(user, CampaignStatusCase.RESULT_SELECTED.toStatusType(), today))
+                .resultNotSelected(campaignStatusRepository.countByUserAndResultNotSelected(user, CampaignStatusCase.RESULT_NOT_SELECTED.toStatusType(), today))
+                .reviewInProgress(campaignStatusRepository.countByUserAndReviewInProgress(user, CampaignStatusCase.REVIEW_IN_PROGRESS.toStatusType(), today))
+                .reviewCompleted(campaignStatusRepository.countByUserAndReviewCompleted(user, CampaignStatusCase.REVIEW_COMPLETED.toStatusType()))
                 .build();
     }
 }
