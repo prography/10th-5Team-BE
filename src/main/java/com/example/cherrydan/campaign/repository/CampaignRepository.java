@@ -113,7 +113,7 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query(value = """
         SELECT COUNT(*)
         FROM campaigns c
-        WHERE AND c.is_active = 1
+        WHERE c.is_active = 1
           AND c.created_at >= DATE(:date - INTERVAL 1 DAY)
           AND c.created_at < DATE(:date)
           AND c.title LIKE CONCAT('%', :keyword, '%')
