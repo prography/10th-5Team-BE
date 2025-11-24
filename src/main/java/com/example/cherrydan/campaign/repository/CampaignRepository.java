@@ -96,9 +96,9 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query(value = """
         SELECT c.*
         FROM campaigns c
-        WHERE c.created_at >= DATE(:date - INTERVAL 1 DAY)
+        WHERE c.is_active = 1
+          AND c.created_at >= DATE(:date - INTERVAL 1 DAY)
           AND c.created_at < DATE(:date)
-          AND c.is_active = 1
           AND c.title LIKE CONCAT('%', :keyword, '%')
         ORDER BY c.created_at
         LIMIT :offset, :limit
@@ -113,9 +113,9 @@ public interface CampaignRepository extends JpaRepository<Campaign, Long>, JpaSp
     @Query(value = """
         SELECT COUNT(*)
         FROM campaigns c
-        WHERE c.created_at >= DATE(:date - INTERVAL 1 DAY)
+        WHERE AND c.is_active = 1
+          AND c.created_at >= DATE(:date - INTERVAL 1 DAY)
           AND c.created_at < DATE(:date)
-          AND c.is_active = 1
           AND c.title LIKE CONCAT('%', :keyword, '%')
         """, nativeQuery = true)
     long countByKeywordSimpleLike(@Param("keyword") String keyword, @Param("date") LocalDate date);
