@@ -54,7 +54,4 @@ public interface CampaignService {
         Pageable pageable,
         Long userId
     );
-
-    // campaigns_daily_search 테이블 사용 (향후 확장용)
-    Page<CampaignResponseDTO> searchDailyCampaignsByFulltext(String keyword, Pageable pageable, Long userId);
 } 
