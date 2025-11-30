@@ -37,4 +37,8 @@ public class Bookmark extends BaseTimeEntity {
     public void setIsActive(Boolean isActive) {
         this.isActive = isActive;
     }
-} 
+
+    public void activate() {
+        this.isActive = true;
+    }
+}
