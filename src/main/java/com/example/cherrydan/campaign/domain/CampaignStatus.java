@@ -63,4 +63,12 @@ public class CampaignStatus extends BaseTimeEntity {
     @Builder.Default
     @Column(name = "is_visible_to_user", nullable = false)
     private Boolean isVisibleToUser = true;
+
+    public void activate(){
+        this.isActive = true;
+    }
+
+    public void updateStatus(CampaignStatusType newStatus){
+        this.status = newStatus;
+    }
 } 
