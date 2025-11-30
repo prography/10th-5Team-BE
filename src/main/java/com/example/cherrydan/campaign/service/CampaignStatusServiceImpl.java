@@ -47,19 +47,15 @@ public class CampaignStatusServiceImpl implements CampaignStatusService {
 
         Optional<CampaignStatus> optional = campaignStatusRepository.findByUserAndCampaign(user, campaign);
 
-        CampaignStatus status;
-        if (optional.isPresent()) {
-            status = optional.get();
-            status.setIsActive(true);
-            status.setStatus(requestDTO.getStatus());
-        } else {
-            status = CampaignStatus.builder()
-                    .user(user)
-                    .campaign(campaign)
-                    .status(requestDTO.getStatus())
-                    .isActive(true)
-                    .build();
-        }
+        CampaignStatus status = optional.orElseGet(() -> CampaignStatus.builder()
+                .user(user)
+                .campaign(campaign)
+                .isActive(false)
+                .build());
+
+        status.activate();
+        status.updateStatus(requestDTO.getStatus());
+
         CampaignStatus saved = campaignStatusRepository.save(status);
         return CampaignStatusResponseDTO.fromEntity(saved);
     }
