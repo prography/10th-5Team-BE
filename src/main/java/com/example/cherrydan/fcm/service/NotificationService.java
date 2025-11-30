@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -239,8 +240,10 @@ public class NotificationService {
      * 성공한 토큰을 통해 성공한 사용자 ID 추출
      */
     private List<Long> extractSuccessfulUserIds(List<String> successfulTokens, List<UserFCMToken> tokenEntities) {
+        HashSet<String> successfulTokensSet = new HashSet<>(successfulTokens);
+
         return tokenEntities.stream()
-                .filter(tokenEntity -> successfulTokens.contains(tokenEntity.getFcmToken()))
+                .filter(tokenEntity -> successfulTokensSet.contains(tokenEntity.getFcmToken()))
                 .map(UserFCMToken::getUserId)
                 .distinct() // 한 사용자가 여러 토큰을 가질 수 있으므로 중복 제거
                 .collect(Collectors.toList());
