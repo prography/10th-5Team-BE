@@ -104,6 +104,8 @@ public enum ErrorMessage {
     SNS_USER_INFO_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 사용자 정보 획득에 실패했습니다."),
     SNS_CONNECTION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 연동에 실패했습니다."),
     SNS_TOKEN_REFRESH_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "SNS 토큰 갱신에 실패했습니다."),
+    SNS_CODE_CHALLENGE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "Code challenge 생성에 실패했습니다."),
+
 
     // 문의 관련 에러
     INQUIRY_NOT_FOUND(NOT_FOUND, "문의 정보를 찾을 수 없습니다."),
