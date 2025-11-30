@@ -44,18 +44,16 @@ public class BookmarkServiceImpl implements BookmarkService {
         Campaign campaign = campaignRepository.findById(campaignId)
                 .orElseThrow(() -> new BaseException(ErrorMessage.RESOURCE_NOT_FOUND));
         Optional<Bookmark> optionalBookmark = bookmarkRepository.findByUserAndCampaign(user, campaign);
-        if (optionalBookmark.isPresent()) {
-            Bookmark bookmark = optionalBookmark.get();
-            bookmark.setIsActive(true);
-            bookmarkRepository.save(bookmark);
-        } else {
-            Bookmark bookmark = Bookmark.builder()
-                    .user(user)
-                    .campaign(campaign)
-                    .isActive(true)
-                    .build();
-            bookmarkRepository.save(bookmark);
-        }
+
+        Bookmark bookmark = optionalBookmark
+                .orElseGet(() -> Bookmark.builder()
+                        .user(user)
+                        .campaign(campaign)
+                        .isActive(false)
+                        .build());
+
+        bookmark.activate();
+        bookmarkRepository.save(bookmark);
     }
 
     @Override
