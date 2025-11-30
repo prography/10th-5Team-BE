@@ -31,12 +31,7 @@ public class RefreshTokenService {
     public void saveOrUpdateRefreshToken(User user, String refreshTokenValue) {
         // 기존 토큰 확인 (userId로만 조회)
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserId(user.getId());
-        if (existingToken.isPresent()) {
-            // 기존 토큰의 값만 업데이트
-            existingToken.get().setRefreshToken(refreshTokenValue);
-            log.info("사용자 ID {}의 기존 Refresh Token 업데이트", user.getId());
-            return;
-        }
+        existingToken.ifPresent(refreshToken -> refreshToken.setRefreshToken(refreshTokenValue));
 
         // 새 토큰 생성 (첫 로그인 등)
         RefreshToken newToken = RefreshToken.builder()
