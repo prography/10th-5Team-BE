@@ -29,7 +29,7 @@ public class NaverBlogService {
             SyndFeedInput input = new SyndFeedInput();
             SyndFeed feed = input.build(new XmlReader(new URL(rssUrl)));
             String description = feed.getDescription();
-            
+
             if (description != null && description.contains(code)) {
                 Optional<SnsConnection> existing = snsConnectionRepository.findByUserAndPlatform(user, platform);
                 if (existing.isPresent()) {
@@ -59,21 +59,21 @@ public class NaverBlogService {
 
     private String getRssUrl(String blogUrl) {
         if (blogUrl == null || blogUrl.isBlank()) {
-            throw new IllegalArgumentException(ErrorMessage.NAVER_BLOG_INVALID_URL.getMessage());
+            throw new SnsException(ErrorMessage.NAVER_BLOG_INVALID_URL);
         }
 
         String url = blogUrl.trim().toLowerCase();
         String domain = url.replaceFirst("^https?://", "");
         if (!domain.startsWith("m.blog.naver.com") && !domain.startsWith("blog.naver.com")) {
-            throw new IllegalArgumentException(ErrorMessage.NAVER_BLOG_INVALID_URL.getMessage());
+            throw new SnsException(ErrorMessage.NAVER_BLOG_INVALID_URL);
         }
 
         String id = domain.replaceFirst("^(m\\.)?blog\\.naver\\.com/", "").split("[/?#]")[0];
         if (id.isBlank()) {
-            throw new IllegalArgumentException(ErrorMessage.NAVER_BLOG_INVALID_URL.getMessage());
+            throw new SnsException(ErrorMessage.NAVER_BLOG_INVALID_URL);
         }
         if (!id.matches("^[a-zA-Z0-9._-]+$")) {
-            throw new IllegalArgumentException(ErrorMessage.NAVER_BLOG_INVALID_ID.getMessage());
+            throw new SnsException(ErrorMessage.NAVER_BLOG_INVALID_ID);
         }
 
         return "https://rss.blog.naver.com/" + id;

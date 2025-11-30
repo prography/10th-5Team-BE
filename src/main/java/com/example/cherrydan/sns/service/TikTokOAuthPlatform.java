@@ -1,5 +1,7 @@
 package com.example.cherrydan.sns.service;
 
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.SnsException;
 import com.example.cherrydan.sns.config.SnsOAuthProperties;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.sns.dto.TokenResponse;
@@ -119,7 +121,7 @@ public class TikTokOAuthPlatform extends AbstractOAuthPlatform {
             return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
         } catch (Exception e) {
             log.error("Code challenge 생성 실패", e);
-            throw new RuntimeException("Code challenge 생성 실패", e);
+            throw new SnsException(ErrorMessage.SNS_CODE_CHALLENGE_FAILED);
         }
     }
 
