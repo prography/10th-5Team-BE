@@ -11,6 +11,7 @@ import com.example.cherrydan.common.exception.UserException;
 import com.example.cherrydan.fcm.dto.NotificationRequest;
 import com.example.cherrydan.fcm.dto.NotificationResultDto;
 import com.example.cherrydan.fcm.service.NotificationService;
+import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.dto.AlertIdsRequestDTO;
 import com.example.cherrydan.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,7 +102,7 @@ public class ActivityAlertService {
      * @return 성공적으로 발송된 알림 개수
      */
     private int processBatchNotifications(List<ActivityAlert> batch) {
-        int successCount = 0;
+        ArrayList<ActivityAlert> successfulAlerts = new ArrayList<>();
 
         for (ActivityAlert alert : batch) {
             try {
@@ -125,8 +127,7 @@ public class ActivityAlertService {
                 if (result.getSuccessCount() > 0) {
                     // 성공 시 즉시 상태 업데이트
                     alert.markAsNotified();
-                    activityAlertRepository.save(alert);
-                    successCount++;
+                    successfulAlerts.add(alert);
 
                     log.debug("알림 발송 성공: userId={}, alertType={}, campaignId={}",
                         alert.getUser().getId(), alert.getAlertType(), alert.getCampaign().getId());
@@ -141,7 +142,11 @@ public class ActivityAlertService {
             }
         }
 
-        return successCount;
+        if (!successfulAlerts.isEmpty()){
+            activityAlertRepository.saveAll(successfulAlerts);
+        }
+
+        return successfulAlerts.size();
     }
 
     /**
@@ -171,7 +176,8 @@ public class ActivityAlertService {
 
         // 모든 알림이 해당 사용자의 것인지 확인
         for (ActivityAlert alert : alerts) {
-            if (!alert.getUser().getId().equals(userId)) {
+            User user = alert.getUser();
+            if (user == null || !user.getId().equals(userId)) {
                 throw new UserException(ErrorMessage.ACTIVITY_ALERT_ACCESS_DENIED);
             }
             alert.hide();

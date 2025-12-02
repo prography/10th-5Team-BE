@@ -44,7 +44,7 @@ public class UserKeywordService {
             throw new UserException(ErrorMessage.USER_KEYWORD_ALREADY_EXISTS);
         }
 
-        long keywordCount = userKeywordRepository.findByUserId(userId).size();
+        long keywordCount = userKeywordRepository.countByUserId(userId);
         if (keywordCount >= 5) {
             throw new UserException(ErrorMessage.USER_KEYWORD_LIMIT_EXCEEDED);
         }
@@ -75,7 +75,7 @@ public class UserKeywordService {
 
     /**
      * 키워드 맞춤 캠페인 알림 대상 업데이트 (10개와 100개를 넘는 순간에만)
-     * 새벽 5시에 배치 처리로 실행
+     * 새벽 7시 30분에 배치 처리로 실행
      */
     @Transactional
     public void updateKeywordCampaignAlerts() {

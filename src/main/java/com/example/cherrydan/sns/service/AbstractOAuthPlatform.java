@@ -1,5 +1,7 @@
 package com.example.cherrydan.sns.service;
 
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.SnsException;
 import com.example.cherrydan.sns.config.SnsOAuthProperties;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.sns.dto.TokenResponse;
@@ -75,7 +77,7 @@ public abstract class AbstractOAuthPlatform implements OAuthPlatform {
     protected SnsOAuthProperties.PlatformConfig getPlatformConfig() {
         SnsOAuthProperties.PlatformConfig config = snsOAuthProperties.getPlatformConfig(getPlatformCode());
         if (config == null) {
-            throw new RuntimeException(getPlatform() + " 설정을 찾을 수 없습니다.");
+            throw new SnsException(ErrorMessage.SNS_PLATFORM_NOT_SUPPORTED);
         }
         return config;
     }

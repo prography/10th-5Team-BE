@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -152,16 +153,32 @@ public class CampaignServiceImpl implements CampaignService {
     @Override
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
 
-        // Simple LIKE 검색으로 변경
         String searchKeyword = keyword.trim();
-        List<Campaign> campaigns = campaignRepository.findByKeywordSimpleLike(
-            searchKeyword,
-            date,
-            (int) pageable.getOffset(),
-            pageable.getPageSize()
-        );
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 
-        long totalElements = campaignRepository.countByKeywordSimpleLike(searchKeyword, date);
+        List<Campaign> campaigns;
+        long totalElements;
+
+        if (date.equals(today)) {
+            // alertDate가 오늘이면 = 전날 캠페인 조회
+            // FULLTEXT 검색 (campaigns_daily_search 테이블, 빠름)
+            campaigns = campaignRepository.searchDailyCampaignsByFulltext(
+                "+" + searchKeyword + "*",
+                (int) pageable.getOffset(),
+                pageable.getPageSize()
+            );
+            totalElements = campaignRepository.countDailyCampaignsByFulltext(searchKeyword);
+        } else {
+            // alertDate가 과거이면 = 그 날짜 기준 전날 캠페인 조회
+            // Simple LIKE 검색 (campaigns 테이블, 폴백)
+            campaigns = campaignRepository.findByKeywordSimpleLike(
+                searchKeyword,
+                date,
+                (int) pageable.getOffset(),
+                pageable.getPageSize()
+            );
+            totalElements = campaignRepository.countByKeywordSimpleLike(searchKeyword, date);
+        }
 
         // N+1 문제 해결: 벌크 조회로 북마크 여부 확인
         List<Long> campaignIds = campaigns.stream()
@@ -185,34 +202,8 @@ public class CampaignServiceImpl implements CampaignService {
 
     @Override
     public long getDailyCampaignCountByKeyword(String keyword, LocalDate date) {
-        return campaignRepository.countByKeywordSimpleLike(keyword.trim(), date);
-    }
-
-    @Override
-    @Transactional
-    public Page<CampaignResponseDTO> searchDailyCampaignsByFulltext(String keyword, Pageable pageable, Long userId) {
-        List<Campaign> campaigns = campaignRepository.searchDailyCampaignsByFulltext(
-            "+" + keyword.trim() + "*",
-            (int) pageable.getOffset(),
-            pageable.getPageSize()
-        );
-
-        long totalElements = campaignRepository.countDailyCampaignsByFulltext(keyword.trim());
-
-        List<Long> campaignIds = campaigns.stream()
-            .map(Campaign::getId)
-            .collect(Collectors.toList());
-
-        Set<Long> bookmarkedCampaignIds = bookmarkRepository.findBookmarkedCampaignIds(userId, campaignIds);
-
-        List<CampaignResponseDTO> content = campaigns.stream()
-            .map(campaign -> {
-                boolean isBookmarked = bookmarkedCampaignIds.contains(campaign.getId());
-                return CampaignResponseDTO.fromEntityWithBookmark(campaign, isBookmarked);
-            })
-            .collect(Collectors.toList());
-
-        return new PageImpl<>(content, pageable, totalElements);
+        // 이 메서드는 processKeywordAsync에서만 호출되며, 항상 전날 데이터를 조회
+        return campaignRepository.countDailyCampaignsByFulltext("+" + keyword.trim() + "*");
     }
 
     @Override

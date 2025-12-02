@@ -95,14 +95,14 @@ public class KeywordProcessingService {
             // 간단! campaignCount가 어제 신규 증가분
             int dailyNewCount = alerts.get(0).getCampaignCount();
             
-            String title = "체리단";
+            String title = KeywordAlertConstants.messageTitle;
             String countText;
             
             // 신규 증가분에 따른 표시 방식
-            if (dailyNewCount >= 100) {
-                countText = "+100";  // 100+건
-            } else if (dailyNewCount >= 10) {
-                countText = "+10";   // 10+건  
+            if (dailyNewCount >= KeywordAlertConstants.THRESHOLD_HUNDRED) {
+                countText = KeywordAlertConstants.HUNDRED_PLUS;  // 100+건
+            } else if (dailyNewCount >= KeywordAlertConstants.THRESHOLD_TEN) {
+                countText = KeywordAlertConstants.TEN_PLUS;   // 10+건
             } else {
                 countText = String.valueOf(dailyNewCount); // 정확한 수 (1~9건)
             }

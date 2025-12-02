@@ -23,7 +23,7 @@ public class NotificationScheduler {
     
     
     /**
-     * 10분마다 실행 - 키워드 맞춤 알림 발송 (테스트용)
+     * 오전 11시에 실행
      */
     @Scheduled(cron = "0 0 11 * * ?", zone = "Asia/Seoul")
     public void sendDailyKeywordNotifications() {
@@ -41,9 +41,9 @@ public class NotificationScheduler {
     }
 
     /**
-     * 10분마다 실행 - 키워드 맞춤 알림 대상 업데이트 (테스트용, 알림 발송보다 먼저)
+     * 오전 8시에 실행 - 키워드 맞춤 알림 대상 업데이트
      */
-    @Scheduled(cron = "0 30 7 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 8 * * ?", zone = "Asia/Seoul")
     public void updateKeywordCampaignAlerts() {
         log.info("=== 새벽 키워드 알림 업데이트 작업 시작 ===");
         
@@ -59,9 +59,9 @@ public class NotificationScheduler {
     }
 
     /**
-     * 10분마다 실행 - 활동 알림 대상 업데이트 (테스트용, 알림 발송보다 먼저)
+     * 오전 7시에 실행 - 활동 알림 대상 업데이트
      */
-    @Scheduled(cron = "0 0 6 * * ?", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 7 * * ?", zone = "Asia/Seoul")
     public void updateActivityAlerts() {
         log.info("=== 활동 알림 업데이트 작업 시작 ===");
         
@@ -76,7 +76,7 @@ public class NotificationScheduler {
     }
 
     /**
-     * 10분마다 실행 - 활동 알림 발송 (테스트용)
+     * 오전 10시에 실행 - 활동 알림 발송
      */
     @Scheduled(cron = "0 0 10 * * ?", zone = "Asia/Seoul")
     public void sendActivityNotifications() {
