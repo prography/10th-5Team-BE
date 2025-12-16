@@ -1,5 +1,9 @@
 package com.example.cherrydan.user.domain.vo;
 
+import org.springframework.util.Assert;
+
+import static org.springframework.util.Assert.*;
+
 /**
  * 키워드 알림 정책 Value Object
  */
@@ -8,12 +12,8 @@ public record KeywordAlertPolicy(int highThreshold, int lowThreshold) {
     public static final KeywordAlertPolicy DEFAULT = new KeywordAlertPolicy(100, 10);
 
     public KeywordAlertPolicy {
-        if (highThreshold <= lowThreshold) {
-            throw new IllegalArgumentException("상위 임계값은 하위 임계값보다 커야 합니다");
-        }
-        if (lowThreshold <= 0) {
-            throw new IllegalArgumentException("임계값은 0보다 커야 합니다");
-        }
+        state(highThreshold > lowThreshold, "상위 임계값은 하위 임계값보다 커야 합니다");
+        state(lowThreshold > 0, "임계값은 0보다 커야 합니다");
     }
 
     /**
