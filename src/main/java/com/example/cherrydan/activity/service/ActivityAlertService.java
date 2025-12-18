@@ -141,16 +141,6 @@ public class ActivityAlertService {
         return successfulAlerts.size();
     }
 
-    private static NotificationRequest getNotificationRequest(ActivityAlertMessage activityAlertMessage) {
-        return NotificationRequest.builder()
-            .title(activityAlertMessage.title())
-            .body(activityAlertMessage.body())
-            .imageUrl(activityAlertMessage.imageUrl())
-            .data(activityAlertMessage.data())
-            .priority("high")
-            .build();
-    }
-
     /**
      * 사용자의 활동 알림 목록 조회 (페이지네이션)
      */
