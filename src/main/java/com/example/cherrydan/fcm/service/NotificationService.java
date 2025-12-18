@@ -29,38 +29,7 @@ import java.util.stream.Collectors;
 public class NotificationService {
     
     private final UserFCMTokenRepository tokenRepository;
-    
-    /**
-     * 단일 사용자에게 알림 전송
-     */
-    public NotificationResultDto sendNotificationToUser(Long userId, NotificationRequest request) {
-        if (!isFirebaseInitialized()) {
-            log.error("Firebase가 초기화되지 않았습니다. FCM 기능을 사용할 수 없습니다.");
-            throw new NotificationException(ErrorMessage.NOTIFICATION_SERVICE_UNAVAILABLE);
-        }
-        
-        try {
-            List<UserFCMToken> tokens = tokenRepository.findActiveTokensByUserId(userId);
-            
-            if (tokens.isEmpty()) {
-                log.error("사용자 {}의 활성화된 FCM 토큰이 없습니다.", userId);
-                throw new NotificationException(ErrorMessage.NOTIFICATION_USER_NO_TOKENS);
-            }
-            
-            List<String> tokenStrings = tokens.stream()
-                    .map(UserFCMToken::getFcmToken)
-                    .collect(Collectors.toList());
-            
-            return sendMulticastNotification(tokenStrings, request, tokens);
-        } catch (NotificationException e) {
-            log.error("사용자 {}에게 알림 전송 실패 (NotificationException): {}", userId, e.getMessage());
-            return NotificationResultDto.multipleResult(0, 1, e.getMessage());
-        } catch (Exception e) {
-            log.error("사용자 {}에게 알림 전송 실패: {}", userId, e.getMessage());
-            return NotificationResultDto.multipleResult(0, 1, "알림 전송 중 오류가 발생했습니다");
-        }
-    }
-    
+
     /**
      * 여러 사용자에게 알림 전송
      */

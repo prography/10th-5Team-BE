@@ -30,7 +30,6 @@ import java.util.stream.Collectors;
 public class ActivityProcessingService {
     
     private final ActivityAlertRepository activityAlertRepository;
-    private final NotificationService notificationService;
     
     private static final int BATCH_SIZE = 500;
 
@@ -113,117 +112,5 @@ public class ActivityProcessingService {
         }
         
         return new BatchResult(processed, skipped);
-    }
-
-    /**
-     * 캠페인별 활동 알림 생성 및 처리 (비동기)
-     */
-    @Async("keywordTaskExecutor")
-    @Transactional
-    @Deprecated
-    public CompletableFuture<List<ActivityAlert>> processCampaignAsync(
-            Campaign campaign, List<Bookmark> bookmarks, LocalDate today) {
-        
-        List<ActivityAlert> results = new ArrayList<>();
-        int successCount = 0;
-        int failureCount = 0;
-        
-        try {
-            // 이미 알림이 생성된 사용자들은 제외
-            for (Bookmark bookmark : bookmarks) {
-                try {
-                    // 이미 해당 사용자-캠페인에 대한 알림이 있는지 확인
-                    if (activityAlertRepository.existsByUserIdAndCampaignId(
-                            bookmark.getUser().getId(), campaign.getId())) {
-                        continue; // 이미 알림이 있으면 스킵
-                    }
-                    
-                    // TODO: 추후 필요시 푸시 알림 정책 체크 추가
-                    // 현재는 북마크한 모든 사용자에게 알림 생성 (발송 시에 푸시 설정 확인)
-
-
-                    ActivityAlert alert = ActivityAlert.builder()
-                            .user(bookmark.getUser())
-                            .campaign(campaign)
-                            .alertDate(today)
-                            .build();
-                    
-                    results.add(alert);
-                    successCount++;
-                    
-                } catch (Exception e) {
-                    failureCount++;
-                    log.error("사용자 {} 캠페인 {} 활동 알림 생성 실패: {}", 
-                        bookmark.getUser().getId(), campaign.getId(), e.getMessage());
-                }
-            }
-            
-            log.info("캠페인 '{}' 활동 알림 처리 완료: 성공 {}건, 실패 {}건", 
-                campaign.getTitle(), successCount, failureCount);
-            
-            return CompletableFuture.completedFuture(results);
-            
-        } catch (Exception e) {
-            log.error("캠페인 '{}' 활동 알림 처리 중 예외 발생: {}", campaign.getTitle(), e.getMessage(), e);
-            throw e;
-        }
-    }
-
-    /**
-     * 캠페인별 활동 알림 발송 (비동기)
-     */
-    @Async("keywordTaskExecutor")
-    @Transactional
-    @Deprecated
-    public CompletableFuture<List<ActivityAlert>> sendActivityNotificationAsync(
-            Campaign campaign, List<ActivityAlert> alerts) {
-        
-        List<ActivityAlert> successAlerts = new ArrayList<>();
-        
-        try {
-            // 알림 타입별로 그룹핑 (같은 타입 = 같은 메시지)
-            for (ActivityAlert alert : alerts) {
-                try {
-                    // ActivityAlert에서 title과 body 가져오기
-                    String title = alert.getNotificationTitle();
-                    String body = alert.getNotificationBody();
-                    
-                    NotificationRequest request = NotificationRequest.builder()
-                            .title(title)
-                            .body(body)
-                            .data(java.util.Map.of(
-                                    "type", "activity_alert",
-                                    "alert_type", alert.getAlertType().name(),
-                                    "campaign_id", String.valueOf(campaign.getId()),
-                                    "campaign_title", campaign.getTitle(),
-                                    "action", "open_activity_page"
-                            ))
-                            .priority("high")
-                            .build();
-                    
-                    // 개별 발송 (사용자마다 다른 메시지일 수 있음)
-                    NotificationResultDto result = notificationService.sendNotificationToUsers(
-                        List.of(alert.getUser().getId()), request);
-                    
-                    if (result.getSuccessCount() > 0) {
-                        successAlerts.add(alert);
-                        log.debug("알림 발송 성공: userId={}, alertType={}, campaign={}", 
-                            alert.getUser().getId(), alert.getAlertType(), campaign.getTitle());
-                    }
-                } catch (Exception e) {
-                    log.error("알림 발송 실패: userId={}, alertId={}", 
-                        alert.getUser().getId(), alert.getId(), e);
-                }
-            }
-            
-            log.info("캠페인 '{}' 활동 알림 발송 완료: 성공 {}건, 실패 {}건", 
-                campaign.getTitle(), successAlerts.size(), alerts.size() - successAlerts.size());
-            
-            return CompletableFuture.completedFuture(successAlerts);
-            
-        } catch (Exception e) {
-            log.error("캠페인 '{}' 활동 알림 발송 중 예외 발생: {}", campaign.getTitle(), e.getMessage(), e);
-            throw e;
-        }
     }
 }

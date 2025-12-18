@@ -1,6 +1,7 @@
 package com.example.cherrydan.activity.service;
 
 import com.example.cherrydan.activity.domain.ActivityAlert;
+import com.example.cherrydan.activity.domain.vo.ActivityAlertMessage;
 import com.example.cherrydan.activity.dto.ActivityAlertResponseDTO;
 import com.example.cherrydan.activity.repository.ActivityAlertRepository;
 import com.example.cherrydan.activity.strategy.AlertStrategy;
@@ -106,19 +107,10 @@ public class ActivityAlertService {
 
         for (ActivityAlert alert : batch) {
             try {
+                ActivityAlertMessage activityAlertMessage = ActivityAlertMessage.create(alert);
+
                 // 개별 알림 발송 (ActivityAlert가 이미 모든 정보를 가지고 있음)
-                NotificationRequest request = NotificationRequest.builder()
-                    .title(alert.getNotificationTitle())
-                    .body(alert.getNotificationBody())
-                    .data(Map.of(
-                        "type", "activity_alert",
-                        "alert_type", alert.getAlertType().name(),
-                        "campaign_id", String.valueOf(alert.getCampaign().getId()),
-                        "campaign_title", alert.getCampaign().getTitle(),
-                        "action", "open_activity_page"
-                    ))
-                    .priority("high")
-                    .build();
+                NotificationRequest request = NotificationRequest.create(activityAlertMessage);
 
                 // 사용자에게 발송
                 NotificationResultDto result = notificationService.sendNotificationToUsers(

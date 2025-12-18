@@ -1,5 +1,6 @@
 package com.example.cherrydan.fcm.dto;
 
+import com.example.cherrydan.notification.domain.AlertMessage;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -62,10 +63,13 @@ public class NotificationRequest {
     @Builder.Default
     private String priority = "high";
 
-    public static NotificationRequest createSimple(String title, String body) {
+    public static NotificationRequest create(AlertMessage alertMessage) {
         return NotificationRequest.builder()
-                .title(title)
-                .body(body)
+                .title(alertMessage.title())
+                .body(alertMessage.body())
+                .imageUrl(alertMessage.imageUrl())
+                .data(alertMessage.data())
+                .priority("high")
                 .build();
     }
 }
