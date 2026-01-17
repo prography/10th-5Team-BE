@@ -1,6 +1,6 @@
 package com.example.cherrydan.oauth.dto;
 
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 import com.example.cherrydan.user.domain.User;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

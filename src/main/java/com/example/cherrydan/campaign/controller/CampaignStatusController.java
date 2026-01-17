@@ -2,10 +2,9 @@ package com.example.cherrydan.campaign.controller;
 
 import com.example.cherrydan.campaign.dto.CampaignStatusRequestDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusListResponseDTO;
-import com.example.cherrydan.campaign.dto.CampaignStatusPopupResponseDTO;
 import com.example.cherrydan.campaign.dto.CampaignStatusCountResponseDTO;
-import com.example.cherrydan.campaign.domain.CampaignStatusType;
+import com.example.cherrydan.campaign.domain.CampaignStatusCase;
+import com.example.cherrydan.common.response.EmptyResponse;
 import com.example.cherrydan.common.response.PageListResponseDTO;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +23,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import com.example.cherrydan.common.exception.CampaignException;
 import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.campaign.dto.CampaignStatusBatchRequestDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusDeleteRequestDTO;
+import com.example.cherrydan.campaign.dto.CampaignStatusPopupByTypeResponseDTO;
+
+import java.util.List;
 
 @Tag(name = "CampaignStatus", description = "내 체험단 상태 관리 및 팝업 API")
 @RestController
@@ -32,32 +36,25 @@ import com.example.cherrydan.common.exception.ErrorMessage;
 public class CampaignStatusController {
     private final CampaignStatusService campaignStatusService;
 
-    @Operation(summary = "내 체험단 상태별 목록 조회", description = "status 파라미터(APPLY/SELECTED/NOT_SELECTED/REVIEWING/ENDED) 기준 페이지네이션, APPLY 상태의 경우 subFilter(waiting/completed)로 기한 남은/지난 공고 필터링 가능")
+    @Operation(summary = "내 체험단 상태별 목록 조회", 
+               description = "case 파라미터(appliedCompleted/appliedWaiting/resultSelected/resultNotSelected/reviewInProgress/reviewCompleted) 기준 페이지네이션")
     @GetMapping
-    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignStatusResponseDTO>>> getMyStatusesByType(
-        @RequestParam(value = "status", defaultValue = "APPLY") String status,
-        @RequestParam(value = "subFilter", required = false) String subFilter,
+    public ResponseEntity<ApiResponse<PageListResponseDTO<CampaignStatusResponseDTO>>> getMyStatusesByCase(
+        @RequestParam(value = "case", defaultValue = "appliedCompleted") String caseParam,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "20") int size,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        CampaignStatusType statusType;
+        CampaignStatusCase statusCase;
+
+        System.out.println("caseParam: " + caseParam);
         try {
-            statusType = CampaignStatusType.valueOf(status.trim().toUpperCase());
+            statusCase = CampaignStatusCase.fromCode(caseParam.trim());
         } catch (IllegalArgumentException e) {
             throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_INVALID);
         }
-
-        // APPLY 상태에서 subFilter가 주어졌다면 waiting/completed만 허용
-        if (statusType == CampaignStatusType.APPLY && subFilter != null && !subFilter.trim().isEmpty()) {
-            String sf = subFilter.trim().toLowerCase();
-            if (!sf.equals("waiting") && !sf.equals("completed")) {
-                throw new CampaignException(ErrorMessage.CAMPAIGN_STATUS_SUBFILTER_INVALID);
-            }
-        }
-
         Pageable pageable = PageRequest.of(page, size);
-        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByType(currentUser.getId(), statusType, subFilter, pageable);
+        PageListResponseDTO<CampaignStatusResponseDTO> result = campaignStatusService.getStatusesByCase(currentUser.getId(), statusCase, pageable);
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
@@ -76,45 +73,36 @@ public class CampaignStatusController {
         @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        requestDTO.setUserId(currentUser.getId());
-        CampaignStatusResponseDTO result = campaignStatusService.createOrRecoverStatus(requestDTO);
+        CampaignStatusResponseDTO result = campaignStatusService.createOrRecoverStatus(requestDTO, currentUser.getId());
         return ResponseEntity.ok(ApiResponse.success(result));
     }
 
-    @Operation(summary = "내 체험단 상태 변경", description = "is_active or status 변경")
+    @Operation(summary = "내 체험단 상태 변경", description = "배치로 여러 캠페인 상태 변경")
     @PatchMapping
-    public ResponseEntity<ApiResponse<CampaignStatusResponseDTO>> updateStatus(
-        @Valid @RequestBody CampaignStatusRequestDTO requestDTO,
+    public ResponseEntity<ApiResponse<List<CampaignStatusResponseDTO>>> updateStatus(
+        @Valid @RequestBody CampaignStatusBatchRequestDTO requestDTO,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        requestDTO.setUserId(currentUser.getId());
-        CampaignStatusResponseDTO result = campaignStatusService.updateStatus(requestDTO);
-        return ResponseEntity.ok(ApiResponse.success(result));
+        List<CampaignStatusResponseDTO> results = campaignStatusService.updateStatusBatch(requestDTO, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success(results));
     }
 
-    @Operation(summary = "내 체험단 상태 삭제", description = "campaignId만 받아서 삭제")
+    @Operation(summary = "내 체험단 상태 삭제", description = "campaignIds 리스트로 일괄 삭제")
     @DeleteMapping
-    public ResponseEntity<ApiResponse<Void>> deleteStatus(
-        @Valid @RequestBody DeleteRequest request,
+    public ResponseEntity<ApiResponse<EmptyResponse>> deleteStatus(
+        @Valid @RequestBody CampaignStatusDeleteRequestDTO request,
         @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        campaignStatusService.deleteStatus(request.getCampaignId(), currentUser.getId());
-        return ResponseEntity.ok(ApiResponse.success());
+        campaignStatusService.deleteStatusBatch(request, currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("체험단 상태 삭제 성공"));
     }
 
-    @Operation(summary = "내 체험단 노출 팝업 조회", description = "지원한 공고/선정 결과/리뷰 작성 중 상태 중 기간이 지난 데이터만 최대 4개씩, 각 상태별 총 개수와 함께 반환")
+    @Operation(summary = "내 체험단 노출 팝업 조회", description = "활성 관심공고 전체 반환 (마감일 순으로 정렬)")
     @GetMapping("/popup")
-    public ResponseEntity<ApiResponse<CampaignStatusPopupResponseDTO>> getPopupStatus(
-        @AuthenticationPrincipal UserDetailsImpl currentUser
+    public ResponseEntity<ApiResponse<CampaignStatusPopupByTypeResponseDTO>> getPopupStatus(
+            @AuthenticationPrincipal UserDetailsImpl currentUser
     ) {
-        CampaignStatusPopupResponseDTO result = campaignStatusService.getPopupStatusByUser(currentUser.getId());
-        return ResponseEntity.ok(ApiResponse.success(result));
-    }
-
-    public static class DeleteRequest {
-        @NotNull(message = "캠페인 ID는 필수입니다.")
-        private Long campaignId;
-
-        public Long getCampaignId() { return campaignId; }
+        CampaignStatusPopupByTypeResponseDTO result = campaignStatusService.getPopupStatusByBookmark(currentUser.getId());
+        return ResponseEntity.ok(ApiResponse.success("팝업 상태 조회 성공", result));
     }
 } 

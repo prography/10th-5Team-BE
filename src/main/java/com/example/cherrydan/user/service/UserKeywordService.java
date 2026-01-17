@@ -44,7 +44,7 @@ public class UserKeywordService {
             throw new UserException(ErrorMessage.USER_KEYWORD_ALREADY_EXISTS);
         }
 
-        long keywordCount = userKeywordRepository.findByUserId(userId).size();
+        long keywordCount = userKeywordRepository.countByUserId(userId);
         if (keywordCount >= 5) {
             throw new UserException(ErrorMessage.USER_KEYWORD_LIMIT_EXCEEDED);
         }
@@ -75,7 +75,7 @@ public class UserKeywordService {
 
     /**
      * 키워드 맞춤 캠페인 알림 대상 업데이트 (10개와 100개를 넘는 순간에만)
-     * 새벽 5시에 배치 처리로 실행
+     * 새벽 7시 30분에 배치 처리로 실행
      */
     @Transactional
     public void updateKeywordCampaignAlerts() {
@@ -184,27 +184,28 @@ public class UserKeywordService {
     /**
      * 특정 키워드로 맞춤형 캠페인 목록 조회
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Page<CampaignResponseDTO> getPersonalizedCampaignsByKeyword(String keyword, LocalDate date, Long userId, Pageable pageable) {
         return campaignService.getPersonalizedCampaignsByKeyword(keyword, date, userId, pageable);
     }
 
     /**
-     * 맞춤형 알림 삭제 (배열)
+     * 맞춤형 알림 삭제 (소프트 삭제)
      */
     @Transactional
     public void deleteKeywordAlert(Long userId, List<Long> alertIds) {
         List<KeywordCampaignAlert> alerts = keywordAlertRepository.findAllById(alertIds);
-        
+
         // 모든 알림이 해당 사용자의 것인지 확인
         for (KeywordCampaignAlert alert : alerts) {
             if (!alert.getUser().getId().equals(userId)) {
                 throw new UserException(ErrorMessage.USER_KEYWORD_ACCESS_DENIED);
             }
+            alert.hide();
         }
-        
-        keywordAlertRepository.deleteAll(alerts);
-        log.info("키워드 알림 삭제 완료: userId={}, count={}", userId, alertIds.size());
+
+        keywordAlertRepository.saveAll(alerts);
+        log.info("키워드 알림 숨김 처리 완료: userId={}, count={}", userId, alertIds.size());
     }
 
     /**

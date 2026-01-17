@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import com.example.cherrydan.common.util.CloudfrontUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @Getter
 @Builder
@@ -19,15 +20,17 @@ public class BookmarkResponseDTO {
     private Long id;
     private Long campaignId;
     private Long userId;
+    private String reviewerAnnouncementStatus;
+    @Schema(description = "상태 보조 라벨 (형식 통일을 위한 placeholder 필드, 항상 null)", nullable = true)
+    private String subStatusLabel;
     private String campaignTitle;
+    private String benefit;
     private String campaignDetailUrl;
     private String campaignImageUrl;
     private String campaignPlatformImageUrl;
-    private String benefit;
     private Integer applicantCount;
     private Integer recruitCount;
     private List<String> snsPlatforms;
-    private String reviewerAnnouncementStatus;
     private String campaignSite;
 
     public static BookmarkResponseDTO fromEntity(Bookmark bookmark) {
@@ -45,7 +48,7 @@ public class BookmarkResponseDTO {
                 .applicantCount(campaign.getApplicantCount())
                 .recruitCount(campaign.getRecruitCount())
                 .snsPlatforms(getPlatforms(campaign))
-                .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getReviewerAnnouncement()))
+                .reviewerAnnouncementStatus(getReviewerAnnouncementStatus(campaign.getApplyEnd()))
                 .campaignSite(getCampaignSiteLabel(campaign.getSourceSite()))
                 .build();
     }
@@ -73,7 +76,7 @@ public class BookmarkResponseDTO {
         } else if (days < 0) {
             return "모집이 종료되었어요";
         } else {
-            return "오늘이 마감일!";
+            return "D-Day";
         }
     }
 

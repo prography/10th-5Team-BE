@@ -1,5 +1,7 @@
 package com.example.cherrydan.sns.domain;
 
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.SnsException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -18,11 +20,11 @@ public enum SnsPlatform {
      * platformCode로부터 SnsPlatform을 찾습니다.
      * @param platformCode 플랫폼 코드
      * @return SnsPlatform
-     * @throws IllegalArgumentException 지원하지 않는 플랫폼인 경우
+     * @throws SnsException 지원하지 않는 플랫폼인 경우
      */
     public static SnsPlatform fromPlatformCode(String platformCode) {
         if (platformCode == null || platformCode.trim().isEmpty()) {
-            throw new IllegalArgumentException("플랫폼 코드가 비어있습니다.");
+            throw new SnsException(ErrorMessage.SNS_PLATFORM_CODE_EMPTY);
         }
 
         for (SnsPlatform platform : values()) {
@@ -31,7 +33,7 @@ public enum SnsPlatform {
             }
         }
 
-        throw new IllegalArgumentException("지원하지 않는 플랫폼입니다: " + platformCode);
+        throw new SnsException(ErrorMessage.SNS_PLATFORM_NOT_SUPPORTED);
     }
 
     /**

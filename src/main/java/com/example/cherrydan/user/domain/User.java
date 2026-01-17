@@ -1,7 +1,7 @@
 package com.example.cherrydan.user.domain;
 
 import com.example.cherrydan.common.entity.BaseTimeEntity;
-import com.example.cherrydan.oauth.model.AuthProvider;
+import com.example.cherrydan.oauth.domain.AuthProvider;
 import com.example.cherrydan.utils.MaskingUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,15 +88,26 @@ public class User extends BaseTimeEntity {
     // 소프트 삭제
     public void softDelete() {
         this.isActive = false;
+        this.setDeletedAt(LocalDateTime.now());
     }
 
     // 계정 복구
     public void restore() {
         this.isActive = true;
+        this.setDeletedAt(null);
     }
 
     // 활성 상태 확인
     public boolean isDeleted() {
         return !this.isActive;
+    }
+
+    // 1년 이내 복구 가능 여부 확인
+    public boolean isRestorableWithin1Year() {
+        if (this.getDeletedAt() == null) {
+            return false;
+        }
+        LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
+        return this.getDeletedAt().isAfter(oneYearAgo);
     }
 }

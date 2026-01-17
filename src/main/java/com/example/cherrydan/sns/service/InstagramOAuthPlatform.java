@@ -4,6 +4,7 @@ import com.example.cherrydan.sns.config.SnsOAuthProperties;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.sns.dto.UserInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,7 +17,6 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@org.springframework.context.annotation.Profile({"local", "dev", "test"})
 public class InstagramOAuthPlatform extends AbstractOAuthPlatform {
 
     public InstagramOAuthPlatform(WebClient webClient, SnsOAuthProperties snsOAuthProperties) {

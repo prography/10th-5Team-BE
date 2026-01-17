@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,4 +66,8 @@ public interface UserFCMTokenRepository extends JpaRepository<UserFCMToken, Long
      */
     @Query("SELECT t FROM UserFCMToken t WHERE t.userId IN :userIds AND t.isActive = true AND t.isAllowed = true")
     List<UserFCMToken> findActiveTokensByUserIds(@Param("userIds") List<Long> userIds);
+
+    @Modifying
+    @Query("DELETE FROM UserFCMToken t WHERE t.userId = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

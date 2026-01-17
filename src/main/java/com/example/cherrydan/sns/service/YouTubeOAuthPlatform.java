@@ -1,5 +1,7 @@
 package com.example.cherrydan.sns.service;
 
+import com.example.cherrydan.common.exception.ErrorMessage;
+import com.example.cherrydan.common.exception.SnsException;
 import com.example.cherrydan.sns.config.SnsOAuthProperties;
 import com.example.cherrydan.sns.domain.SnsPlatform;
 import com.example.cherrydan.sns.dto.UserInfo;
@@ -37,16 +39,22 @@ public class YouTubeOAuthPlatform extends AbstractOAuthPlatform {
                 .retrieve()
                 .bodyToMono(Map.class)
                 .doOnError(error -> log.error("YouTube 사용자 정보 조회 실패: {}", error.getMessage()))
-                .map(response -> {
+                .flatMap(response -> {
                     List<Map<String, Object>> items = (List<Map<String, Object>>) response.get("items");
+                    if (items == null || items.isEmpty()){
+                        return Mono.error(new SnsException(ErrorMessage.SNS_CONNECTION_FAILED));
+                    }
+
                     Map<String, Object> item = items.get(0);
                     String id = (String) item.get("id");
+
                     Map<String, Object> snippet = (Map<String, Object>) item.get("snippet");
                     String customUrl = (String) snippet.get("customUrl");
                     String channelUrl = customUrl != null && customUrl.startsWith("@") ? 
                             "https://www.youtube.com/" + customUrl : 
                             "https://www.youtube.com/channel/" + id;
-                    return new UserInfo(id, channelUrl);
+
+                    return Mono.just(new UserInfo(id, channelUrl));
                 });
     }
 

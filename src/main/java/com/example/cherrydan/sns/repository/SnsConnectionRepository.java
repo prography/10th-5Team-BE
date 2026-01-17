@@ -6,6 +6,7 @@ import com.example.cherrydan.user.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -33,4 +34,10 @@ public interface SnsConnectionRepository extends JpaRepository<SnsConnection, Lo
 
     @Query("SELECT sc FROM SnsConnection sc WHERE sc.user = :user AND sc.user.isActive = true")
     List<SnsConnection> findAllByUser(@Param("user") User user);
+
+    @Modifying
+    @Query("DELETE FROM SnsConnection sc WHERE sc.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
+
+    List<SnsConnection> findByUserId(@Param("id") Long userId);
 } 

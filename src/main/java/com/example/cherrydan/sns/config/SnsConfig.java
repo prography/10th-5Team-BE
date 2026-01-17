@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @Configuration
 @RequiredArgsConstructor
 public class SnsConfig {
-    // 블로그 인증 방식으로 변경되어 WebClient가 더 이상 필요하지 않음
 
     @Bean
     public WebClient webClient() {

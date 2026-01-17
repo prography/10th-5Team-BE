@@ -6,6 +6,8 @@ import com.example.cherrydan.fcm.service.NotificationService;
 import com.example.cherrydan.user.domain.KeywordCampaignAlert;
 import com.example.cherrydan.user.domain.User;
 import com.example.cherrydan.user.domain.UserKeyword;
+import com.example.cherrydan.user.domain.vo.KeywordAlertMessage;
+import com.example.cherrydan.user.domain.vo.KeywordAlertPolicy;
 import com.example.cherrydan.user.repository.KeywordCampaignAlertRepository;
 import com.example.cherrydan.campaign.service.CampaignServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+
+
 /**
  * 키워드 관련 비동기 처리를 담당하는 서비스
  * AOP 프록시가 정상 작동하도록 별도 서비스로 분리
@@ -28,8 +32,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class KeywordProcessingService {
-    
-    private final KeywordCampaignAlertRepository keywordAlertRepository;
     private final CampaignServiceImpl campaignService;
     private final NotificationService notificationService;
 
@@ -96,33 +98,9 @@ public class KeywordProcessingService {
         try {
             // 간단! campaignCount가 어제 신규 증가분
             int dailyNewCount = alerts.get(0).getCampaignCount();
-            
-            String title = "체리단";
-            String countText;
-            
-            // 신규 증가분에 따른 표시 방식
-            if (dailyNewCount >= 100) {
-                countText = "+100";  // 100+건
-            } else if (dailyNewCount >= 10) {
-                countText = "+10";   // 10+건  
-            } else {
-                countText = String.valueOf(dailyNewCount); // 정확한 수 (1~9건)
-            }
-            
-            String body = String.format("'%s' 키워드 캠페인이 %s건 등록됐어요. \n지금 체리단에서 확인해 보세요.", 
-                    keyword, countText);
-            
-            NotificationRequest notificationRequest = NotificationRequest.builder()
-                    .title(title)
-                    .body(body)
-                    .data(java.util.Map.of(
-                            "type", "keyword_campaign",
-                            "keyword", keyword,
-                            "dailyNewCount", String.valueOf(dailyNewCount),
-                            "action", "open_personalized_page"
-                    ))
-                    .priority("high")
-                    .build();
+
+            KeywordAlertMessage keywordAlertMessage = KeywordAlertMessage.create(keyword, dailyNewCount, KeywordAlertPolicy.DEFAULT);
+            NotificationRequest notificationRequest = NotificationRequest.create(keywordAlertMessage);
             
             // 같은 키워드를 가진 사용자들에게 단체 발송
             List<Long> userIds = alerts.stream()

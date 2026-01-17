@@ -1,5 +1,8 @@
 package com.example.cherrydan.sns.controller;
 
+import com.example.cherrydan.common.constants.DeepLinkConstants;
+import com.example.cherrydan.common.exception.OAuthStateException;
+import com.example.cherrydan.common.exception.SnsException;
 import com.example.cherrydan.common.response.ApiResponse;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.sns.domain.SnsPlatform;
@@ -12,14 +15,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -34,32 +36,51 @@ public class SnsController {
 
     @Operation(summary = "OAuth 인증 URL 생성")
     @GetMapping("/oauth/{platform}/auth-url")
-    public ApiResponse<String> getAuthUrl(@PathVariable("platform") String platform) {
+    public ResponseEntity<ApiResponse<String>> getAuthUrl(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @PathVariable("platform") String platform) {
         SnsPlatform snsPlatform = SnsPlatform.fromPlatformCode(platform);
-        String authUrl = snsOAuthService.getAuthUrl(snsPlatform);
-        return ApiResponse.success(snsPlatform.getDisplayName() + " 인증 URL 생성 성공", authUrl);
+        String authUrl = snsOAuthService.getAuthUrlWithState(snsPlatform, userDetails.getId());
+        return ResponseEntity.ok(ApiResponse.success(snsPlatform.getDisplayName() + " 인증 URL 생성 성공", authUrl));
     }
 
     @Operation(summary = "OAuth 콜백 처리")
     @GetMapping("/oauth/{platform}/callback")
-    public Mono<ApiResponse<SnsConnectionResponse>> handleOAuthCallback(
-            @AuthenticationPrincipal UserDetailsImpl userDetails,
+    public Mono<ResponseEntity<Void>> handleOAuthCallback(
             @PathVariable("platform") String platform,
-            @RequestParam("code") String code) {
+            @RequestParam("code") String code,
+            @RequestParam("state") String state) {
         SnsPlatform snsPlatform = SnsPlatform.fromPlatformCode(platform);
-        User user = userService.getUserById(userDetails.getId());
-        
-        return snsOAuthService.connect(user, code, snsPlatform)
-                .map(response -> ApiResponse.success(snsPlatform.getDisplayName() + " 연동이 완료되었습니다.", response));
+
+        return snsOAuthService.handleCallback(code, state, snsPlatform)
+                .map(response -> {
+                    String deeplink = DeepLinkConstants.buildOAuthSuccessUrl(platform);
+                    log.info("OAuth 성공 - 딥링크 리다이렉트: {}", deeplink);
+                    ResponseEntity<Void> redirect = ResponseEntity.status(HttpStatus.FOUND)
+                            .location(URI.create(deeplink))
+                            .build();
+
+                    return redirect;
+                })
+                .onErrorResume(error -> {
+                    String errorCode = mapExceptionToErrorCode(error);
+                    String deeplink = DeepLinkConstants.buildOAuthFailureUrl(errorCode);
+                    log.error("OAuth 실패 - 딥링크 리다이렉트: {} (에러 코드: {})", deeplink, errorCode, error);
+                    ResponseEntity<Void> redirect = ResponseEntity.status(HttpStatus.FOUND)
+                            .location(URI.create(deeplink))
+                            .build();
+
+                    return Mono.just(redirect);
+                });
     }
 
     @Operation(summary = "사용자 SNS 연동 목록 조회")
     @GetMapping("/connections")
-    public ApiResponse<List<SnsConnectionResponse>> getConnections(
+    public ResponseEntity<ApiResponse<List<SnsConnectionResponse>>> getConnections(
             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         User user = userService.getUserById(userDetails.getId());
         List<SnsConnectionResponse> response = snsOAuthService.getUserSnsConnections(user);
-        return ApiResponse.success("SNS 연동 목록 조회 성공", response);
+        return ResponseEntity.ok(ApiResponse.success("SNS 연동 목록 조회 성공", response));
     }
 
     @Operation(summary = "SNS 연동 해제")
@@ -72,4 +93,22 @@ public class SnsController {
         snsOAuthService.disconnectSns(user, snsPlatform);
         return ResponseEntity.ok(ApiResponse.success(snsPlatform.getDisplayName() + " 연동이 해제되었습니다.", null));
     }
-} 
+
+    /**
+     * 예외를 에러 코드로 매핑
+     * @param error 예외
+     * @return 에러 코드
+     */
+    private String mapExceptionToErrorCode(Throwable error) {
+        if (error instanceof SnsException snsException) {
+            return snsException.getErrorMessage().name();
+        }
+
+        if (error instanceof OAuthStateException oauthStateException) {
+            return oauthStateException.getErrorMessage().name();
+        }
+
+        log.warn("매핑되지 않은 예외 타입: {}", error.getClass().getName());
+        return "UNKNOWN_ERROR";
+    }
+}

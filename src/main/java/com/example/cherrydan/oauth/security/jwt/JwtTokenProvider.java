@@ -1,15 +1,14 @@
 package com.example.cherrydan.oauth.security.jwt;
 
+import com.example.cherrydan.common.util.JwtSecretKeyProvider;
 import com.example.cherrydan.oauth.dto.TokenDTO;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -26,7 +25,7 @@ public class JwtTokenProvider {
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.access-token.validity-in-minutes:60}") long accessTokenValidityInMinutes,
             @Value("${jwt.refresh-token.validity-in-days:14}") long refreshTokenValidityInDays) {
-        this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        this.secretKey = JwtSecretKeyProvider.createSecretKey(secret);
         this.accessTokenValidityInMinutes = accessTokenValidityInMinutes;
         this.refreshTokenValidityInDays = refreshTokenValidityInDays;
     }
@@ -94,6 +93,7 @@ public class JwtTokenProvider {
             throw e;
         } catch (UnsupportedJwtException e) {
             log.error("지원되지 않는 JWT 토큰입니다: {}", e.getMessage());
+            throw e;
         } catch (MalformedJwtException e) {
             log.error("잘못된 형식의 JWT 토큰입니다: {}", e.getMessage());
             throw e;

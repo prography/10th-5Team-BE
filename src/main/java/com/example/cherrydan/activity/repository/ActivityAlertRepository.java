@@ -1,15 +1,18 @@
 package com.example.cherrydan.activity.repository;
 
 import com.example.cherrydan.activity.domain.ActivityAlert;
+import com.example.cherrydan.activity.domain.ActivityAlertType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Long> {
@@ -20,19 +23,34 @@ public interface ActivityAlertRepository extends JpaRepository<ActivityAlert, Lo
     @Query("SELECT aa FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isVisibleToUser = true ORDER BY aa.alertDate DESC")
     Page<ActivityAlert> findByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId, Pageable pageable);
 
+    /**
+     * 사용자의 활동 알림 개수 조회
+     */
+    @Query("SELECT COUNT(aa) FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isVisibleToUser = true")
+    Long countByUserIdAndIsVisibleToUserTrue(@Param("userId") Long userId);
 
     /**
-     * 당일 생성된 알림 미발송 활동 알림들 조회 (Campaign과 User를 Fetch Join으로 함께 조회)
+     * 당일 생성된 알림 미발송 활동 알림들 페이징 조회 (Campaign과 User를 Fetch Join으로 함께 조회)
      */
     @Query("SELECT aa FROM ActivityAlert aa " +
            "JOIN FETCH aa.campaign c " +
            "JOIN FETCH aa.user u " +
            "WHERE aa.alertStage = 0 AND aa.isVisibleToUser = true AND aa.alertDate = :alertDate")
-    List<ActivityAlert> findTodayUnnotifiedAlerts(@Param("alertDate") LocalDate alertDate);
+    Page<ActivityAlert> findTodayUnnotifiedAlertsWithPaging(@Param("alertDate") LocalDate alertDate, Pageable pageable);
 
     /**
      * 사용자와 캠페인으로 알림 존재 여부 확인
      */
     @Query("SELECT COUNT(aa) > 0 FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.campaign.id = :campaignId AND aa.isVisibleToUser = true")
     boolean existsByUserIdAndCampaignId(@Param("userId") Long userId, @Param("campaignId") Long campaignId);
+
+    /**
+     * 사용자의 미읽은 활동 알림 개수 조회
+     */
+    @Query("SELECT COUNT(aa) FROM ActivityAlert aa WHERE aa.user.id = :userId AND aa.isRead = false AND aa.isVisibleToUser = true")
+    Long countUnreadByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Query("DELETE FROM ActivityAlert aa WHERE aa.user.id = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

@@ -2,6 +2,7 @@ package com.example.cherrydan.user.service;
 
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.UserException;
+import com.example.cherrydan.fcm.service.FCMTokenService;
 import com.example.cherrydan.oauth.dto.UserInfoDTO;
 import com.example.cherrydan.oauth.security.jwt.UserDetailsImpl;
 import com.example.cherrydan.user.domain.User;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final FCMTokenService fcmTokenService;
 
     public UserInfoDTO getCurrentUser(UserDetailsImpl currentUser) {
         User user = getActiveUserById(currentUser.getId());
@@ -50,8 +52,10 @@ public class UserService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = getActiveUserById(userId);
-        user.softDelete(); // 소프트 삭제 적용
+        user.softDelete();
         userRepository.save(user);
+
+        fcmTokenService.deactivateUserTokens(userId);
     }
     
     @Transactional
@@ -60,6 +64,8 @@ public class UserService {
                 .orElseThrow(() -> new UserException(ErrorMessage.USER_NOT_FOUND));
         user.restore();
         userRepository.save(user);
+
+        fcmTokenService.activateUserTokens(userId);
     }
     
     // 활성 사용자만 조회 (기본 메서드)

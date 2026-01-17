@@ -46,12 +46,12 @@ public class AppleIdentityTokenService {
             
             // 2. JWT 토큰 검증
             Claims claims = Jwts.parser()
-                    .setSigningKey(publicKey)
+                    .verifyWith(publicKey)
                     .requireIssuer(APPLE_ISSUER)
                     .requireAudience(APPLE_AUDIENCE)
                     .build()
-                    .parseClaimsJws(identityToken)
-                    .getBody();
+                    .parseSignedClaims(identityToken)
+                    .getPayload();
 
             log.info("Apple Identity Token 검증 성공: sub={}", claims.getSubject());
             

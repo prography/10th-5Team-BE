@@ -3,7 +3,7 @@ package com.example.cherrydan.oauth.service;
 import com.example.cherrydan.common.exception.ErrorMessage;
 import com.example.cherrydan.common.exception.RefreshTokenException;
 import com.example.cherrydan.common.exception.UserException;
-import com.example.cherrydan.oauth.model.RefreshToken;
+import com.example.cherrydan.oauth.domain.RefreshToken;
 import com.example.cherrydan.oauth.repository.RefreshTokenRepository;
 import com.example.cherrydan.oauth.security.jwt.JwtTokenProvider;
 import com.example.cherrydan.user.domain.User;
@@ -31,6 +31,7 @@ public class RefreshTokenService {
     public void saveOrUpdateRefreshToken(User user, String refreshTokenValue) {
         // 기존 토큰 확인 (userId로만 조회)
         Optional<RefreshToken> existingToken = refreshTokenRepository.findByUserId(user.getId());
+
         if (existingToken.isPresent()) {
             // 기존 토큰의 값만 업데이트
             existingToken.get().setRefreshToken(refreshTokenValue);

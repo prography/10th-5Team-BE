@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -183,13 +182,22 @@ public class GlobalExceptionHandler {
     /**
      * JWT 유효성 검증 실패 예외 처리
      */
-    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class, IllegalArgumentException.class})
+    @ExceptionHandler({SignatureException.class, MalformedJwtException.class, UnsupportedJwtException.class})
     public ResponseEntity<ApiResponse<Void>> handleJwtValidationException(Exception ex) {
         logger.error("Invalid JWT token: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), "유효하지 않은 토큰입니다."));
     }
 
+    /**
+     * IllegalArgumentException 예외 처리
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        logger.error("Invalid argument: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
 
     /**
      * 유효성 검사 실패 예외 처리
@@ -232,18 +240,28 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(OAuth2AuthenticationProcessingException.class)
     public ResponseEntity<ApiResponse<Void>> handleOAuth2AuthenticationProcessingException(OAuth2AuthenticationProcessingException ex) {
-        logger.error("OAuth2AuthenticationProcessingException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+        ErrorMessage errorMessage = ex.getErrorMessage();
+        String message = ex.getMessage();
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        
+        if (errorMessage != null) {
+            status = errorMessage.getHttpStatus();
+            message = errorMessage.getMessage();
+        }
+        
+        logger.error("OAuth2AuthenticationProcessingException: {}", message);
+        return ResponseEntity.status(status)
+                .body(ApiResponse.error(status.value(), message));
     }
     
     /**
      * 리소스 없음 예외 처리
      */
     @ExceptionHandler(NoResourceFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ApiResponse<?> handleNoResourceFound(NoResourceFoundException ex) {
-        return ApiResponse.error(HttpStatus.NOT_FOUND.value(), "Not Found");
+    public ResponseEntity<ApiResponse<Void>> handleNoResourceFound(NoResourceFoundException ex) {
+        logger.warn("Resource not found: {}", ex.getResourcePath());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.error(HttpStatus.NOT_FOUND.value(), "요청하신 리소스를 찾을 수 없습니다."));
     }
 
     /**
