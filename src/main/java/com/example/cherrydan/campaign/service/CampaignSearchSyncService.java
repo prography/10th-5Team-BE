@@ -22,7 +22,7 @@ public class CampaignSearchSyncService {
     private static final String MAIN_TABLE = "campaigns_daily_search";
     private static final String TEMP_TABLE = "campaigns_daily_search_temp";
     private static final int RETRY_MAX_ATTEMPTS = 3;
-    private static final long RETRY_BACKOFF_DELAY = 18000L;
+    private static final long RETRY_BACKOFF_DELAY = 180000L;
     private static final int LOCK_WAIT_TIMEOUT_SECONDS = 60;
 
     @Retryable(
